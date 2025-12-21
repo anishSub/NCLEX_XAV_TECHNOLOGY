@@ -12,7 +12,10 @@ services:
     depends_on:
       - db
     environment:
+
       - DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1 [::1]
+      - DB_HOST=db
+      - DB_PORT=5432
 
   # The Database (PostgreSQL)
   db:

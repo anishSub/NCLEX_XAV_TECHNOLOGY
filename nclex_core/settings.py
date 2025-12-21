@@ -1,4 +1,5 @@
 from pathlib import Path
+import os
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -52,6 +53,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'nclex_core.wsgi.application'
 
+
 # Database Configuration
 DATABASES = {
     'default': {
@@ -59,8 +61,10 @@ DATABASES = {
         'NAME': 'nclex_db',
         'USER': 'nclex_user',
         'PASSWORD': 'nclex_password',
-        'HOST': '127.0.0.1',  # Important for Mac Docker connection
-        'PORT': '5433',       # Must match docker-compose
+        # IF 'DB_HOST' is set (by Docker), use it. OTHERWISE use '127.0.0.1' (your Mac).
+        'HOST': os.environ.get('DB_HOST', '127.0.0.1'), 
+        # IF 'DB_PORT' is set (by Docker), use 5432. OTHERWISE use '5433' (your Mac).
+        'PORT': os.environ.get('DB_PORT', '5433'),
     }
 }
 
