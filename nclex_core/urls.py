@@ -16,7 +16,14 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from django.urls import include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    # 1. Your Custom Login/Register App
+    path('auth/', include('users.urls')), 
+    
+    # 2. REQUIRED: The Magic Allauth URLs for Google/Facebook
+    path('accounts/', include('allauth.urls')),
+    
 ]

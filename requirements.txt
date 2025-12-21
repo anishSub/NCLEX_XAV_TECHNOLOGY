@@ -1,5 +1,12 @@
-asgiref
-Django>=5.1
-psycopg2-binary
-pytz
-sqlparse
+asgiref==3.11.0
+Django==6.0
+django-jazzmin==3.0.1
+pillow==12.0.0
+psycopg2-binary==2.9.11
+pytz==2025.2
+sqlparse==0.5.5
+django-allauth
+requests
+requests-oauthlib
+PyJWT
+cryptography
