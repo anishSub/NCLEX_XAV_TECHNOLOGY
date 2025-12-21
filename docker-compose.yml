@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  # The Web App (Django)
+  web:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    environment:
+      - DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1 [::1]
+
+  # The Database (PostgreSQL)
+  db:
+    image: postgres:15
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=nclex_db
+      - POSTGRES_USER=nclex_user
+      - POSTGRES_PASSWORD=nclex_password
+    ports:
+      - "5433:5432"  # Maps internal 5432 to Mac's 5433
+
+volumes:
+  postgres_data:
