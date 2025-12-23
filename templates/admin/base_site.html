@@ -1,0 +1,472 @@
+{% extends "admin/base.html" %}
+
+{% block extrahead %}
+{{ block.super }}
+
+<!-- CUSTOM CSS - Injected directly -->
+<style>
+/* ========================================
+   NCLEX Admin Panel - Modern White Design
+   ======================================== */
+
+:root {
+    --primary-blue: #007bff;
+    --primary-light: #e3f2fd;
+    --glass-bg: rgba(255, 255, 255, 0.85);
+}
+
+/* White sidebar */
+.main-sidebar {
+    background: rgba(255, 255, 255, 0.95) !important;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Sidebar links - WITH BORDERS */
+.sidebar-light-primary .nav-sidebar > .nav-item {
+    margin: 2px 8px !important;
+}
+
+.sidebar-light-primary .nav-sidebar > .nav-item > .nav-link {
+    color: #495057 !important;
+    transition: all 0.3s ease !important;
+    border-radius: 8px !important;
+    margin: 2px 0 !important;
+    border: 1px solid rgba(0, 123, 255, 0.15) !important;
+    background: rgba(255, 255, 255, 0.3) !important;
+}
+
+.sidebar-light-primary .nav-sidebar > .nav-item > .nav-link:hover {
+    background: linear-gradient(135deg, var(--primary-light), #bbdefb) !important;
+    color: var(--primary-blue) !important;
+    transform: translateX(5px) !important;
+}
+
+.sidebar-light-primary .nav-sidebar > .nav-item > .nav-link.active {
+    background: linear-gradient(135deg, var(--primary-blue), #0056b3) !important;
+    color: white !important;
+    box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3) !important;
+}
+
+/* FIX: Parent should NOT be active when child is selected */
+.nav-sidebar > .nav-item.has-treeview.menu-open > .nav-link {
+    background: rgba(255, 255, 255, 0.9) !important;
+    color: #495057 !important;
+    box-shadow: none !important;
+}
+
+/* Only highlight parent if it's directly clicked (no active children) */
+.nav-sidebar > .nav-item.has-treeview:not(.menu-open) > .nav-link.active {
+    background: linear-gradient(135deg, var(--primary-blue), #0056b3) !important;
+    color: white !important;
+}
+
+/* Colorful icons */
+.sidebar .nav-icon.fa-user-nurse,
+.sidebar .nav-icon.fa-users { color: #6f42c1 !important; }
+
+.sidebar .nav-icon.fa-clipboard-question,
+.sidebar .nav-icon.fa-folder-tree { color: #007bff !important; }
+
+.sidebar .nav-icon.fa-laptop-medical { color: #28a745 !important; }
+
+/* Clean off-white background */
+body {
+    background: #f4f6f9 !important;  /* Soft off-white */
+}
+
+/* Content wrapper - UPDATED TO MATCH NEW SIDEBAR */
+.content-wrapper {
+    background: white !important;
+    margin-left: 310px !important; /* 280px sidebar + 30px gap */
+    margin-right: 30px !important;
+    margin-top: 80px !important;
+    margin-bottom: 20px !important;
+    border-radius: 15px !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08) !important;
+    padding: 30px !important;
+}
+
+/* Top navbar spacing */
+.main-header {
+    margin-bottom: 20px !important;
+    margin-left: 280px !important;
+}
+
+/* USER EMAIL in sidebar - Clean, no icon */
+.user-panel {
+    padding: 10px !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important;
+}
+
+.user-panel .info {
+    padding-left: 5px !important;
+    color: #495057 !important;
+    font-size: 14px !important;
+}
+
+/* Remove image/icon placeholder */
+.user-panel .image {
+    display: none !important;
+}
+
+/* Transparent cards within content */
+.card, .info-box {
+    background: white !important;
+    border: 1px solid #e3e6f0 !important;
+    border-radius: 10px !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Breadcrumb area */
+.content-header {
+    background: transparent !important;
+    padding: 15px 0 !important;
+    margin-bottom: 20px !important;
+}
+
+/* FIX: White logo icon - make it visible with border */
+.brand-link {
+    background: linear-gradient(135deg, var(--primary-blue), #0056b3) !important;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+.brand-link .brand-image {
+    background: white !important;
+    border: 2px solid var(--primary-blue) !important;
+    border-radius: 50% !important;
+    padding: 3px !important;
+}
+
+/* Alternative: Use a user icon if image is missing */
+.brand-text::before {
+    content: "👨‍⚕️ " !important;  /* Medical professional emoji */
+}
+
+/* DASHBOARD CARDS - Modular & Flexible */
+.content {
+    padding: 0 !important;
+}
+
+/* SIDEBAR WIDTH - 280px */
+.main-sidebar, .main-sidebar::before {
+    width: 280px !important;
+}
+
+/* Adjust content to fit sidebar width with gap */
+.content-wrapper {
+    margin-left: 310px !important; /* 280px sidebar + 30px gap */
+    margin-right: 30px !important;
+    margin-top: 80px !important;
+    margin-bottom: 20px !important;
+}
+
+.main-header {
+    margin-left: 280px !important;
+}
+
+.main-footer {
+    margin-left: 280px !important;
+}
+
+.brand-link {
+    width: 280px !important;
+}
+
+/* Sidebar nav items - fix hover width */
+.sidebar-light-primary .nav-sidebar > .nav-item > .nav-link {
+    width: calc(100% - 16px) !important; /* Full width minus margins */
+}
+
+/* DASHBOARD GRID - BALANCED 2 COLUMNS */
+body.sidebar-mini-md .content-wrapper .content .row,
+.content-wrapper .content > .row,
+.content > .container-fluid > .row,
+.row.dashboard-cards {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    column-gap: 35px !important;  /* Balanced horizontal gap */
+    row-gap: 30px !important;     /* Balanced vertical gap */
+    margin: 0 !important;
+    padding: 0 !important;
+    align-items: start !important;
+    /* Kill Bootstrap flex */
+    flex-wrap: nowrap !important;
+    flex-direction: unset !important;
+}
+
+/* Force ALL dashboard children to be grid items */
+.content .row > *,
+.content .row > div,
+.content .row > .col,
+.content .row > .col-lg-6,
+.content .row > .col-md-6,
+.content .row > [class*="col-"] {
+    display: block !important;
+    grid-column: span 1 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    flex: none !important;
+    flex-basis: auto !important;
+}
+
+/* Ensure Recent Actions doesn't break the grid */
+#content-related {
+    grid-column: span 2 !important;
+    margin-top: 30px !important;
+}
+
+/* Card Styling - AUTO HEIGHT */
+.card, .small-box, .dashboard-item {
+    height: auto !important;  /* Let content determine height */
+    min-height: 100px !important;
+    margin: 0 !important;
+    background: white !important;
+    border: 1px solid #e3e6f0 !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05) !important;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+/* Card Header */
+.card-header {
+    background: rgba(0, 123, 255, 0.03) !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
+    padding: 15px 20px !important;
+}
+
+.card-title {
+    font-weight: 600 !important;
+    font-size: 1.1rem !important;
+    color: #495057 !important;
+}
+
+/* Card Body / Tables */
+.card-body {
+    padding: 0 !important;
+}
+
+.table {
+    margin-bottom: 0 !important;
+}
+
+.table td {
+    border-top: 1px solid #f4f6f9 !important;
+    padding: 12px 20px !important;
+    vertical-align: middle !important;
+}
+
+/* BUTTONS - Compact and Inside */
+.btn-xs, .btn-sm {
+    padding: 4px 10px !important;
+    font-size: 0.85rem !important;
+    border-radius: 6px !important;
+    margin-left: 5px !important;
+    box-shadow: none !important;
+}
+
+/* Make action buttons float right but closer */
+td .float-right {
+    float: right !important;
+    display: flex !important;
+    gap: 5px !important;
+}
+
+/* Hover effects */
+.card:hover {
+    transform: translateY(-3px) !important;
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1) !important;
+    transition: all 0.3s ease !important;
+}
+
+/* Recent Actions Sidebar (usually on the right) */
+#content-related {
+    margin-top: 25px !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+.module {
+    background: white !important;
+    border-radius: 12px !important;
+    padding: 15px !important;
+    border: 1px solid #e3e6f0 !important;
+}
+
+.small-box:hover {
+    transform: translateY(-5px) !important;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Dashboard card icons */
+.small-box .icon {
+    font-size: 50px !important;
+    opacity: 0.3 !important;
+}
+
+/* Dashboard card numbers */
+.small-box h3 {
+    font-size: 2.5rem !important;
+    font-weight: 700 !important;
+    margin: 0 !important;
+}
+
+/* Dashboard card labels */
+.small-box p {
+    font-size: 1rem !important;
+    margin-top: 10px !important;
+}
+
+/* Dashboard "More info" footer */
+.small-box-footer {
+    padding-top: 10px !important;
+    margin-top: 15px !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.3) !important;
+}
+</style>
+
+<!-- SIDEBAR SCROLL FIX - JavaScript -->
+<script>
+console.log('🚀 Admin customization loaded!');
+
+(function() {
+    'use strict';
+    
+    // Save clicked link
+    function saveClickedLink() {
+        document.querySelectorAll('.sidebar a').forEach(link => {
+            link.addEventListener('click', function() {
+                const sidebar = document.querySelector('.sidebar');
+                sessionStorage.setItem('clickedHref', this.getAttribute('href'));
+                if (sidebar) {
+                    sessionStorage.setItem('sidebarScroll', sidebar.scrollTop);
+                    console.log('✅ Saved scroll:', sidebar.scrollTop);
+                }
+            });
+        });
+    }
+    
+    // Restore scroll position
+    function restoreScroll() {
+        const sidebar = document.querySelector('.sidebar');
+        const savedHref = sessionStorage.getItem('clickedHref');
+        const savedScroll = sessionStorage.getItem('sidebarScroll');
+        
+        if (!sidebar) return;
+        
+        console.log('🔄 Restoring scroll:', savedScroll);
+        
+        if (savedHref) {
+            const link = sidebar.querySelector(`a[href="${savedHref}"]`);
+            if (link) {
+                setTimeout(() => {
+                    const linkTop = link.offsetTop;
+                    sidebar.scrollTop = Math.max(0, linkTop - 100);
+                    console.log('📍 Scrolled to link');
+                }, 200);
+                return;
+            }
+        }
+        
+        if (savedScroll) {
+            setTimeout(() => {
+                sidebar.scrollTop = parseInt(savedScroll);
+                console.log('📍 Restored scroll');
+            }, 200);
+        }
+    }
+    
+    // Fix double selection
+    function fixDoubleSelection() {
+        document.querySelectorAll('.nav-item.has-treeview').forEach(parent => {
+            const parentLink = parent.querySelector('.nav-link');
+            const hasActiveChild = parent.querySelector('.nav-treeview .nav-link.active');
+            
+            if (hasActiveChild && parentLink) {
+                parentLink.classList.remove('active');
+                parent.classList.add('menu-open');
+                console.log('🔧 Fixed double selection');
+            }
+        });
+    }
+    
+    // Run on ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+    
+    function init() {
+        saveClickedLink();
+        restoreScroll();
+        fixDoubleSelection();
+    }
+    
+    // Also run on window load
+    window.addEventListener('load', function() {
+        setTimeout(restoreScroll, 300);
+        setTimeout(fixDoubleSelection, 300);
+    });
+    
+})();
+</script>
+
+<!-- FORCE 2-COLUMN DASHBOARD GRID WITH JAVASCRIPT -->
+<script>
+console.log('🔧 Forcing dashboard 2-column layout...');
+
+function forceDashboardGrid() {
+    // Find the dashboard row
+    const dashboardRows = document.querySelectorAll('.content .row');
+    
+    dashboardRows.forEach(row => {
+        // Skip if this is not a dashboard card row
+        if (row.querySelector('.card') || row.querySelector('.small-box')) {
+            console.log('✅ Found dashboard row:', row);
+            
+            // Force grid styles directly on the element
+            row.style.display = 'grid';
+            row.style.gridTemplateColumns = 'repeat(2, 1fr)';
+            row.style.columnGap = '30px';
+            row.style.rowGap = '25px';
+            row.style.margin = '0';
+            row.style.padding = '0';
+            
+            // Fix all children (the Bootstrap cols)
+            const children = row.children;
+            for (let child of children) {
+                child.style.gridColumn = 'span 1';
+                child.style.maxWidth = '100%';
+                child.style.width = '100%';
+                child.style.padding = '0';
+                child.style.margin = '0';
+                child.style.flex = 'none';
+                
+                console.log('📦 Fixed child:', child);
+            }
+        }
+    });
+}
+
+// Run immediately
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', forceDashboardGrid);
+} else {
+    forceDashboardGrid();
+}
+
+// Also run after window load (in case Jazzmin loads later)
+window.addEventListener('load', function() {
+    setTimeout(forceDashboardGrid, 100);
+    setTimeout(forceDashboardGrid, 500);
+    setTimeout(forceDashboardGrid, 1000);
+});
+
+console.log('✅ Dashboard grid script loaded');
+</script>
+
+{% endblock %}

@@ -1,0 +1,59 @@
+<div style="width: 80%; margin: auto;">
+    <canvas id="performanceChart"></canvas>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+fetch('/api/performance-data/{{ session.id }}/')
+    .then(response => response.json())
+    .then(data => {
+        const ctx = document.getElementById('performanceChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: data.labels,
+                datasets: [
+                    {
+                        label: 'Ability Estimate (Theta)',
+                        data: data.theta_history,
+                        borderColor: '#004a99',
+                        fill: false,
+                        tension: 0.1
+                    },
+                    {
+                        label: '95% Confidence (Upper Bound)',
+                        data: data.upper_bound,
+                        borderColor: 'rgba(46, 204, 113, 0.2)',
+                        backgroundColor: 'rgba(46, 204, 113, 0.1)',
+                        fill: '+1', // Fill the area between bounds
+                        pointRadius: 0
+                    },
+                    {
+                        label: '95% Confidence (Lower Bound)',
+                        data: data.lower_bound,
+                        borderColor: 'rgba(46, 204, 113, 0.2)',
+                        pointRadius: 0,
+                        fill: false
+                    }
+                ]
+            },
+            options: {
+                scales: {
+                    y: { 
+                        suggestedMin: -3, 
+                        suggestedMax: 3,
+                        title: { display: true, text: 'Logit Score' }
+                    },
+                    x: { title: { display: true, text: 'Question Number' } }
+                },
+                plugins: {
+                    annotation: { // Optional: Draw the Passing Line at 0.0
+                        annotations: {
+                            line1: { type: 'line', yMin: 0, borderColor: 'red', borderWidth: 2 }
+                        }
+                    }
+                }
+            }
+        });
+    });
+</script>

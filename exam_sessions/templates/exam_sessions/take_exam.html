@@ -1,0 +1,243 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NCLEX Adaptive Exam</title>
+    
+    <!-- External Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <!-- Dark Mode Theme CSS -->
+    <link rel="stylesheet" href="{% static 'css/theme.css' %}">
+    
+    <!-- Your Custom CSS -->
+    <link rel="stylesheet" href="{% static 'exam_sessions/css/exam_style.css' %}">
+    
+    <!--Dark Mode Toggle JavaScript -->
+    <script src="{% static 'js/theme-toggle.js' %}"></script>
+    
+    <style>
+        /* Quick inline styles for exam header */
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f6f9;
+        }
+        
+        .exam-header {
+            background: linear-gradient(135deg, #004a99 0%, #0066cc 100%);
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .exam-title h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        
+        .exam-info {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+        
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        #timer {
+            font-size: 1.3rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+        
+        #question-counter {
+            font-size: 1.1rem;
+            background: rgba(255,255,255,0.2);
+            padding: 5px 15px;
+            border-radius: 20px;
+        }
+        
+        .exam-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        #exam-layout {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+        
+        #question-panel {
+            padding: 30px;
+        }
+        
+        .submit-btn {
+            width: 100%;
+            max-width: 300px;
+            margin: 30px auto 0;
+            display: block;
+            padding: 15px;
+            background: linear-gradient(135deg, #004a99 0%, #0066cc 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 74, 153, 0.3);
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 74, 153, 0.4);
+        }
+        
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+        
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Exam Header with Timer and Progress -->
+    <div class="exam-header">
+        <div class="exam-title">
+            <h1>🩺 NCLEX Adaptive Exam</h1>
+        </div>
+        <div class="exam-info">
+            <div class="info-item">
+                <span>⏱️ Time:</span>
+                <span id="timer">00:00:00</span>
+            </div>
+            <div class="info-item">
+                <span>📝 Question:</span>
+                <span><span id="current-q">1</span> of 75</span>
+            </div>
+            <!-- Dark Mode Toggle -->
+            <div class="info-item">
+                <button id="theme-toggle-btn" class="theme-toggle-icon" title="Toggle Dark Mode">
+                    🌙
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Exam Container -->
+    <div class="exam-container">
+        <div id="exam-layout" class="standard-layout">
+            <!-- Left Panel: Clinical Scenario (Only shows for case studies) -->
+            <div id="scenario-panel" class="hidden">
+                <div id="scenario-tabs" class="tab-header"></div>
+                <div id="scenario-content" class="tab-content"></div>
+            </div>
+
+            <!-- Right Panel: Question Display -->
+            <div id="question-panel">
+                <div id="question-display-area">
+                    <!-- Questions dynamically injected here by exam_engine.js -->
+                    <div style="text-align: center; padding: 50px; color: #999;">
+                        <p>Loading your first question...</p>
+                    </div>
+                </div>
+                
+                <button class="submit-btn" onclick="handleUserSubmit()">
+                    Submit Answer & Continue
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Your Custom Exam Engine JavaScript -->
+    <script src="{% static 'exam_sessions/js/exam_engine.js' %}"></script>
+    
+    <!-- Initialization Script -->
+    <script>
+        // CSRF Token Helper (needed for POST requests)
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        
+        
+        // Initialize exam when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set global variables for the exam session
+            window.activeSessionId = {{ session.id }};
+            
+            // Start the 5-hour timer
+            startTimer();
+            
+            // Load first question from API
+            fetch(`/exam/api/session/{{ session.id }}/first-question/`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.error) {
+                        // No questions in database
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'No Questions Available',
+                            text: data.message || 'Please contact administrator.',
+                            confirmButtonText: 'Go Back'
+                        }).then(() => {
+                            window.location.href = '/';
+                        });
+                    } else if (data.question) {
+                        // Store global question metadata
+                        window.activeQuestionId = data.question.id;
+                        window.activeQuestionType = data.question.type;
+                        
+                        // Update question counter
+                        document.getElementById('current-q').textContent = '1';
+                        
+                        // Render the first question
+                        renderQuestion(data.question);
+                    }
+                })
+                .catch(err => {
+                    console.error('===== EXAM LOAD ERROR =====');
+                    console.error('Error details:', err);
+                    console.error('Error message:', err.message);
+                    console.error('Error stack:', err.stack);
+                    console.error('Session ID:', '{{ session.id }}');
+                    console.error('API URL:', `/exam/api/session/{{ session.id }}/first-question/`);
+                    
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Connection Error',
+                        text: `Could not load exam: ${err.message}. Please check browser console for details.`,
+                        confirmButtonText: 'Refresh'
+                    }).then(() => {
+                        location.reload();
+                    });
+                });
+        });
+    </script>
+</body>
+</html>

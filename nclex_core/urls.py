@@ -26,4 +26,9 @@ urlpatterns = [
     # 2. REQUIRED: The Magic Allauth URLs for Google/Facebook
     path('accounts/', include('allauth.urls')),
     
+    # 3. Exam Sessions (Adaptive Testing)
+    path('exam/', include('exam_sessions.urls')),
+    
+    path('', include('pages.urls')),  # Home Page
+    
 ]

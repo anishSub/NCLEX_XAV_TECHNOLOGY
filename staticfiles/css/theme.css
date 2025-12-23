@@ -1,0 +1,340 @@
+/* =========================================
+   NCLEX Platform - Dark Mode Theme System
+   ========================================= */
+
+/* CSS Variables for Light Theme (Default) */
+:root {
+  /* Background Colors */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f4f6f9;
+  --bg-tertiary: #e9ecef;
+
+  /* Text Colors */
+  --text-primary: #212529;
+  --text-secondary: #6c757d;
+  --text-muted: #999999;
+
+  /* Border Colors */
+  --border-color: #dee2e6;
+  --border-light: #e9ecef;
+
+  /* Card Colors */
+  --card-bg: #ffffff;
+  --card-shadow: rgba(0, 0, 0, 0.1);
+
+  /* Button Colors */
+  --btn-primary-bg: #004a99;
+  --btn-primary-text: #ffffff;
+  --btn-secondary-bg: #6c757d;
+
+  /* Input Colors */
+  --input-bg: #ffffff;
+  --input-border: #ced4da;
+  --input-focus: #80bdff;
+
+  /* Chart Colors */
+  --chart-grid: #e0e0e0;
+  --chart-text: #666666;
+}
+
+/* Dark Theme Variables */
+[data-theme="dark"] {
+  /* Background Colors */
+  --bg-primary: #1a1a1a;
+  --bg-secondary: #2d2d2d;
+  --bg-tertiary: #3a3a3a;
+
+  /* Text Colors */
+  --text-primary: #ffffff;
+  --text-secondary: #b0b0b0;
+  --text-muted: #808080;
+
+  /* Border Colors */
+  --border-color: #404040;
+  --border-light: #333333;
+
+  /* Card Colors */
+  --card-bg: #2d2d2d;
+  --card-shadow: rgba(0, 0, 0, 0.3);
+
+  /* Button Colors */
+  --btn-primary-bg: #0066cc;
+  --btn-primary-text: #ffffff;
+  --btn-secondary-bg: #4a4a4a;
+
+  /* Input Colors */
+  --input-bg: #3a3a3a;
+  --input-border: #555555;
+  --input-focus: #4da3ff;
+
+  /* Chart Colors */
+  --chart-grid: #404040;
+  --chart-text: #b0b0b0;
+}
+
+/* ==========================================
+   Apply Theme Variables to Elements
+   ========================================== */
+
+/* Base Elements */
+body {
+  background-color: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Cards and Containers */
+.card,
+.results-container,
+.exam-container,
+.content-wrapper {
+  background-color: var(--card-bg) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-color) !important;
+  box-shadow: 0 2px 10px var(--card-shadow) !important;
+}
+
+/* Headers */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: var(--text-primary) !important;
+}
+
+/* Paragraph Text */
+p,
+span,
+div {
+  color: var(--text-primary);
+}
+
+/* Muted Text */
+.text-muted,
+.report-meta p {
+  color: var(--text-secondary) !important;
+}
+
+/* Borders */
+.border,
+.card-header,
+.table,
+hr {
+  border-color: var(--border-color) !important;
+}
+
+/* Tables */
+.table {
+  color: var(--text-primary) !important;
+  background-color: var(--card-bg) !important;
+}
+
+.table th {
+  background-color: var(--bg-tertiary) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-color) !important;
+}
+
+.table td {
+  border-color: var(--border-light) !important;
+  color: var(--text-primary) !important;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+  background-color: var(--bg-secondary) !important;
+}
+
+/* Inputs */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+textarea,
+select {
+  background-color: var(--input-bg) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--input-border) !important;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--input-focus) !important;
+  background-color: var(--input-bg) !important;
+}
+
+/* Buttons */
+.btn-secondary {
+  background-color: var(--btn-secondary-bg) !important;
+  border-color: var(--btn-secondary-bg) !important;
+}
+
+/* Exam Question Cards */
+#question-panel {
+  background-color: var(--card-bg) !important;
+  color: var(--text-primary) !important;
+}
+
+/* CRITICAL: Keep ONLY the question display area WHITE in dark mode */
+[data-theme="dark"] #question-display-area {
+  background-color: #ffffff !important;
+  color: #212529 !important;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+/* Force ALL text inside question area to be BLACK */
+[data-theme="dark"] #question-display-area,
+[data-theme="dark"] #question-display-area *,
+[data-theme="dark"] #question-display-area p,
+[data-theme="dark"] #question-display-area h1,
+[data-theme="dark"] #question-display-area h2,
+[data-theme="dark"] #question-display-area h3,
+[data-theme="dark"] #question-display-area h4,
+[data-theme="dark"] #question-display-area span,
+[data-theme="dark"] #question-display-area div,
+[data-theme="dark"] #question-display-area label {
+  color: #212529 !important;
+}
+
+/* Keep exam container and body DARK */
+[data-theme="dark"] .exam-container {
+  background-color: #1a1a1a !important;
+}
+
+[data-theme="dark"] body {
+  background-color: #1a1a1a !important;
+}
+
+.question-stem {
+  color: var(--text-primary) !important;
+}
+
+/* Force question text to be dark even in dark mode */
+[data-theme="dark"] .question-stem,
+[data-theme="dark"] .question-stem p,
+[data-theme="dark"] .question-stem h3,
+[data-theme="dark"] .question-stem h4 {
+  color: #212529 !important;
+}
+
+/* Answer Options */
+.answer-option {
+  background-color: var(--bg-secondary) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Keep answer options visible in dark mode */
+[data-theme="dark"] .answer-option {
+  background-color: #f8f9fa !important;
+  color: #212529 !important;
+  border-color: #dee2e6 !important;
+}
+
+.answer-option:hover {
+  background-color: var(--bg-tertiary) !important;
+}
+
+[data-theme="dark"] .answer-option:hover {
+  background-color: #e9ecef !important;
+}
+
+.answer-option.selected {
+  background-color: var(--btn-primary-bg) !important;
+  color: var(--btn-primary-text) !important;
+}
+
+/* Keep selected answer visible in dark mode */
+[data-theme="dark"] .answer-option.selected {
+  background-color: #0066cc !important;
+  color: #ffffff !important;
+}
+
+/* Radio buttons and checkboxes - keep visible */
+[data-theme="dark"] input[type="radio"],
+[data-theme="dark"] input[type="checkbox"] {
+  background-color: #ffffff !important;
+  border: 2px solid #495057 !important;
+}
+
+[data-theme="dark"] input[type="radio"]:checked,
+[data-theme="dark"] input[type="checkbox"]:checked {
+  background-color: #0066cc !important;
+  border-color: #0066cc !important;
+}
+
+/* Results Page Specific */
+.result-card {
+  background-color: var(--card-bg) !important;
+}
+
+[data-theme="dark"] .result-card.pass {
+  background-color: #1a3a2a !important;
+  border-color: #38a169 !important;
+}
+
+[data-theme="dark"] .result-card.fail {
+  background-color: #3a1a1a !important;
+  border-color: #e53e3e !important;
+}
+
+/* Chart Containers */
+canvas {
+  filter: brightness(var(--chart-brightness, 1));
+}
+
+[data-theme="dark"] canvas {
+  --chart-brightness: 0.9;
+}
+
+/* Modal/Popups */
+.modal-content {
+  background-color: var(--card-bg) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Theme Toggle Button Styles */
+.theme-toggle {
+  position: relative;
+  width: 60px;
+  height: 30px;
+  background-color: var(--bg-tertiary);
+  border-radius: 30px;
+  border: 2px solid var(--border-color);
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.theme-toggle .toggle-thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  background-color: var(--btn-primary-bg);
+  border-radius: 50%;
+  transition: transform 0.3s ease;
+}
+
+[data-theme="dark"] .theme-toggle .toggle-thumb {
+  transform: translateX(30px);
+}
+
+.theme-toggle-icon {
+  font-size: 1.2rem;
+  margin: 0 10px;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.theme-toggle-icon:hover {
+  color: var(--btn-primary-bg);
+}
+
+/* Smooth Transitions */
+* {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}

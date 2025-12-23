@@ -1,0 +1,373 @@
+/* ========================================
+   NCLEX Admin Panel - Modern Design
+   White Sidebar | Transparent Cards | Colorful Icons
+   ======================================== */
+
+/* ===== GLOBAL STYLES ===== */
+:root {
+  --primary-blue: #007bff;
+  --primary-light: #e3f2fd;
+  --success-green: #28a745;
+  --warning-yellow: #ffc107;
+  --danger-red: #dc3545;
+  --purple: #6f42c1;
+  --orange: #fd7e14;
+  --glass-bg: rgba(255, 255, 255, 0.85);
+  --shadow-soft: 0 4px 6px rgba(0, 0, 0, 0.07);
+  --shadow-medium: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* ===== BODY BACKGROUND ===== */
+body {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  background-attachment: fixed !important;
+}
+
+/* ===== CONTENT WRAPPER - Transparent Cards ===== */
+.content-wrapper {
+  background: transparent !important;
+}
+
+/* ===== MAIN CARDS - Glass Morphism ===== */
+.card,
+.info-box,
+.small-box {
+  background: var(--glass-bg) !important;
+  backdrop-filter: blur(10px) !important;
+  border-radius: 15px !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  box-shadow: var(--shadow-medium) !important;
+  transition: transform 0.3s ease, box-shadow 0.3s ease !important;
+}
+
+.card:hover,
+.info-box:hover,
+.small-box:hover {
+  transform: translateY(-5px) !important;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* ===== SIDEBAR - White Modern ===== */
+.main-sidebar {
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(10px) !important;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Sidebar Links */
+.sidebar-light-primary .nav-sidebar>.nav-item>.nav-link {
+  color: #495057 !important;
+  transition: all 0.3s ease !important;
+  border-radius: 8px !important;
+  margin: 2px 8px !important;
+  border: 1px solid rgba(0, 123, 255, 0.1) !important;
+  /* Light border */
+  background: rgba(255, 255, 255, 0.5) !important;
+}
+
+.sidebar-light-primary .nav-sidebar>.nav-item>.nav-link:hover {
+  background: linear-gradient(135deg, var(--primary-light), #bbdefb) !important;
+  color: var(--primary-blue) !important;
+  transform: translateX(5px) !important;
+  border-color: rgba(0, 123, 255, 0.3) !important;
+  /* Slightly darker on hover */
+}
+
+.sidebar-light-primary .nav-sidebar>.nav-item>.nav-link.active {
+  background: linear-gradient(135deg, var(--primary-blue), #0056b3) !important;
+  color: white !important;
+  box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3) !important;
+  border-color: transparent !important;
+}
+
+/* ===== SIDEBAR SECTION SEPARATORS - MORE VISIBLE ===== */
+.nav-sidebar>.nav-item {
+  border: 1px solid rgba(0, 123, 255, 0.15) !important;
+  /* Border around EACH item */
+  border-radius: 8px !important;
+  padding: 3px !important;
+  margin: 8px 5px !important;
+  /* More spacing */
+  background: rgba(255, 255, 255, 0.3) !important;
+  /* Light background */
+}
+
+.nav-sidebar>.nav-item:hover {
+  background: rgba(255, 255, 255, 0.5) !important;
+  /* Lighter on hover */
+  border-color: rgba(0, 123, 255, 0.25) !important;
+}
+
+/* Parent sections (like "Users", "Exam Sessions") - Make them stand out */
+.nav-sidebar>.nav-item.has-treeview {
+  border: 2px solid rgba(0, 123, 255, 0.25) !important;
+  /* Thicker border for parents */
+  background: rgba(255, 255, 255, 0.5) !important;
+  /* More opaque */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05) !important;
+  /* Subtle shadow */
+}
+
+.nav-sidebar>.nav-item.has-treeview>.nav-link {
+  font-weight: 600 !important;
+  /* Bolder text for parent items */
+}
+
+/* FIX: When child is active, parent should NOT have active styling */
+.nav-sidebar>.nav-item.has-treeview.menu-open>.nav-link {
+  background: rgba(255, 255, 255, 0.9) !important;
+  /* Lighter, not highlighted */
+  color: #495057 !important;
+  /* Normal text color */
+  box-shadow: none !important;
+  /* No shadow */
+}
+
+/* Only highlight parent if it's directly clicked (no active children) */
+.nav-sidebar>.nav-item.has-treeview:not(.menu-open)>.nav-link.active {
+  background: linear-gradient(135deg, var(--primary-blue), #0056b3) !important;
+  color: white !important;
+}
+
+/* ===== COLORFUL ICONS ===== */
+/* User Management - Purple */
+.sidebar .nav-icon.fa-shield-alt,
+.sidebar .nav-icon.fa-users,
+.sidebar .nav-icon.fa-user-nurse,
+.sidebar .nav-icon.fa-id-card-clip {
+  color: var(--purple) !important;
+  font-size: 1.1rem !important;
+}
+
+/* Content Management - Blue */
+.sidebar .nav-icon.fa-clipboard-question,
+.sidebar .nav-icon.fa-folder-tree,
+.sidebar .nav-icon.fa-book-medical {
+  color: var(--primary-blue) !important;
+  font-size: 1.1rem !important;
+}
+
+/* Exam System - Green */
+.sidebar .nav-icon.fa-laptop-medical,
+.sidebar .nav-icon.fa-file-signature {
+  color: var(--success-green) !important;
+  font-size: 1.1rem !important;
+}
+
+/* Social Auth - Orange */
+.sidebar .nav-icon.fa-share-nodes,
+.sidebar .nav-icon.fa-user-check {
+  color: var(--orange) !important;
+  font-size: 1.1rem !important;
+}
+
+/* System - Gray */
+.sidebar .nav-icon.fa-globe {
+  color: #6c757d !important;
+  font-size: 1.1rem !important;
+}
+
+/* Active icon glow */
+.nav-link.active .nav-icon {
+  filter: drop-shadow(0 0 5px currentColor) !important;
+}
+
+/* ===== NAVBAR - Clean White ===== */
+.main-header {
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(10px) !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05) !important;
+  border-bottom: none !important;
+}
+
+/* ===== DROPDOWN SUBSECTIONS - Smooth Expand ===== */
+.nav-treeview {
+  background: rgba(0, 123, 255, 0.03) !important;
+  border-radius: 8px !important;
+  margin: 5px 8px !important;
+  padding: 5px 0 !important;
+}
+
+.nav-treeview>.nav-item>.nav-link {
+  padding-left: 2.5rem !important;
+  color: #6c757d !important;
+  transition: all 0.2s ease !important;
+}
+
+.nav-treeview>.nav-item>.nav-link:hover {
+  color: var(--primary-blue) !important;
+  background: rgba(0, 123, 255, 0.08) !important;
+  padding-left: 3rem !important;
+}
+
+.nav-treeview>.nav-item>.nav-link.active {
+  color: var(--primary-blue) !important;
+  font-weight: 600 !important;
+  background: rgba(0, 123, 255, 0.12) !important;
+}
+
+/* ===== BUTTONS - Modern Gradient ===== */
+.btn-primary {
+  background: linear-gradient(135deg, var(--primary-blue), #0056b3) !important;
+  border: none !important;
+  box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3) !important;
+  transition: all 0.3s ease !important;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 15px rgba(0, 123, 255, 0.4) !important;
+}
+
+.btn-success {
+  background: linear-gradient(135deg, var(--success-green), #1e7e34) !important;
+  border: none !important;
+}
+
+.btn-warning {
+  background: linear-gradient(135deg, var(--warning-yellow), #e0a800) !important;
+  border: none !important;
+}
+
+.btn-danger {
+  background: linear-gradient(135deg, var(--danger-red), #c82333) !important;
+  border: none !important;
+}
+
+/* ===== TABLES - Clean Design ===== */
+.table {
+  background: white !important;
+  border-radius: 10px !important;
+  overflow: hidden !important;
+  box-shadow: var(--shadow-soft) !important;
+}
+
+.table thead th {
+  background: linear-gradient(135deg, #f8f9fa, #e9ecef) !important;
+  color: #495057 !important;
+  font-weight: 600 !important;
+  border: none !important;
+}
+
+.table tbody tr:hover {
+  background: var(--primary-light) !important;
+  transition: background 0.2s ease !important;
+}
+
+/* ===== FORMS - Modern Input ===== */
+.form-control {
+  border-radius: 8px !important;
+  border: 1px solid #ced4da !important;
+  transition: all 0.3s ease !important;
+}
+
+.form-control:focus {
+  border-color: var(--primary-blue) !important;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.15) !important;
+}
+
+/* ===== INFO BOXES - Dashboard Widgets ===== */
+.info-box {
+  padding: 1.5rem !important;
+}
+
+.info-box-icon {
+  border-radius: 12px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.bg-info .info-box-icon {
+  background: linear-gradient(135deg, #17a2b8, #117a8b) !important;
+}
+
+.bg-success .info-box-icon {
+  background: linear-gradient(135deg, var(--success-green), #1e7e34) !important;
+}
+
+.bg-warning .info-box-icon {
+  background: linear-gradient(135deg, var(--warning-yellow), #e0a800) !important;
+}
+
+.bg-danger .info-box-icon {
+  background: linear-gradient(135deg, var(--danger-red), #c82333) !important;
+}
+
+/* ===== PAGINATION - Modern ===== */
+.pagination .page-link {
+  border-radius: 8px !important;
+  margin: 0 3px !important;
+  border: 1px solid #dee2e6 !important;
+  color: var(--primary-blue) !important;
+}
+
+.pagination .page-item.active .page-link {
+  background: var(--primary-blue) !important;
+  border-color: var(--primary-blue) !important;
+}
+
+/* ===== BREADCRUMB - Clean ===== */
+.content-header {
+  background: rgba(255, 255, 255, 0.8) !important;
+  backdrop-filter: blur(10px) !important;
+  border-radius: 10px !important;
+  margin-bottom: 1.5rem !important;
+  padding: 1rem 1.5rem !important;
+  box-shadow: var(--shadow-soft) !important;
+}
+
+/* ===== BRAND LOGO - Professional ===== */
+.brand-link {
+  background: linear-gradient(135deg, var(--primary-blue), #0056b3) !important;
+  color: white !important;
+  font-weight: 600 !important;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+/* ===== SCROLLBAR - Custom ===== */
+.sidebar::-webkit-scrollbar {
+  width: 6px !important;
+}
+
+.sidebar::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05) !important;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+  background: rgba(0, 123, 255, 0.3) !important;
+  border-radius: 10px !important;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 123, 255, 0.5) !important;
+}
+
+/* ===== RESPONSIVE ADJUSTMENTS ===== */
+@media (max-width: 768px) {
+  .content-wrapper {
+    padding: 1rem !important;
+  }
+
+  .card {
+    margin-bottom: 1rem !important;
+  }
+}
+
+/* ===== ANIMATION ===== */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.card,
+.info-box {
+  animation: fadeInUp 0.5s ease-out !important;
+}
