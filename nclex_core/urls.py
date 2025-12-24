@@ -35,6 +35,9 @@ urlpatterns = [
     # 5. Subscriptions & Pricing
     path('subscriptions/', include('subscriptions.urls')),
     
+    # 6. Gamification (Streaks, Badges, Points)
+    path('gamification/', include('gamification.urls')),
+    
     path('', include('pages.urls')),  # Home Page
     
 ]

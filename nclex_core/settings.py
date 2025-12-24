@@ -26,6 +26,7 @@ INSTALLED_APPS = [
     "pages",
     "study_planner",  # NEW: Study Planner with calendar and to-do list
     "subscriptions",  # NEW: Subscription & Payment System
+    "gamification",   # NEW: Gamification System (Streaks, Badges, Points)
     
     # ALLAUTH (Social Login)
     'allauth',
