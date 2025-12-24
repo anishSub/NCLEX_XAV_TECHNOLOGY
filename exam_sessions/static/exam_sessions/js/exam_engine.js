@@ -1,7 +1,17 @@
+/* --- GLOBAL QUESTION COUNTER --- */
+window.currentQuestionNumber = window.currentQuestionNumber || 0;
+
 /* --- PART 1: THE SWITCH --- */
 function renderQuestion(questionData) {
     try {
         console.log('🎯 renderQuestion called with ID:', questionData.id, 'Type:', questionData.type);
+
+        // Increment and update question counter
+        window.currentQuestionNumber++;
+        const counterElement = document.getElementById('current-q');
+        if (counterElement) {
+            counterElement.textContent = window.currentQuestionNumber;
+        }
 
         // CRITICAL: Update global question metadata for validation
         window.activeQuestionId = questionData.id;
@@ -435,20 +445,23 @@ async function handleUserSubmit() {
         return;
     }
 
-    // 3. If answer exists, show a "Thinking" loader while the API works
-    Swal.fire({
-        title: 'Evaluating...',
-        allowOutsideClick: false,
-        didOpen: () => {
-            Swal.showLoading();
-        }
-    });
+    // 3. Transform the submit button to show loading state
+    const submitBtn = document.querySelector('.submit-btn');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = `
+        <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+            <div style="width: 20px; height: 20px; border: 3px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite;"></div>
+            <span>Processing...</span>
+        </div>
+    `;
 
     // 4. Send to your Django API
     await submitAnswer(sessionId, questionId, answers);
 
-    // 5. Close the loader after the engine responds
-    Swal.close();
+    // 5. Restore the button after the response
+    submitBtn.disabled = false;
+    submitBtn.innerHTML = originalText;
 }
 
 

@@ -1,0 +1,442 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study Planner</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: #f4f6f9; }
+        .header { background: linear-gradient(135deg, #004a99 0%, #0066cc 100%); color: white; padding: 1.5rem 2rem; }
+        .header-content { max-width: 1400px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+        .nav-links a { color: white; text-decoration: none; margin-left: 2rem; }
+        .container { max-width: 1400px; margin: 0 auto; padding: 2rem; }
+        .stats-grid { display: grid; grid-template-columns: repeat( auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+        .stat-card { background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
+        .stat-number { font-size: 2.5rem; font-weight: 700; color: #004a99; }
+        .stat-label { color: #5a6c7d; margin-top: 0.5rem; }
+        .kanban-board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 2rem; }
+        .kanban-column { background: white; border-radius: 15px; padding: 1.5rem; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
+        .kanban-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 2px solid #e0e0e0; }
+        .kanban-title { font-size: 1.1rem; font-weight: 700; }
+        .kanban-count { background: #e0e0e0; padding: 0.3rem 0.8rem; border-radius: 50px; font-size: 0.9rem; font-weight: 600; }
+        .todo-col .kanban-header { color: #0066cc; }
+        .todo-col .kanban-count { background: #e3f2fd; color: #0066cc; }
+        .in-progress-col .kanban-header { color: #ff9800; }
+        .in-progress-col .kanban-count { background: #fff3e0; color: #ff9800; }
+        .completed-col .kanban-header { color: #38a169; }
+        .completed-col .kanban-count { background: #e8f5e9; color: #38a169; }
+        .task-card { background: #f8fbff; padding: 1rem; margin-bottom: 1rem; border-radius: 10px; border-left: 4px solid; cursor: pointer; transition: all 0.3s; }
+        .task-card:hover { transform: translateX(5px); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .todo-col .task-card { border-left-color: #0066cc; }
+        .in-progress-col .task-card { border-left-color: #ff9800; }
+        .completed-col .task-card { border-left-color: #38a169; opacity: 0.7; }
+        .task-title { font-weight: 600; color: #2c3e50; margin-bottom: 0.5rem; }
+        .task-meta { font-size: 0.9rem; color: #5a6c7d; }
+        .task-actions { display: flex; gap: 0.5rem; margin-top: 0.8rem; }
+        .btn-action { padding: 0.4rem 0.8rem; font-size: 0.85rem; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; transition: all 0.2s; }
+        .btn-start { background: #fff3e0; color: #ff9800; }
+        .btn-complete { background: #e8f5e9; color: #38a169; }
+        .btn-reset { background: #e3f2fd; color: #0066cc; }
+        .btn-add { padding: 0.8rem 2rem; background: #004a99; color: white; border: none; border-radius: 50px; cursor: pointer; font-weight: 600; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; }
+        .modal-content { background: white; max-width: 500px; margin: 100px auto; padding: 2rem; border-radius: 15px; }
+        .form-group { margin-bottom: 1rem; }
+        label { display: block; margin-bottom: 0.3rem; font-weight: 600; }
+        input, select, textarea { width: 100%; padding: 0.8rem; border: 2px solid #e0e0e0; border-radius: 8px; font-family: inherit; }
+        .btn-submit { width: 100%; padding: 1rem; background: #004a99; color: white; border: none; border-radius: 50px; cursor: pointer; font-weight: 600; margin-top: 1rem; }
+        .streak-badge { background: linear-gradient(135deg, #ff6b6b, #ff8e53); padding: 1rem 2rem; border-radius: 15px; color: white; text-align: center; font-size: 1.2rem; font-weight: 700; }
+        .upcoming-panel { background: white; border-radius: 15px; padding: 2rem; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
+        .upcoming-task { padding: 0.8rem; background: #f8fbff; margin-bottom: 0.8rem; border-radius: 8px; }
+        .hidden-task { display: none; }
+        .btn-show-more { width: 100%; padding: 0.8rem; background: #f0f0f0; border: 2px dashed #ccc; border-radius: 8px; color: #666; font-weight: 600; cursor: pointer; margin-top: 1rem; transition: all 0.3s; }
+        .btn-show-more:hover { background: #e8e8e8; border-color: #999; }
+        
+        /* Recommendations Section */
+        .recommendations-section { background: linear-gradient(135deg, #fff5f5 0%, #ffe8e8 100%); border-radius: 20px; padding: 2rem; margin-bottom: 2rem; border: 2px solid #ffcdd2; }
+        .rec-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+        .rec-title { font-size: 1.5rem; font-weight: 700; color: #c62828; }
+        .rec-subtitle { color: #666; font-size: 0.95rem; margin-top: 0.3rem; }
+        .rec-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; }
+        .rec-card { background: white; border-radius: 15px; padding: 1.5rem; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border-left: 5px solid; transition: all 0.3s; }
+        .rec-card:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(0,0,0,0.12); }
+        .rec-card.weak { border-left-color: #f44336; }
+        .rec-card.needs_work { border-left-color: #ff9800; }
+        .rec-card.strong { border-left-color: #4caf50; }
+        .rec-card-header { display: flex; align-items: center; gap: 0.8rem; margin-bottom: 1rem; }
+        .rec-icon { font-size: 2rem; }
+        .rec-category { font-size: 1.2rem; font-weight: 700; color: #2c3e50; flex: 1; }
+        .rec-percentage { font-size: 3rem; font-weight: 700; text-align: center; margin: 1rem 0; }
+        .rec-card.weak .rec-percentage { color: #f44336; }
+        .rec-card.needs_work .rec-percentage { color: #ff9800; }
+        .rec-card.strong .rec-percentage { color: #4caf50; }
+        .rec-details { text-align: center; color: #666; font-size: 0.9rem; margin-bottom: 1.5rem; }
+        .btn-practice { width: 100%; padding: 1rem; background: linear-gradient(135deg, #004a99 0%, #0066cc 100%); color: white; border: none; border-radius: 50px; font-weight: 600; cursor: pointer; transition: all 0.3s; }
+        .btn-practice:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0, 74, 153, 0.4); }
+        .no-recommendations { text-align: center; padding: 3rem; color: #999; }
+        .no-recommendations i { font-size: 3rem; margin-bottom: 1rem; display: block; }
+        
+        /* ============ RESPONSIVE DESIGN ============ */
+        
+        /* Tablet (768px - 1024px) */
+        @media (max-width: 1024px) {
+            .container { padding: 1rem; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+        }
+        
+        /* Mobile (< 768px) */
+        @media (max-width: 768px) {
+            .header-content { flex-direction: column; gap: 1rem; text-align: center; }
+            .header-content div:last-child { width: 100%; justify-content: center; }
+            
+            .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 0.8rem; }
+            .stat-card { padding: 1rem; }
+            .stat-number { font-size: 1.8rem; }
+            .stat-label { font-size: 0.8rem; }
+            
+            /* Stack Kanban columns vertically */
+            .kanban-board { 
+                display: flex;
+                flex-direction: column;
+                gap: 1.5rem;
+            }
+            
+            .kanban-column { flex: none; width: 100%; }
+            
+            .task-header { flex-direction: column; gap: 1rem; align-items: flex-start; }
+            .btn-add { width: 100%; }
+            
+            /* Recommendations */
+            .rec-grid { grid-template-columns: 1fr; }
+            
+            .rec-card-header { flex-direction: column; text-align: center; }
+            .rec-stats { flex-direction: column; text-align: center; }
+            .btn-practice { width: 100%; }
+        }
+        
+        /* Small Mobile (< 480px) */
+        @media (max-width: 480px) {
+            .header h1 { font-size: 1.5rem; }
+            .stats-grid { grid-template-columns: 1fr; }
+            .stat-number { font-size: 2rem; }
+            .task-card { padding: 0.8rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div><h1>📅 Study Planner</h1></div>
+            <div><a href="{% url 'home' %}">Home</a><a href="{% url 'setup_study_plan' %}">Settings</a></div>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number">{{ days_until_exam }}</div>
+                <div class="stat-label">Days Until Exam</div>
+                <div style="font-size: 0.9rem; color: #5a6c7d; margin-top: 0.5rem;">{{ study_plan.exam_date|date:"F d, Y" }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="streak-badge">🔥 {{ study_plan.study_streak }} Day Streak</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ completion_rate }}%</div>
+                <div class="stat-label">Completion Rate</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ study_plan.daily_study_hours }}h</div>
+                <div class="stat-label">Daily Goal</div>
+            </div>
+        </div>
+        
+        <!-- Smart Recommendations Section -->
+        <div class="recommendations-section" id="recommendationsSection" style="display: none;">
+            <div class="rec-header">
+                <div>
+                    <div class="rec-title">⭐ Recommended Practice</div>
+                    <div class="rec-subtitle">Based on your exam performance, focus on these areas</div>
+                </div>
+            </div>
+            <div class="rec-grid" id="recommendationsGrid">
+                <!-- Recommendations will be loaded here dynamically -->
+            </div>
+        </div>
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h2 style="color: #004a99;">Today's Tasks</h2>
+            <button class="btn-add" onclick="openAddTaskModal()">+ Add Task</button>
+        </div>
+        
+        <div class="kanban-board">
+            <!-- TO DO Column -->
+            <div class="kanban-column todo-col">
+                <div class="kanban-header">
+                    <span class="kanban-title">☐ To Do</span>
+                    <span class="kanban-count">{{ todays_tasks_todo.count }}</span>
+                </div>
+                {% for task in todays_tasks_todo %}
+                <div class="task-card {% if forloop.counter > 5 %}hidden-task{% endif %}" data-column="todo">
+                    <div class="task-title">{{ task.title }}</div>
+                    <div class="task-meta">{{ task.estimated_minutes }} min · {{ task.get_priority_display }}</div>
+                    <div class="task-actions">
+                        <button class="btn-action btn-start" onclick="updateStatus({{ task.id }}, 'IN_PROGRESS')">▶️ Start</button>
+                        <button class="btn-action btn-complete" onclick="updateStatus({{ task.id }}, 'COMPLETED')">✓ Complete</button>
+                    </div>
+                </div>
+                {% empty %}
+                <p style="color: #999; text-align: center; padding: 2rem;">No tasks</p>
+                {% endfor %}
+                {% if todays_tasks_todo.count > 5 %}
+                <button class="btn-show-more" onclick="toggleShowMore('todo')">+ Show {{ todays_tasks_todo.count|add:"-5" }} More</button>
+                {% endif %}
+            </div>
+            
+            <!-- IN PROGRESS Column -->
+            <div class="kanban-column in-progress-col">
+                <div class="kanban-header">
+                    <span class="kanban-title">⏳ In Progress</span>
+                    <span class="kanban-count">{{ todays_tasks_in_progress.count }}</span>
+                </div>
+                {% for task in todays_tasks_in_progress %}
+                <div class="task-card {% if forloop.counter > 5 %}hidden-task{% endif %}" data-column="in-progress">
+                    <div class="task-title">{{ task.title }}</div>
+                    <div class="task-meta">{{ task.estimated_minutes }} min · {{ task.get_priority_display }}</div>
+                    <div class="task-actions">
+                        <button class="btn-action btn-reset" onclick="updateStatus({{ task.id }}, 'TODO')">↩️ To Do</button>
+                        <button class="btn-action btn-complete" onclick="updateStatus({{ task.id }}, 'COMPLETED')">✓ Complete</button>
+                    </div>
+                </div>
+                {% empty %}
+                <p style="color: #999; text-align: center; padding: 2rem;">No tasks</p>
+                {% endfor %}
+                {% if todays_tasks_in_progress.count > 5 %}
+                <button class="btn-show-more" onclick="toggleShowMore('in-progress')">+ Show {{ todays_tasks_in_progress.count|add:"-5" }} More</button>
+                {% endif %}
+            </div>
+            
+            <!-- COMPLETED Column -->
+            <div class="kanban-column completed-col">
+                <div class="kanban-header">
+                    <span class="kanban-title">✓ Completed</span>
+                    <span class="kanban-count">{{ todays_tasks_completed.count }}</span>
+                </div>
+                {% for task in todays_tasks_completed %}
+                <div class="task-card {% if forloop.counter > 5 %}hidden-task{% endif %}" data-column="completed">
+                    <div class="task-title">{{ task.title }}</div>
+                    <div class="task-meta">Completed at {{ task.completed_at|date:"g:i A" }}</div>
+                    <div class="task-actions">
+                        <button class="btn-action btn-reset" onclick="updateStatus({{ task.id }}, 'TODO')">↩️ Redo</button>
+                    </div>
+                </div>
+                {% empty %}
+                <p style="color: #999; text-align: center; padding: 2rem;">No tasks</p>
+                {% endfor %}
+                {% if todays_tasks_completed.count > 5 %}
+                <button class="btn-show-more" onclick="toggleShowMore('completed')">+ Show {{ todays_tasks_completed.count|add:"-5" }} More</button>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="upcoming-panel">
+            <h2 style="color: #004a99; margin-bottom: 1rem;">Upcoming Tasks</h2>
+            {% for task in upcoming_tasks %}
+            <div class="upcoming-task">
+                <strong>{{ task.title }}</strong> - {{ task.scheduled_date|date:"M d" }} ({{ task.estimated_minutes }} min)
+            </div>
+            {% empty %}
+            <p style="color: #999; text-align: center; padding: 2rem;">No upcoming tasks</p>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <!-- Add Task Modal -->
+    <div id="addTaskModal" class="modal">
+        <div class="modal-content">
+            <h2 style="margin-bottom: 1.5rem;">Add New Task</h2>
+            <form id="taskForm">
+                <div class="form-group">
+                    <label>Title</label>
+                    <input type="text" name="title" required>
+                </div>
+                <div class="form-group">
+                    <label>Date</label>
+                    <input type="date" name="scheduled_date" value="{{ today|date:'Y-m-d' }}" required>
+                </div>
+                <div class="form-group">
+                    <label>Priority</label>
+                    <select name="priority">
+                        <option value="HIGH">High</option>
+                        <option value="MEDIUM" selected>Medium</option>
+                        <option value="LOW">Low</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Estimated Time (minutes)</label>
+                    <input type="number" name="estimated_minutes" value="30">
+                </div>
+                <button type="submit" class="btn-submit">Add Task</button>
+                <button type="button" onclick="closeModal()" style="background: #6c757d; margin-top: 0.5rem;" class="btn-submit">Cancel</button>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+    function openAddTaskModal() { document.getElementById('addTaskModal').style.display = 'block'; }
+    function closeModal() { document.getElementById('addTaskModal').style.display = 'none'; }
+    
+    document.getElementById('taskForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const data = { title: formData.get('title'), scheduled_date: formData.get('scheduled_date'), priority: formData.get('priority'), estimated_minutes: formData.get('estimated_minutes') };
+        
+        try {
+            const response = await fetch('/planner/api/tasks/create/', {
+                method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+                body: JSON.stringify(data)
+            });
+            if (response.ok) { location.reload(); }
+        } catch (error) { console.error('Error:', error); }
+    });
+    
+    async function updateStatus(taskId, newStatus) {
+        try {
+            const response = await fetch(`/planner/api/tasks/${taskId}/status/`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+                body: JSON.stringify({ status: newStatus })
+            });
+            if (response.ok) { location.reload(); }
+        } catch (error) { console.error('Error:', error); }
+    }
+    
+    function toggleShowMore(columnName) {
+        const column = document.querySelector(`.${columnName}-col`);
+        const hiddenTasks = column.querySelectorAll('.hidden-task');
+        const button = column.querySelector('.btn-show-more');
+        
+        const isHidden = hiddenTasks[0].style.display === 'none' || !hiddenTasks[0].style.display;
+        
+        hiddenTasks.forEach(task => {
+            task.style.display = isHidden ? 'block' : 'none';
+        });
+        
+        if (isHidden) {
+            button.textContent = '- Show Less';
+        } else {
+            const count = hiddenTasks.length;
+            button.textContent = `+ Show ${count} More`;
+        }
+    }
+    
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    </script>
+    
+    <script>
+    // Load recommendations on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        loadRecommendations();
+    });
+    
+    async function loadRecommendations() {
+        try {
+            const response = await fetch('/planner/api/recommendations/');
+            const data = await response.json();
+            
+            if (data.recommendations && data.recommendations.length > 0) {
+                displayRecommendations(data.recommendations);
+            }
+        } catch (error) {
+            console.error('Error loading recommendations:', error);
+        }
+    }
+    
+    function displayRecommendations(recommendations) {
+        const section = document.getElementById('recommendationsSection');
+        const grid = document.getElementById('recommendationsGrid');
+        
+        // Show only weak areas (< 70%) or top 3 if all are strong
+        const weakAreas = recommendations.filter(r => r.percentage < 70);
+        const toShow = weakAreas.length > 0 ? weakAreas.slice(0, 3) : recommendations.slice(0, 3);
+        
+        if (toShow.length === 0) {
+            return; // Don't show section if no recommendations
+        }
+        
+        grid.innerHTML = '';
+        
+        toShow.forEach(rec => {
+            const card = document.createElement('div');
+            card.className = `rec-card ${rec.status}`;
+            card.innerHTML = `
+                <div class="rec-card-header">
+                    <span class="rec-icon">${rec.icon}</span>
+                    <span class="rec-category">${rec.category_name}</span>
+                </div>
+                <div class="rec-percentage">${rec.percentage}%</div>
+                <div class="rec-details">
+                    ${rec.correct_answers} correct / ${rec.total_questions} total
+                </div>
+                <button class="btn-practice" onclick="createPracticeTask(${rec.category_id}, '${rec.category_name}', ${rec.recommended_practice})">
+                    Practice ${rec.recommended_practice} Questions →
+                </button>
+            `;
+            grid.appendChild(card);
+        });
+        
+        section.style.display = 'block';
+    }
+    
+    async function createPracticeTask(categoryId, categoryName, numQuestions) {
+        if (!categoryId) {
+            alert('Cannot create task - category not found in database');
+            return;
+        }
+        
+        try {
+            const response = await fetch('/planner/api/recommendations/create-task/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({
+                    category_id: categoryId,
+                    category_name: categoryName,
+                    num_questions: numQuestions
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                alert(`✅ ${data.message}`);
+                location.reload(); // Refresh to show new task
+            } else {
+                alert(`⚠️ ${data.error}`);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Failed to create task');
+        }
+    }
+    </script>
+</body>
+</html>

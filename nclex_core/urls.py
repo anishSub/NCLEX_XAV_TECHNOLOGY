@@ -29,6 +29,12 @@ urlpatterns = [
     # 3. Exam Sessions (Adaptive Testing)
     path('exam/', include('exam_sessions.urls')),
     
+    # 4. Study Planner (Calendar & To-Do List)
+    path('planner/', include('study_planner.urls')),
+    
+    # 5. Subscriptions & Pricing
+    path('subscriptions/', include('subscriptions.urls')),
+    
     path('', include('pages.urls')),  # Home Page
     
 ]

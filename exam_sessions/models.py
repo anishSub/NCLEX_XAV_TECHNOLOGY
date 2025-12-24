@@ -24,6 +24,19 @@ class ExamSessions(models.Model):
     # Stores history for Chart.js: [{"theta": 0.1, "se": 0.8, "is_correct": true}, ...]
     question_history = models.JSONField(default=list, blank=True)
     
+    # Session type: ADAPTIVE (95% confidence CAT) or PRACTICE (category-based)
+    SESSION_TYPES = [
+        ('ADAPTIVE', 'Adaptive Exam'),
+        ('PRACTICE', 'Practice Mode'),
+    ]
+    session_type = models.CharField(max_length=20, choices=SESSION_TYPES, default='ADAPTIVE')
+    
+    # For practice mode: selected category IDs
+    selected_categories = models.JSONField(default=list, blank=True)
+    
+    # For practice mode: total questions to practice
+    total_questions = models.IntegerField(null=True, blank=True)
+    
     created_at = models.DateTimeField(auto_now_add=True)
     
     completed_at = models.DateTimeField(null=True, blank=True)

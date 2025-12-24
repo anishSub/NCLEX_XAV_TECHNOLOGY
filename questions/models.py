@@ -38,8 +38,9 @@ class Questions(models.Model):
         if not self.options:
             raise ValidationError("You must provide the 'options' JSON.")
     
-    # If you still use categories
-    # category_ids = models.ManyToManyField('categories.Categories', blank=True)
+    # Link questions to categories for practice mode
+    category_ids = models.ManyToManyField('categories.Categories', blank=True, related_name='questions')
+
 
     class Meta:
         db_table = 'questions'

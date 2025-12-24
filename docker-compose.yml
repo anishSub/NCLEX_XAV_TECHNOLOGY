@@ -13,7 +13,7 @@ services:
       - db
 
     env_file:
-      - .env
+      - .env # this was not linked to the docker but now it is linked
 
     environment:
       - DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1 [::1]

@@ -24,6 +24,8 @@ INSTALLED_APPS = [
     "exam_sessions",
     "user_responses",
     "pages",
+    "study_planner",  # NEW: Study Planner with calendar and to-do list
+    "subscriptions",  # NEW: Subscription & Payment System
     
     # ALLAUTH (Social Login)
     'allauth',

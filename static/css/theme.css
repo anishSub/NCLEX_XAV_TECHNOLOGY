@@ -324,14 +324,38 @@ canvas {
 }
 
 .theme-toggle-icon {
-  font-size: 1.2rem;
-  margin: 0 10px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
-  transition: color 0.3s ease;
+  transition: all 0.3s ease;
+  padding: 0;
 }
 
 .theme-toggle-icon:hover {
-  color: var(--btn-primary-bg);
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+}
+
+.theme-toggle-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Make button white in dark mode for visibility */
+[data-theme="dark"] .theme-toggle-icon {
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+}
+
+[data-theme="dark"] .theme-toggle-icon:hover {
+  background: rgba(255, 255, 255, 0.25);
 }
 
 /* Smooth Transitions */

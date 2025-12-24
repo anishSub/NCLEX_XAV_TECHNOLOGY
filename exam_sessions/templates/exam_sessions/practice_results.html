@@ -1,0 +1,65 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Practice Results</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #f0f8ff 0%, #e6f3ff 100%); min-height: 100vh; padding: 2rem; }
+        .container { max-width: 900px; margin: 0 auto; background: white; border-radius: 20px; padding: 3rem; box-shadow: 0 10px 40px rgba(0, 74, 153, 0.15); }
+        h1 { color: #004a99; margin-bottom: 1rem; }
+        .score-card { text-align: center; background: linear-gradient(135deg, #004a99 0%, #0066cc 100%); color: white; padding: 2rem; border-radius: 15px; margin: 2rem 0; }
+        .score-big { font-size: 4rem; font-weight: 700; }
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin: 2rem 0; }
+        .stat-box { background: #f8fbff; padding: 1.5rem; border-radius: 12px; text-align: center; }
+        .stat-number { font-size: 2rem; font-weight: 700; color: #004a99; }
+        .stat-label { color: #5a6c7d; margin-top: 0.5rem; }
+        .category-breakdown { margin: 2rem 0; }
+        .category-item { display: flex; justify-content: space-between; padding: 1rem; margin: 0.5rem 0; background: #f8fbff; border-radius: 8px; }
+        .btn-home { display: inline-block; padding: 1rem 2rem; background: #004a99; color: white; text-decoration: none; border-radius: 50px; margin-top: 2rem; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Practice Results</h1>
+        
+        <div class="score-card">
+            <div class="score-big">{{ score_percentage }}%</div>
+            <p>Overall Score</p>
+        </div>
+        
+        <div class="stats-grid">
+            <div class="stat-box">
+                <div class="stat-number">{{ total_questions }}</div>
+                <div class="stat-label">Total Questions</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number" style="color: #38a169;">{{ correct_count }}</div>
+                <div class="stat-label">Correct</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number" style="color: #e53e3e;">{{ incorrect_count }}</div>
+                <div class="stat-label">Incorrect</div>
+            </div>
+        </div>
+        
+        <div class="category-breakdown">
+            <h2 style="color: #004a99; margin-bottom: 1rem;">Performance by Category</h2>
+            {% for cat in category_breakdown %}
+            <div class="category-item">
+                <span><strong>{{ cat.name }}</strong></span>
+                <span>{{ cat.correct }}/{{ cat.total }} ({{ cat.percentage }}%)</span>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div style="text-align: center;">
+            <a href="{% url 'practice_categories' %}" class="btn-home">Practice Again</a>
+            <a href="{% url 'home' %}" class="btn-home" style="background: #6c757d; margin-left: 1rem;">Home</a>
+        </div>
+    </div>
+</body>
+</html>

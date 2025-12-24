@@ -1,0 +1,185 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - NCLEX Prep</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); min-height: 100vh; padding: 2rem 1rem; }
+        .container { max-width: 600px; margin: 0 auto; }
+        
+        .checkout-card { background: white; border-radius: 20px; padding: 2.5rem; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3); }
+        
+        .header { text-align: center; margin-bottom: 2rem; }
+        .header h1 { font-size: 2rem; color: #2c3e50; margin-bottom: 0.5rem; }
+        .header p { color: #7f8c8d; }
+        
+        .plan-summary { background: #f8f9fa; border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; }
+        .plan-name { font-size: 1.5rem; font-weight: 700; color: #1e3c72; margin-bottom: 0.5rem; }
+        .plan-price { font-size: 2.5rem; font-weight: 800; color: #27ae60; margin-bottom: 1rem; }
+        .plan-details { color: #5a6c7d; font-size: 0.95rem; line-height: 1.6; }
+        .plan-details li { margin-bottom: 0.5rem; }
+        
+        .payment-methods { margin-bottom: 2rem; }
+        .payment-methods h3 { font-size: 1.2rem; color: #2c3e50; margin-bottom: 1rem; }
+        
+        .payment-option { background: white; border: 2px solid #e0e0e0; border-radius: 12px; padding: 1.5rem; margin-bottom: 1rem; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; gap: 1rem; }
+        .payment-option:hover { border-color: #1e3c72; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(30, 60, 114, 0.1); }
+        .payment-option.selected { border-color: #1e3c72; background: #f0f8ff; }
+        
+        .payment-logo { width: 80px; height: 40px; object-fit: contain; }
+        .payment-info { flex: 1; }
+        .payment-name { font-weight: 700; color: #2c3e50; margin-bottom: 0.3rem; }
+        .payment-desc { font-size: 0.85rem; color: #7f8c8d; }
+        
+        .btn-pay { width: 100%; padding: 1.2rem; background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white; border: none; border-radius: 50px; font-size: 1.1rem; font-weight: 700; cursor: pointer; transition: all 0.3s; text-transform: uppercase; letter-spacing: 1px; }
+        .btn-pay:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(30, 60, 114, 0.4); }
+        .btn-pay:disabled { opacity: 0.5; cursor: not-allowed; }
+        
+        .security-note { text-align: center; margin-top: 1.5rem; color: #7f8c8d; font-size: 0.9rem; }
+        .security-note i { color: #27ae60; }
+        
+        .btn-back { display: inline-block; margin-bottom: 1rem; color: white; text-decoration: none; padding: 0.8rem 1.5rem; background: rgba(255,255,255,0.2); border-radius: 50px; transition: all 0.3s; }
+        .btn-back:hover { background: rgba(255,255,255,0.3); }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .checkout-card { padding: 1.5rem; }
+            .header h1 { font-size: 1.6rem; }
+            .plan-price { font-size: 2rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="{% url 'pricing' %}" class="btn-back">← Back to Pricing</a>
+        
+        <div class="checkout-card">
+            <div class="header">
+                <h1>Complete Your Purchase</h1>
+                <p>Choose your payment method</p>
+            </div>
+            
+            <div class="plan-summary">
+                <div class="plan-name">
+                    {% if duration == 'MONTHLY' %}आगमन (Aagaman) - Monthly{% endif %}
+                    {% if duration == 'QUARTERLY' %}प्रगति (Pragati) - 3 Months{% endif %}
+                    {% if duration == 'YEARLY' %}विजय (Vijaya) - 1 Year{% endif %}
+                </div>
+                <div class="plan-price">Rs. {{ amount }}</div>
+                <ul class="plan-details">
+                    <li>✅ Full Adaptive CAT Exam Access</li>
+                    <li>✅ Advanced Performance Analytics</li>
+                    <li>✅ AI-Powered Recommendations</li>
+                    <li>✅ Pass Probability Tracking</li>
+                    <li>✅ Download Study Reports (PDF)</li>
+                </ul>
+            </div>
+            
+            <div class="payment-methods">
+                <h3>Select Payment Method</h3>
+                
+                <!-- eSewa -->
+                <div class="payment-option selected" data-method="esewa" onclick="selectPayment('esewa')">
+                    <div class="payment-logo" style="background: #60bb46; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 1.2rem;">eSewa</div>
+                    <div class="payment-info">
+                        <div class="payment-name">eSewa</div>
+                        <div class="payment-desc">Most popular in Nepal</div>
+                    </div>
+                </div>
+                
+                <!-- Khalti -->
+                <div class="payment-option" data-method="khalti" onclick="selectPayment('khalti')">
+                    <div class="payment-logo" style="background: #5c2d91; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 1.2rem;">Khalti</div>
+                    <div class="payment-info">
+                        <div class="payment-name">Khalti</div>
+                        <div class="payment-desc">Digital wallet payment</div>
+                    </div>
+                </div>
+                
+                <!-- Manual (for testing) -->
+                <div class="payment-option" data-method="manual" onclick="selectPayment('manual')">
+                    <div class="payment-logo" style="background: #004a99; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 0.9rem;">MANUAL</div>
+                    <div class="payment-info">
+                        <div class="payment-name">Manual Activation (Testing)</div>
+                        <div class="payment-desc">For development/testing only</div>
+                    </div>
+                </div>
+            </div>
+            
+            <button class="btn-pay" onclick="proceedPayment()">
+                Proceed to Payment
+            </button>
+            
+            <div class="security-note">
+                🔒 Secure payment · 7-day money-back guarantee
+            </div>
+        </div>
+    </div>
+    
+    <script>
+    let selectedMethod = 'esewa';
+    const duration = '{{ duration }}';
+    const amount = '{{ amount }}';
+    
+    function selectPayment(method) {
+        selectedMethod = method;
+        document.querySelectorAll('.payment-option').forEach(opt => {
+            opt.classList.remove('selected');
+        });
+        document.querySelector(`[data-method="${method}"]`).classList.add('selected');
+    }
+    
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    
+    async function proceedPayment() {
+        if (selectedMethod === 'manual') {
+            // For testing - manually activate subscription
+            try {
+                const response = await fetch('/subscriptions/api/activate/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({
+                        duration: duration,
+                        amount: amount
+                    })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    alert('✅ ' + data.message);
+                    window.location.href = '/subscriptions/dashboard/';
+                } else {
+                    alert('❌ ' + (data.error || 'Activation failed'));
+                }
+            } catch (error) {
+                console.error(error);
+                alert('Error activating subscription');
+            }
+        } else {
+            // TODO: Integrate real payment gateways
+            alert(`${selectedMethod.toUpperCase()} integration coming soon!\n\nFor now, use "Manual Activation (Testing)" to activate your subscription.`);
+        }
+    }
+    </script>
+</body>
+</html>

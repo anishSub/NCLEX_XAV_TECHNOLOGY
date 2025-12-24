@@ -1,0 +1,94 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Practice Exam</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="{% static 'exam_sessions/css/exam_style.css' %}">
+    <script src="{% static 'exam_sessions/js/exam_engine.js' %}"></script>
+    <style>body { margin: 0; font-family: 'Segoe UI', Tahoma, sans-serif; background-color: #f4f6f9; } .exam-header { background: linear-gradient(135deg, #0066cc 0%, #004a99 100%);  color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); } .exam-title h1 { margin: 0; font-size: 1.5rem; font-weight: 600; } .exam-info { display: flex; gap: 30px; align-items: center; } #question-counter { font-size: 1.1rem; background: rgba(255,255,255,0.2); padding: 5px 15px; border-radius: 20px; } .exam-container { max-width: 1400px; margin: 0 auto; padding: 20px; } #question-panel { background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); padding: 30px; } .submit-btn { width: 100%; max-width: 300px; margin: 30px auto 0; display: block; padding: 15px; background: linear-gradient(135deg, #004a99 0%, #0066cc 100%); color: white; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 10px rgba(0, 74, 153, 0.3); min-height: 54px; } .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0, 74, 153, 0.4); } @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }</style>
+</head>
+<body>
+    <div class="exam-header">
+        <div class="exam-title"><h1>📝 Practice Mode</h1></div>
+        <div class="exam-info">
+            <div>📚 {{ category_names }}</div>
+            <span id="question-counter">Question: <span id="current-q">0</span> of {{ session.total_questions }}</span>
+        </div>
+    </div>
+    <div class="exam-container">
+        <div id="question-panel">
+            <div id="question-display-area"><div style="text-align: center; padding: 50px; color: #999;"><p>Loading your first question...</p></div></div>
+            <button class="submit-btn" onclick="handlePracticeSubmit()">Submit Answer & Continue</button>
+        </div>
+    </div>
+    <script>
+    window.practiceMode = true;
+    window.activeSessionId = {{ session.id }};
+    window.totalQuestions = {{ session.total_questions }};
+    window.currentQuestionNumber = 0;
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        fetch(`/exam/practice/api/session/{{ session.id }}/first-question/`)
+            .then(res => res.json())
+            .then(data => { if (data.question) { renderQuestion(data.question); } })
+            .catch(err => console.error('Error:', err));
+    });
+    
+    async function handlePracticeSubmit() {
+        const questionType = window.activeQuestionType;
+        const sessionId = window.activeSessionId;
+        const questionId = window.activeQuestionId;
+        const answers = getSelectedAnswers(questionType);
+        
+        if (!answers || answers === '' || (Array.isArray(answers) && answers.length === 0)) {
+            Swal.fire({ icon: 'warning', title: 'Empty Answer', text: 'Please select an answer before proceeding.' });
+            return;
+        }
+        
+        const submitBtn = document.querySelector('.submit-btn');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<div style="display: flex; align-items: center; justify-content: center; gap: 10px;"><div style="width: 20px; height: 20px; border: 3px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite;"></div><span>Processing...</span></div>';
+        
+        try {
+            const response = await fetch(`/exam/practice/api/session/${sessionId}/submit/`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+                body: JSON.stringify({ question_id: questionId, user_answer: answers })
+            });
+            const data = await response.json();
+            
+            if (data.status === "CONTINUE") {
+                renderQuestion(data.next_question);
+            } else if (data.status === "FINISHED") {
+                Swal.fire({ icon: 'success', title: 'Practice Complete!', text: 'You\'ve completed all questions!', timer: 2000, showConfirmButton: false }).then(() => {
+                    window.location.href = `/exam/practice/results/${sessionId}/`;
+                });
+            }
+        } catch (error) {
+            console.error("Error:", error);
+        }
+        
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Submit Answer & Continue';
+    }
+    
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    </script>
+</body>
+</html>

@@ -424,6 +424,10 @@
                 font-size: 2.5rem;
             }
             
+            .hero-buttons {
+                justify-content: center;
+            }
+            
             .visual-circle {
                 width: 300px;
                 height: 300px;
@@ -441,6 +445,37 @@
                 flex-direction: column;
                 gap: 1rem;
             }
+            
+            /* Pricing section responsive */
+            .pricing-cta {
+                padding: 3rem 1rem !important;
+            }
+            
+            .pricing-cta h2 {
+                font-size: 2rem !important;
+            }
+            
+            .pricing-cta p {
+                font-size: 1.1rem !important;
+            }
+            
+            /* Stack pricing cards on mobile */
+            .pricing-cta div[style*="display: flex"] {
+                flex-direction: column !important;
+                align-items: center !important;
+            }
+            
+            .pricing-cta div[style*="min-width: 280px"] {
+                min-width: 100% !important;
+                max-width: 400px !important;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .hero-content h1 { font-size: 2rem; }
+            .hero-content p { font-size: 1rem; }
+            .btn-primary, .btn-secondary { padding: 1rem 2rem; font-size: 1rem; }
+            .pricing-cta h2 { font-size: 1.8rem !important; }
         }
     </style>
 </head>
@@ -455,7 +490,7 @@
             <ul class="nav-links">
                 <li><a href="{% url 'home' %}">Home</a></li>
                 <li><a href="#features">Features</a></li>
-                <li><a href="#about">About</a></li>
+                <li><a href="{% url 'study_planner' %}">Study Planner</a></li>
                 {% if user.is_authenticated %}
                     <li><a href="{% url 'logout' %}">Logout</a></li>
                 {% else %}
@@ -476,7 +511,11 @@
                     {% if user.is_authenticated %}
                         <a href="{% url 'start_exam' %}" class="btn-primary">
                             <i class="fas fa-stethoscope"></i>
-                            Start Your Exam
+                            Start Adaptive Exam
+                        </a>
+                        <a href="{% url 'practice_categories' %}" class="btn-secondary">
+                            <i class="fas fa-tasks"></i>
+                            Practice by Topic
                         </a>
                     {% else %}
                         <a href="{% url 'register' %}" class="btn-primary">
@@ -564,6 +603,14 @@
                     <h3>PDF Reports</h3>
                     <p>Download comprehensive performance reports with category breakdowns and improvement recommendations.</p>
                 </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-tasks"></i>
+                    </div>
+                    <h3>Practice by Category</h3>
+                    <p>Focus on specific topics! Choose from 8 NCLEX categories and practice questions where you need it most.</p>
+                </div>
             </div>
         </div>
     </section>
@@ -587,13 +634,67 @@
             {% endif %}
         </div>
     </section>
+        
+        <!-- Pricing Section -->
+        <section class="pricing-cta" style="background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); padding: 5rem 2rem; text-align: center; color: white;">
+            <div class="container" style="max-width: 1200px; margin: 0 auto;">
+                <h2 style="font-size: 3rem; font-weight: 800; margin-bottom: 1rem;">Ready to Ace Your NCLEX?</h2>
+                <p style="font-size: 1.3rem; opacity: 0.9; margin-bottom: 3rem; max-width: 700px; margin-left: auto; margin-right: auto;">
+                    Practice unlimited questions for FREE. Upgrade for the full adaptive CAT exam experience!
+                </p>
+                
+                <div style="display: flex; gap: 2rem; justify-content: center; flex-wrap: wrap; margin-bottom: 3rem;">
+                    <!-- Free Tier - PARICHAYA with hover badge -->
+                    <div class="home-pricing-card home-pricing-card-free" style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); border-radius: 20px; padding: 2rem; min-width: 280px; max-width: 350px; border: 2px solid rgba(255,255,255,0.3); position: relative; transition: all 0.3s;">
+                        <!-- FREE badge - shows on hover -->
+                        <div class="home-free-badge" style="position: absolute; top: -15px; right: 20px; background: #27ae60; color: white; padding: 0.5rem 1.5rem; border-radius: 50px; font-weight: 700; font-size: 0.85rem; opacity: 0; transition: opacity 0.3s;">FREE</div>
+                        
+                        <div style="font-size: 3rem; margin-bottom: 1rem;">🌱</div>
+                        <h3 style="font-size: 1.8rem; margin-bottom: 1rem;">परिचय (Parichaya)</h3>
+                        <p style="font-size: 3rem; font-weight: 800; margin-bottom: 1rem;">Rs. 0</p>
+                        <p style="opacity: 0.9; margin-bottom: 1.5rem;">Unlimited practice questions</p>
+                        <a href="{% url 'register' %}" style="display: inline-block; padding: 1rem 2.5rem; background: white; color: #1e3c72; text-decoration: none; border-radius: 50px; font-weight: 700; transition: all 0.3s;">
+                            Start Free Now →
+                        </a>
+                    </div>
+                    
+                    <!-- Premium Tier - AAGAMAN with hover badge -->
+                    <div class="home-pricing-card home-pricing-card-premium" style="background: rgba(255,255,255,0.25); backdrop-filter: blur(10px); border-radius: 20px; padding: 2rem; min-width: 280px; max-width: 350px; border: 3px solid #ffd93d; position: relative; transition: all 0.3s;">
+                        <!-- POPULAR badge - shows on hover -->
+                        <div class="home-popular-badge" style="position: absolute; top: -15px; right: 20px; background: #ffd93d; color: #1e3c72; padding: 0.5rem 1.5rem; border-radius: 50px; font-weight: 700; font-size: 0.85rem; opacity: 0; transition: opacity 0.3s;">POPULAR</div>
+                        
+                        <div style="font-size: 3rem; margin-bottom: 1rem;">🚀</div>
+                        <h3 style="font-size: 1.8rem; margin-bottom: 1rem;">आगमन (Aagaman)</h3>
+                        <p style="font-size: 1rem; opacity: 0.8; margin-bottom: 0.5rem;">Starting at</p>
+                        <p style="font-size: 3rem; font-weight: 800; margin-bottom: 1rem;">Rs. 999</p>
+                       <p style="opacity: 0.9; margin-bottom: 1.5rem;">Full adaptive CAT exam + analytics</p>
+                        <a href="{% url 'pricing' %}" style="display: inline-block; padding: 1rem 2.5rem; background: #ffd93d; color: #1e3c72; text-decoration: none; border-radius: 50px; font-weight: 700; transition: all 0.3s;">
+                            View All Plans →
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <style>
+                /* Hover effect for homepage pricing cards */
+                .home-pricing-card:hover {
+                    transform: translateY(-10px);
+                }
+                
+                .home-pricing-card-free:hover .home-free-badge {
+                    opacity: 1;
+                }
+                
+                .home-pricing-card-premium:hover .home-popular-badge {
+                    opacity: 1;
+                }
+            </style>
+        </section>
 
-    <!-- FOOTER -->
-    <footer class="footer">
-        <div class="footer-container">
+        <!-- Footer -->
+        <footer style="background-color: #2c3e50; color: #ecf0f1; padding: 3rem 2rem; text-align: center;">
             <p>&copy; 2025 NCLEX XAV Technology. All rights reserved.</p>
             <p>Empowering nurses through adaptive learning technology.</p>
-        </div>
-    </footer>
+        </footer>
 </body>
 </html>

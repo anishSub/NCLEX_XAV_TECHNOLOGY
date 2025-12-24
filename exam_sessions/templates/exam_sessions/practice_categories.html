@@ -1,0 +1,62 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Practice Mode - Select Categories</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #f0f8ff 0%, #e6f3ff 100%); min-height: 100vh; padding: 2rem; }
+        .container { max-width: 800px; margin: 0 auto; background: white; border-radius: 20px; padding: 3rem; box-shadow: 0 10px 40px rgba(0, 74, 153, 0.15); }
+        h1 { color: #004a99; margin-bottom: 0.5rem; font-size: 2.5rem; }
+        .subtitle { color: #5a6c7d; margin-bottom: 2rem; font-size: 1.1rem; }
+        .category-grid { display: grid; grid-template-columns: repeat(auto-fill, minmin(200px, 1fr)); gap: 1rem; margin: 2rem 0; }
+        .category-checkbox { display: flex; align-items: center; padding: 1.2rem; background: #f8fbff; border: 2px solid #e0e0e0; border-radius: 12px; cursor: pointer; transition: all 0.3s ease; }
+        .category-checkbox:hover { background: #f0f8ff; border-color: #0066cc; transform: translateY(-2px); }
+        .category-checkbox input[type="checkbox"] { width: 20px; height: 20px; margin-right: 12px; cursor: pointer; }
+        .category-checkbox input[type="checkbox"]:checked + label { font-weight: 600; color: #004a99; }
+        .category-checkbox label { cursor: pointer; flex: 1; }
+        .question-count { margin: 2rem 0; }
+        .question-count label { display: block; margin-bottom: 0.5rem; font-weight: 600; color: #004a99; }
+        .question-count select { width: 100%; padding: 1rem; font-size: 1.1rem; border: 2px solid #e0e0e0; border-radius: 8px; }
+        .btn-start { width: 100%; padding: 1.2rem; background: linear-gradient(135deg, #004a99 0%, #0066cc 100%); color: white; border: none; border-radius: 50px; font-size: 1.2rem; font-weight: 600; cursor: pointer; margin-top: 2rem; }
+        .btn-start:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0, 74, 153, 0.3); }
+        .btn-back { display: inline-block; margin-bottom: 1rem; color: #0066cc; text-decoration: none; }
+        .btn-back:hover { text-decoration: underline; }
+       </style>
+</head>
+<body>
+    <div class="container">
+        <a href="{% url 'home' %}" class="btn-back">← Back to Home</a>
+        <h1>📝 Practice Mode</h1>
+        <p class="subtitle">Select categories you want to practice and choose the number of questions</p>
+        
+        <form method="POST" action="{% url 'start_practice' %}">
+            {% csrf_token %}
+            
+            <div class="category-grid">
+                {% for category in categories %}
+                <div class="category-checkbox">
+                    <input type="checkbox" name="categories" value="{{ category.id }}" id="cat-{{ category.id }}">
+                    <label for="cat-{{ category.id }}">{{ category.name }}</label>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <div class="question-count">
+                <label for="num_questions">Number of Questions:</label>
+                <select name="num_questions" id="num_questions">
+                    <option value="10">10 Questions</option>
+                    <option value="20" selected>20 Questions</option>
+                    <option value="30">30 Questions</option>
+                    <option value="50">50 Questions</option>
+                </select>
+            </div>
+            
+            <button type="submit" class="btn-start">Start Practice 🚀</button>
+        </form>
+    </div>
+</body>
+</html>

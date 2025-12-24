@@ -1,0 +1,45 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Setup Study Plan</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #f0f8ff 0%, #e6f3ff 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem; }
+        .setup-container { max-width: 500px; width: 100%; background: white; border-radius: 20px; padding: 3rem; box-shadow: 0 10px 40px rgba(0, 74, 153, 0.15); }
+        h1 { color: #004a99; margin-bottom: 2rem; text-align: center; }
+        .form-group { margin-bottom: 1.5rem; }
+        label { display: block; margin-bottom: 0.5rem; font-weight: 600; color: #004a99; }
+        input, select { width: 100%; padding: 0.8rem; font-size: 1rem; border: 2px solid #e0e0e0; border-radius: 8px; }
+        input:focus { border-color: #0066cc; outline: none; }
+        .btn-submit { width: 100%; padding: 1rem; background: linear-gradient(135deg, #004a99 0%, #0066cc 100%); color: white; border: none; border-radius: 50px; font-size: 1.1rem; font-weight: 600; cursor: pointer; margin-top: 1rem; }
+        .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0, 74, 153, 0.3); }
+    </style>
+</head>
+<body>
+    <div class="setup-container">
+        <h1>📅 Setup Study Plan</h1>
+        <form method="POST">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="exam_date">NCLEX Exam Date</label>
+                <input type="date" id="exam_date" name="exam_date" value="{{ study_plan.exam_date|date:'Y-m-d' }}" required>
+            </div>
+            <div class="form-group">
+                <label for="daily_study_hours">Daily Study Goal (hours)</label>
+                <select id="daily_study_hours" name="daily_study_hours">
+                    <option value="1" {% if study_plan.daily_study_hours == 1 %}selected{% endif %}>1 hour</option>
+                    <option value="2" {% if study_plan.daily_study_hours == 2 or not study_plan %}selected{% endif %}>2 hours</option>
+                    <option value="3" {% if study_plan.daily_study_hours == 3 %}selected{% endif %}>3 hours</option>
+                    <option value="4" {% if study_plan.daily_study_hours == 4 %}selected{% endif %}>4 hours</option>
+                    <option value="5" {% if study_plan.daily_study_hours == 5 %}selected{% endif %}>5 hours</option>
+                </select>
+            </div>
+            <button type="submit" class="btn-submit">{% if study_plan %}Update Plan{% else %}Create Plan{% endif %}</button>
+        </form>
+    </div>
+</body>
+</html>
