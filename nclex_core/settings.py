@@ -10,6 +10,7 @@ ALLOWED_HOSTS = ['0.0.0.0', 'localhost', '127.0.0.1']
 
 INSTALLED_APPS = [
     'jazzmin',
+    'django_json_widget',  # Add this BEFORE admin to ensure templates load
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -271,13 +272,6 @@ JAZZMIN_SETTINGS = {
                 "icon": "fas fa-check-circle",
             },
         ],
-        "questions": [
-            {
-                "name": "Add Bulk Questions",
-                "url": "/admin/questions/questions/",
-                "icon": "fas fa-plus-circle",
-            },
-        ],
     },
     
     
@@ -315,14 +309,51 @@ JAZZMIN_SETTINGS = {
     "related_modal_active": True,
     
     
-    # ========== CUSTOM CSS/JS FOR MODERN DESIGN ==========
-    "custom_css": "admin/css/custom_admin.css",  # Custom modern styling
-    "custom_js": "admin/js/smooth_navigation.js",  # Smooth scroll & navigation
+    # ========== CUSTOM CSS FOR FULL-WIDTH FORMS ==========
+    "custom_css": None,  # Using custom_js to inject CSS instead
+    "custom_js": None,
     
     
     # ========== LANGUAGE CHOOSER ==========
     "language_chooser": False,
 }
+
+
+# ========== INJECT CUSTOM CSS DIRECTLY ==========
+JAZZMIN_SETTINGS["custom_css"] = None  # Disable external file
+JAZZMIN_SETTINGS["show_ui_builder"] = False
+
+# Add custom CSS to override Jazzmin styles
+JAZZMIN_SETTINGS_CUSTOM_CSS = """
+<style>
+/* FULL WIDTH FORM LAYOUT */
+#content, #content-main { max-width: none !important; width: 100% !important; margin-right: 0 !important; }
+.colM, .colMS, .module, .change-form { max-width: none !important; width: 100% !important; }
+fieldset, .aligned fieldset, fieldset.module { max-width: none !important; width: 100% !important; }
+.form-row, .aligned .form-row, .wide .form-row { max-width: none !important; width: 100% !important; clear: both; }
+.aligned .form-row > div, .aligned .form-row > p { max-width: none !important; width: calc(100% - 200px) !important; padding-left: 220px; }
+.aligned label { width: 200px !important; float: left !important; margin-left: 0 !important; }
+
+/* JSON EDITORS - FULL WIDTH */
+.django-json-widget { max-width: none !important; width: 100% !important; }
+.django-json-widget .jsoneditor, .django-json-widget .jsoneditor-outer { min-height: 450px !important; max-height: 650px !important; width: 100% !important; }
+.form-row.field-options, .form-row.field-correct_option_ids { width: 100% !important; }
+
+/* TEXTAREAS - FULL WIDTH */
+textarea, .form-row textarea, .form-row.field-text textarea { width: 100% !important; max-width: none !important; min-height: 150px; box-sizing: border-box; }
+.form-row.field-rationale textarea { min-height: 200px; }
+
+/* BUTTONS - RIGHT ALIGNED */
+.submit-row { display: flex !important; justify-content: flex-end !important; gap: 10px !important; padding: 15px 20px !important; background: #f8f9fa !important; border-top: 1px solid #ddd !important; position: sticky !important; bottom: 0 !important; z-index: 100 !important; }
+.submit-row input[type="submit"], .submit-row .button { margin: 0 !important; flex-shrink: 0 !important; }
+.submit-row .default { background: #28a745 !important; color: white !important; padding: 10px 24px !important; border-radius: 5px !important; font-weight: 600 !important; border: none !important; }
+.submit-row input[type="submit"]:not(.default) { background: #007bff !important; color: white !important; padding: 10px 24px !important; border-radius: 5px !important; border: none !important; }
+.submit-row .deletelink { background: #dc3545 !important; color: white !important; padding: 10px 24px !important; border-radius: 5px !important; }
+
+/* PREVENT TAB SHRINKING */
+.module.aligned .form-row, .tab-content { max-width: none !important; width: 100% !important; }
+</style>
+"""
 
 
 # ========== JAZZMIN UI TWEAKS (MODERN WHITE THEME) ==========

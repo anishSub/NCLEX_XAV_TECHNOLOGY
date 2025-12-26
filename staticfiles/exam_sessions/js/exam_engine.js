@@ -66,26 +66,38 @@ function renderQuestion(questionData) {
     }
 }
 
-/* --- PART 2: THE BUILDER --- */
+/* --- PART 2: THE BUILDER (NCLEX SINGLE COLUMN FORMAT) --- */
 function createDragDropHTML(data) {
-    const well1 = data.options.answer_wells.well1.map(opt =>
+    // Get all well keys dynamically (well1, well2, well3, etc.)
+    const wellKeys = Object.keys(data.options.answer_wells);
+
+    // Combine ALL options into single list (NCLEX format)
+    let allOptions = [];
+    wellKeys.forEach(wellKey => {
+        allOptions = allOptions.concat(data.options.answer_wells[wellKey]);
+    });
+    const uniqueOptions = [...new Set(allOptions)];
+    const draggablesHTML = uniqueOptions.map(opt =>
         `<div class="draggable" draggable="true" data-val="${opt}">${opt}</div>`
     ).join('');
 
-    const well2 = data.options.answer_wells.well2.map(opt =>
-        `<div class="draggable" draggable="true" data-val="${opt}">${opt}</div>`
-    ).join('');
+    // Replace [well1], [well2], [well3], etc. with drop zones
+    let sentenceHTML = data.options.template;
+    wellKeys.forEach((wellKey, index) => {
+        const dropZone = `<div class="drop-zone" id="target-${wellKey}" data-well="${index + 1}"></div>`;
+        sentenceHTML = sentenceHTML.replace(`[${wellKey}]`, dropZone);
+    });
 
     return `
-      <div class="rationale-sentence">
-            The client is at risk for 
-            <div class="drop-zone" id="target-well1" data-well="1"></div> 
-            due to 
-            <div class="drop-zone" id="target-well2" data-well="2"></div>.
+        <div class="q-header">
+            <p class="q-text">${data.text}</p>
         </div>
-        <div class="wells-grid">
-            <div class="source-well" id="source-well1">${well1}</div>
-            <div class="source-well" id="source-well2">${well2}</div>
+        <div class="rationale-sentence">
+            ${sentenceHTML}
+        </div>
+        <div class="answer-choices-header">Answer Choices</div>
+        <div class="source-well-single">
+            ${draggablesHTML}
         </div>
     `;
 }
@@ -133,7 +145,7 @@ function createSATAHTML(data) {
     `;
 }
 
-/* --- PART 3: THE INTERACTION --- */
+/* --- PART 3: THE INTERACTION (NCLEX FORMAT) --- */
 function initDragAndDropLogic() {
     const draggables = document.querySelectorAll('.draggable');
     const dropZones = document.querySelectorAll('.drop-zone');
@@ -144,14 +156,20 @@ function initDragAndDropLogic() {
     });
 
     dropZones.forEach(zone => {
-        zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('hovered'); });
+        zone.addEventListener('dragover', e => {
+            e.preventDefault();
+            zone.classList.add('hovered');
+        });
         zone.addEventListener('dragleave', () => zone.classList.remove('hovered'));
         zone.addEventListener('drop', e => {
             const dragging = document.querySelector('.dragging');
-            // Check if the dragged item belongs to the correct Well
-            if (dragging.parentElement.id.includes(zone.dataset.well)) {
+            if (dragging) {
+                // Allow ANY option to go in ANY well (real NCLEX behavior)
                 zone.innerHTML = dragging.innerText;
-                zone.dataset.selectedVal = dragging.dataset.val; // Store for submission
+                zone.dataset.selectedVal = dragging.dataset.val;
+                // Hide the dragged item so it can only be used once
+                dragging.style.opacity = '0.3';
+                dragging.style.pointerEvents = 'none';
             }
             zone.classList.remove('hovered');
         });
@@ -488,11 +506,26 @@ function getSelectedAnswers(type) {
             break;
 
         case 'DRAG_DROP_RATIONALE':
-            // Now this matches the IDs in our fixed builder
-            const w1 = document.getElementById('target-well1').innerText.trim();
-            const w2 = document.getElementById('target-well2').innerText.trim();
-            // BOTH wells must be filled
-            if (w1 && w2) answers = { well1: w1, well2: w2 };
+            // Dynamically collect all wells (well1, well2, well3, etc.)
+            const dropZones = document.querySelectorAll('.drop-zone');
+            const wellAnswers = {};
+            let allFilled = true;
+
+            dropZones.forEach(zone => {
+                const wellId = zone.id.replace('target-', '');
+                const value = zone.innerText.trim();
+
+                if (value) {
+                    wellAnswers[wellId] = value;
+                } else {
+                    allFilled = false;
+                }
+            });
+
+            // Only return if ALL wells are filled
+            if (allFilled && Object.keys(wellAnswers).length > 0) {
+                answers = wellAnswers;
+            }
             break;
 
         case 'DROPDOWN_RATIONALE':

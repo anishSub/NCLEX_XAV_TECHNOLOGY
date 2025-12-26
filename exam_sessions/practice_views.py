@@ -28,7 +28,15 @@ def start_practice_session(request):
     try:
         # Get selected category IDs from POST data
         category_ids = request.POST.getlist('categories')  # List of category IDs
-        num_questions = int(request.POST.get('num_questions', 20))
+        
+        # Count available questions in selected categories
+        available_count = Questions.objects.filter(
+            category_ids__id__in=category_ids
+        ).distinct().count()
+        
+        # Use available count or user-specified, whichever is smaller
+        num_questions = int(request.POST.get('num_questions', available_count))
+        num_questions = min(num_questions, available_count) if available_count > 0 else 0
         
         if not category_ids:
             return JsonResponse({'error': 'Please select at least one category'}, status=400)
@@ -92,7 +100,7 @@ def get_practice_first_question(request, session_id):
             'question': {
                 'id': question.id,
                 'text': question.text,
-                'type': question.type,
+                'type': question.question_type.code if question.question_type else 'MCQ',
                 'options': question.options,
                 'is_case_study': bool(question.parent_scenario),
             }
@@ -176,7 +184,7 @@ def submit_practice_answer(request, session_id):
             'next_question': {
                 'id': next_question.id,
                 'text': next_question.text,
-                'type': next_question.type,
+                'type': next_question.question_type.code if next_question.question_type else 'MCQ',
                 'options': next_question.options,
                 'is_case_study': bool(next_question.parent_scenario)
             }
@@ -195,6 +203,59 @@ def submit_practice_answer(request, session_id):
         return JsonResponse({'error': str(e)}, status=500)
 
 
+import re
+
+def format_answer_display(answer, q_type, question_obj=None):
+    """
+    Helper to format complex JSON answers into a human-readable list of strings.
+    """
+    if not answer:
+        return ["No Answer"]
+
+    # 1. Drag & Drop (Dict: {'well1': 'Text'})
+    if isinstance(answer, dict):
+        return [str(v) for k, v in answer.items() if v]
+
+    # 2. Matrix (List of Dicts: [{'finding': 'F', 'diagnosis': 'D'}])
+    if isinstance(answer, list) and len(answer) > 0 and isinstance(answer[0], dict):
+        lines = []
+        for item in answer:
+            # Try to find consistent keys for matrix
+            # Usually {'row_label': 'X', 'col_label': 'Y'} or {'finding': 'X', 'diagnosis': 'Y'}
+            # We'll just join the values to be generic but usually finding/diagnosis
+            vals = [str(v) for k, v in item.items() if k != 'id'] 
+            lines.append(" → ".join(vals))
+        return lines
+
+    # 3. Highlight Text (List of IDs: ['h1', 'h3'])
+    # We need to map IDs back to text from question_obj.options['formatted_text']
+    if q_type == 'HIGHLIGHT_TEXT' and isinstance(answer, list) and question_obj:
+        try:
+            formatted_text = question_obj.options.get('formatted_text', '')
+            # Regex to find id='ID'...>Content</span>
+            # Matches <span ... id='h1' ... >Content</span>
+            # This is a simple regex assumption, might need robustness
+            readable_answers = []
+            for ans_id in answer:
+                # Find the content inside the span with this ID
+                pattern = re.compile(f"id=['\"]{ans_id}['\"].*?>(.*?)</span>", re.IGNORECASE | re.DOTALL)
+                match = pattern.search(formatted_text)
+                if match:
+                    # Strip any nested tags if simple text is wanted
+                    text = re.sub('<[^<]+?>', '', match.group(1)).strip()
+                    readable_answers.append(text)
+                else:
+                    readable_answers.append(str(ans_id)) # Fallback
+            return readable_answers
+        except:
+            return [str(a) for a in answer]
+
+    # 4. Standard List (MCQ/SATA: ['Option A', 'Option B'])
+    if isinstance(answer, list):
+        return [str(a) for a in answer]
+
+    return [str(answer)]
+
 @login_required
 def practice_results_view(request, session_id):
     """Display results for practice mode."""
@@ -206,15 +267,58 @@ def practice_results_view(request, session_id):
     incorrect_count = total_questions - correct_count
     score_percentage = round((correct_count / total_questions) * 100) if total_questions > 0 else 0
     
-    # Category breakdown
+    # Statistics containers
     category_stats = {}
+    type_stats = {}
+    detailed_review = []
+    
+    # Pre-fetch all questions to get details like text/rationale
+    # We need to preserve order, so we'll map them
+    q_ids = [entry['question_id'] for entry in session.question_history]
+    questions_map = {q.id: q for q in Questions.objects.filter(id__in=q_ids)}
+
     for entry in session.question_history:
+        # --- Category Stats ---
         cat = entry.get('category', 'General')
         if cat not in category_stats:
             category_stats[cat] = {'correct': 0, 'total': 0}
         category_stats[cat]['total'] += 1
         if entry['is_correct']:
             category_stats[cat]['correct'] += 1
+            
+        # --- Question Type Stats ---
+        # Get question type from the pre-fetched object
+        question_obj = questions_map.get(entry['question_id'])
+        q_type = question_obj.question_type.display_name if question_obj and question_obj.question_type else 'Unknown'
+        q_code = question_obj.question_type.code if question_obj and question_obj.question_type else 'MCQ'
+        
+        if q_type not in type_stats:
+            type_stats[q_type] = {'correct': 0, 'total': 0}
+        type_stats[q_type]['total'] += 1
+        if entry['is_correct']:
+            type_stats[q_type]['correct'] += 1
+            
+        # --- Detailed Review Data ---
+        if question_obj:
+            user_ans_raw = entry.get('user_answer')
+            # Correct answer might need normalization if it's just IDs in DB but we want text
+            # For simplicity, if correct_answer is missing in history, use question_obj.correct_option_ids
+            # usage: format_answer_display uses question_obj to lookup text if needed
+            
+            # Note: entry['correct_answer'] is what was saved during submission. 
+            # If it's just ids, we might want to resolve them. 
+            # Ideally the submission logic saved the *ids*. 
+            
+            detailed_review.append({
+                'id': question_obj.id,
+                'num': len(detailed_review) + 1,
+                'text': question_obj.text,
+                'user_answer': format_answer_display(user_ans_raw, q_code, question_obj),
+                'correct_answer': format_answer_display(entry.get('correct_answer'), q_code, question_obj),
+                'rationale': question_obj.rationale,
+                'is_correct': entry['is_correct'],
+                'type': q_type
+            })
     
     # Format category data
     category_list = []
@@ -226,6 +330,17 @@ def practice_results_view(request, session_id):
             'total': stats['total'],
             'percentage': percentage
         })
+        
+    # Format type data
+    type_list = []
+    for qtype, stats in type_stats.items():
+        percentage = round((stats['correct'] / stats['total']) * 100)
+        type_list.append({
+            'name': qtype,
+            'correct': stats['correct'],
+            'total': stats['total'],
+            'percentage': percentage
+        })
     
     context = {
         'session': session,
@@ -233,7 +348,9 @@ def practice_results_view(request, session_id):
         'correct_count': correct_count,
         'incorrect_count': incorrect_count,
         'score_percentage': score_percentage,
-        'category_breakdown': category_list
+        'category_breakdown': category_list,
+        'type_breakdown': type_list,
+        'detailed_review': detailed_review
     }
     
     return render(request, 'exam_sessions/practice_results.html', context)

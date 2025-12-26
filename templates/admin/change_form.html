@@ -1,0 +1,971 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls static admin_modify %}
+
+{% block extrahead %}{{ block.super }}
+<script src="{% url 'admin:jsi18n' %}"></script>
+{{ media }}
+{% endblock %}
+
+{% block extrastyle %}{{ block.super }}
+<style>
+/* CENTERED WIDER LAYOUT */
+#content {
+    max-width: 1600px !important;
+    margin: 0 auto !important;
+    padding: 30px 60px !important;
+}
+
+#content-main {
+    max-width: 1400px !important;
+    margin: 0 auto !important;
+    width: 100% !important;
+}
+
+/* WIDER CARDS */
+.module, .change-form {
+    max-width: 1400px !important;
+    margin: 0 auto 25px auto !important;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.12) !important;
+    border-radius: 10px !important;
+    overflow: hidden !important;
+}
+
+fieldset.module {
+    max-width: 100% !important;
+    background: white !important;
+    padding: 25px 30px !important;
+    margin-bottom: 20px !important;
+}
+
+/* FORM ROWS - FIX 2-COLUMN LAYOUT SPACING */
+.form-row {
+    max-width: 100% !important;
+    width: 100% !important;
+    margin-bottom: 25px !important;
+    padding: 5px 0 25px 0 !important;
+    clear: both !important;
+    display: block !important;
+    overflow: visible !important;
+}
+
+/* OVERRIDE DJANGO ADMIN INLINE PADDING - CRITICAL FIX FOR GAPS */
+div[class*="field-"] {
+    padding: 0 !important;
+    margin-bottom: 25px !important;
+}
+
+div#field_options,
+div#field_correct_option_ids,
+div#field_text,
+div#field_rationale,
+div#field_category_ids {
+    padding: 0 !important;
+    margin: 0 0 25px 0 !important;
+}
+
+/* ULTRA AGGRESSIVE FORM ROW SPACING */
+.form-row,
+div.form-row,
+.aligned .form-row,
+form .form-row,
+fieldset .form-row {
+    margin-bottom: 25px !important;
+}
+
+.aligned .form-row > div {
+    width: calc(100% - 200px) !important;
+    padding-left: 220px !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    padding-right: 0 !important;
+}
+
+.aligned label {
+    width: 200px !important;
+    font-weight: 600 !important;
+    font-size: 15px !important;
+    color: #333 !important;
+}
+
+/* JSON EDITORS - ULTRA SPECIFIC TO OVERRIDE DJANGO ADMIN */
+.django-json-widget,
+div.django-json-widget,
+.field-options .django-json-widget,
+.field-correct_option_ids .django-json-widget {
+    width: 100% !important;
+    max-width: 100% !important;
+    display: block !important;
+}
+
+.django-json-widget .jsoneditor,
+div.django-json-widget .jsoneditor {
+    min-height: 350px !important;
+    max-height: 500px !important;
+    border: 1px solid #ddd !important;
+    border-radius: 4px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1) !important;
+}
+
+/* Clean up JSON editor outer container */
+.django-json-widget {
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+/* Remove extra borders from JSON editor menu/toolbar */
+.jsoneditor-menu {
+    border-bottom: none !important;
+    border-top: none !important;
+}
+
+/* Ensure outer wrapper has no border */
+.jsoneditor-outer {
+    border: none !important;
+}
+
+/* Make sure the main editor area fills properly */
+.jsoneditor > .jsoneditor-outer {
+    border: none !important;
+}
+
+/* TEXTAREAS - ULTRA SPECIFIC */
+.form-row textarea,
+.aligned .form-row textarea,
+.field-text textarea,
+.field-rationale textarea,
+form textarea {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: 120px !important;
+    border: 2px solid #ddd !important;
+    border-radius: 6px !important;
+    padding: 15px !important;
+    font-size: 15px !important;
+    line-height: 1.6 !important;
+    box-sizing: border-box !important;
+    display: block !important;
+}
+
+.form-row.field-rationale textarea {
+    min-height: 150px !important;
+}
+
+/* INPUT FIELDS - ULTRA SPECIFIC */
+.form-row input[type="text"],
+.form-row input[type="number"],
+.form-row select,
+.aligned .form-row input[type="text"],
+.aligned .form-row input[type="number"],
+.aligned .form-row select {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 10px 15px !important;
+    font-size: 15px !important;
+    border: 2px solid #ddd !important;
+    border-radius: 5px !important;
+    box-sizing: border-box !important;
+}
+
+/* FORCE ALL FORM FIELD CONTAINERS - ULTRA SPECIFIC */
+form .form-row.field-text,
+form .form-row.field-options,
+form .form-row.field-correct_option_ids,
+form .form-row.field-rationale,
+form .aligned .form-row.field-text,
+form .aligned .form-row.field-options,
+form .aligned .form-row.field-correct_option_ids,
+form .aligned .form-row.field-rationale {
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+/* FIELD CONTENT DIVS - MAKE SAME WIDTH */
+form .aligned .form-row.field-text > div,
+form .aligned .form-row.field-options > div,
+form .aligned .form-row.field-correct_option_ids > div,
+form .aligned .form-row.field-rationale > div,
+.form-row.field-text .vLargeTextField,
+.form-row.field-options .vLargeTextField,
+.form-row.field-rationale .vLargeTextField {
+    width: calc(100% - 200px) !important;
+    max-width: none !important;
+    padding-left: 220px !important;
+    box-sizing: border-box !important;
+}
+
+/* OVERRIDE DJANGO'S VWIDEFIELD */
+.vLargeTextField,
+.vTextField {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+/* OVERRIDE JSONEDITOR CONTAINER */
+.jsoneditor-outer,
+.jsoneditor {
+    padding: 0 !important;
+}
+
+/* HIDE DUPLICATE TEXTAREA THAT APPEARS AFTER JSON WIDGET */
+/* Use adjacent sibling selector to hide textarea that comes after the widget */
+.django-json-widget + textarea,
+.field-options textarea[name*="options"],
+.field-correct_option_ids textarea[name*="correct_option_ids"] {
+    display: none !important;
+    visibility: hidden !important;
+}
+
+/* BUTTONS - RIGHT ALIGNED */
+.submit-row {
+    display: flex !important;
+    justify-content: flex-end !important;
+    gap: 12px !important;
+    padding: 25px 40px !important;
+    background: #f8f9fa !important;
+    border-top: 3px solid #e0e0e0 !important;
+    max-width: 1400px !important;
+    margin: 30px auto 0 auto !important;
+    border-radius: 0 0 10px 10px !important;
+}
+
+.submit-row .default {
+    background: #28a745 !important;
+    color: white !important;
+    padding: 14px 32px !important;
+    border-radius: 7px !important;
+    border: none !important;
+    font-weight: 600 !important;
+    font-size: 16px !important;
+}
+
+.submit-row input[type="submit"]:not(.default) {
+    background: #007bff !important;
+    color: white !important;
+    padding: 14px 32px !important;
+    border-radius: 7px !important;
+    border: none !important;
+    font-size: 16px !important;
+}
+
+/* HELP BUTTON */
+.help-guide-btn {
+    position: fixed !important;
+    top: 80px !important;
+    right: 30px !important;
+    background: #17a2b8 !important;
+    color: white !important;
+    border: none !important;
+    padding: 12px 24px !important;
+    border-radius: 25px !important;
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    box-shadow: 0 4px 12px rgba(23, 162, 184, 0.4) !important;
+    z-index: 1000 !important;
+    transition: all 0.3s ease !important;
+}
+
+.help-guide-btn:hover {
+    background: #138496 !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 16px rgba(23, 162, 184, 0.5) !important;
+}
+
+/* MODAL OVERLAY */
+.modal-overlay {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 9998;
+    backdrop-filter: blur(3px);
+    transition: opacity 0.3s ease;
+}
+
+.modal-overlay.active {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+/* TAB NAVIGATION */
+.tab-nav {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 30px;
+    border-bottom: 2px solid #e0e0e0;
+    padding-bottom: 10px;
+}
+
+.tab-btn {
+    background: none;
+    border: none;
+    padding: 12px 24px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #666;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: all 0.3s ease;
+    position: relative;
+    bottom: -12px;
+}
+
+.tab-btn:hover {
+    color: #004a99;
+    background: #f8f9fa;
+}
+
+.tab-btn.active {
+    color: #004a99;
+    border-bottom-color: #004a99;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* HELP MODAL - FIXED HEADER & TABS IMPLEMENTATION */
+.help-modal {
+    /* Fixed Positioning */
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    
+    /* Layout */
+    width: 90%;
+    max-width: 800px;
+    height: 85vh; /* Fixed height is REQUIRED */
+    max-height: 800px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    z-index: 9999;
+    
+    /* FLEX COLUMN IS THE TRICK FOR STICKY HEADERS */
+    display: flex !important; 
+    flex-direction: column !important;
+    overflow: hidden !important; /* Hide outer scroll */
+    
+    /* Transitions */
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.help-modal.active {
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: flex !important;
+}
+
+
+@keyframes slideIn {
+    from { opacity: 0; transform: translate(-50%, -45%); }
+    to { opacity: 1; transform: translate(-50%, -50%); }
+}
+
+/* 1. HEADER (Fixed) */
+.modal-header {
+    flex: 0 0 auto; /* Don't shrink */
+    background: linear-gradient(135deg, #1e88e5 0%, #00acc1 100%);
+    color: white;
+    padding: 20px 25px;
+    border-radius: 12px 12px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* 2. TAB NAV (Fixed) */
+.tab-nav {
+    flex: 0 0 auto; /* Don't shrink */
+    display: flex;
+    gap: 10px;
+    margin: 0;
+    border-bottom: 2px solid #e0e0e0;
+    padding: 15px 25px 0 25px;
+    background: #f8f9fa;
+    overflow-x: auto;
+}
+
+/* 3. MODAL BODY (Scrollable) */
+.modal-body {
+    flex: 1 1 auto; /* Fill remaining space */
+    overflow-y: auto; /* Internal Scroll */
+    padding: 25px;
+    background: white;
+}
+
+.step {
+    margin-bottom: 25px;
+    padding: 20px;
+    background: #f8f9fa;
+    border-left: 4px solid #1e88e5;
+    border-radius: 6px;
+}
+
+.step-number {
+    display: inline-block;
+    background: #1e88e5;
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 32px;
+    font-weight: 700;
+    margin-right: 12px;
+}
+
+.step h3 {
+    display: inline-block;
+    margin: 0 0 10px 0;
+    font-size: 18px;
+    color: #333;
+}
+
+.step p {
+    margin: 8px 0;
+    color: #666;
+    line-height: 1.6;
+}
+
+.code-example {
+    background: #2d2d2d;
+    color: #f8f8f2;
+    padding: 15px;
+    border-radius: 5px;
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    overflow-x: auto;
+    margin: 10px 0;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div id="content-main">
+{% block object-tools %}
+  {% if change and not is_popup %}
+    <ul class="object-tools">
+      {% block object-tools-items %}
+        {% change_form_object_tools %}
+      {% endblock %}
+    </ul>
+  {% endif %}
+{% endblock %}
+<form {% if has_file_field %}enctype="multipart/form-data" {% endif %}{% if form_url %}action="{{ form_url }}" {% endif %}method="post" id="{{ opts.model_name }}_form" novalidate>{% csrf_token %}{% block form_top %}{% endblock %}
+<div>
+{% if is_popup %}<input type="hidden" name="{{ is_popup_var }}" value="1">{% endif %}
+{% if to_field %}<input type="hidden" name="{{ to_field_var }}" value="{{ to_field }}">{% endif %}
+{% if save_on_top %}{% block submit_buttons_top %}{% submit_row %}{% endblock %}{% endif %}
+{% if errors %}
+    <p class="errornote">
+    {% blocktranslate count counter=errors|length %}Please correct the error below.{% plural %}Please correct the errors below.{% endblocktranslate %}
+    </p>
+    {{ adminform.form.non_field_errors }}
+{% endif %}
+
+{% block field_sets %}
+{% for fieldset in adminform %}
+  {% include "admin/includes/fieldset.html" %}
+{% endfor %}
+{% endblock %}
+
+{% block after_field_sets %}{% endblock %}
+
+{% block inline_field_sets %}
+{% for inline_admin_formset in inline_admin_formsets %}
+    {% include inline_admin_formset.opts.template %}
+{% endfor %}
+{% endblock %}
+
+{% block after_related_objects %}{% endblock %}
+
+{% block submit_buttons_bottom %}{% submit_row %}{% endblock %}
+
+{% block admin_change_form_document_ready %}
+    <script id="django-admin-form-add-constants"
+            src="{% static 'admin/js/change_form.js' %}"
+            {% if adminform and add %}
+                data-model-name="{{ opts.model_name }}"
+            {% endif %}>
+    </script>
+{% endblock %}
+
+{# JavaScript for prepopulated fields #}
+{% prepopulated_fields_js %}
+
+</div>
+</form>
+
+<!-- HELP BUTTON - Fixed position, won't interfere with form -->
+<button type="button" class="help-guide-btn" id="helpButton">
+    📚 How to Add Questions
+</button>
+
+<!-- MODAL OVERLAY -->
+<div class="modal-overlay" id="modalOverlay"></div>
+
+<!-- HELP MODAL -->
+<div class="help-modal" id="helpModal">
+    <!-- 1. HEADER (Fixed) -->
+    <div class="modal-header">
+        <h3>📝 How to Add Questions - By Question Type</h3>
+        <button class="modal-close" id="modalCloseBtn">&times;</button>
+    </div>
+    <!-- 2. TAB NAVIGATION (Fixed - Now Outside Body) -->
+    <div class="tab-nav">
+        <button class="tab-btn active" data-tab="mcq-sata">📋 MCQ / SATA</button>
+        <button class="tab-btn" data-tab="drag-drop">🎯 Drag & Drop</button>
+        <button class="tab-btn" data-tab="dropdown">▼ Dropdown</button>
+        <button class="tab-btn" data-tab="matrix">田 Matrix</button>
+        <button class="tab-btn" data-tab="highlight">🖍️ Highlight</button>
+        <button class="tab-btn" data-tab="general">⚙️ General Settings</button>
+    </div>
+
+    <div class="modal-body">
+        <!-- TAB CONTENT: MCQ/SATA -->
+        <div class="tab-content active" id="tab-mcq-sata">
+            <h3 style="color: #004a99; margin-bottom: 20px;">Multiple Choice (MCQ) & Select All That Apply (SATA)</h3>
+            
+            <div class="step">
+                <span class="step-number">1</span>
+                <h3>Select Question Type</h3>
+                <p>Choose <strong>Multiple Choice Question (MCQ)</strong> or <strong>Select All That Apply (SATA)</strong></p>
+            </div>
+
+            <div class="step">
+                <span class="step-number">2</span>
+                <h3>Enter Question Text</h3>
+                <p><strong>Place question here:</strong></p>
+                <pre style="background: #fff3cd; padding: 12px; border-radius: 8px; border-left: 4px solid #ffc107;">A client with diabetes has a blood glucose of 45 mg/dL. 
+What should the nurse do first?</pre>
+            </div>
+
+            <div class="step">
+                <span class="step-number">3</span>
+                <h3>Add Options (JSON Format)</h3>
+                <p>Pre-filled with 4 options (A-D). <strong>Just fill in the "text" values:</strong></p>
+                <pre style="background: #f5f5f5; padding: 15px; border-radius: 8px; overflow-x: auto;">[
+  {"id": "A", "text": "Give insulin"},
+  {"id": "B", "text": "Give 15g carbs"},
+  {"id": "C", "text": "Call doctor"},
+  {"id": "D", "text": "Recheck in 30min"}
+]</pre>
+                <p>💡 <strong>To add more options (E, F, etc.):</strong> Add comma after last item, press Enter, then add:</p>
+                <pre style="background: #f5f5f5; padding: 10px; border-radius: 6px;">  {"id": "E", "text": "Your option text here"}</pre>
+            </div>
+
+            <div class="step">
+                <span class="step-number">4</span>
+                <h3>Set Correct Answers</h3>
+                <p>For <strong>MCQ</strong> (one answer):</p>
+                <pre style="background: #f5f5f5; padding: 12px; border-radius: 6px;">["B"]</pre>
+                <p>For <strong>SATA</strong> (multiple answers):</p>
+                <pre style="background: #f5f5f5; padding: 12px; border-radius: 6px;">["A", "B", "C"]</pre>
+            </div>
+        </div>
+
+        <!-- TAB CONTENT: DRAG & DROP -->
+        <div class="tab-content" id="tab-drag-drop">
+            <h3 style="color: #004a99; margin-bottom: 20px;">🎯 Drag & Drop Rationale Questions</h3>
+            
+            <div class="step">
+                <span class="step-number">1</span>
+                <h3>Select Question Type</h3>
+                <p>Choose <strong>Drag & Drop Rationale (DRAG_DROP_RATIONALE)</strong></p>
+            </div>
+
+            <div class="step">
+                <span class="step-number">2</span>
+                <h3>Enter Question Text</h3>
+                <p><strong>Place question here:</strong></p>
+                <pre style="background: #fff3cd; padding: 12px; border-radius: 8px; border-left: 4px solid #ffc107;">A client with Type 1 Diabetes presents with fruity breath, 
+rapid breathing, and blood glucose of 450 mg/dL.
+
+Complete the sentence below.</pre>
+            </div>
+
+            <div class="step">
+                <span class="step-number">3</span>
+                <h3>Add Options (Template + Wells)</h3>
+                <p>Drag-drop uses <strong>template</strong> with placeholders (<code>[well1]</code>, <code>[well2]</code>, etc.)</p>
+                <pre style="background: #f5f5f5; padding: 15px; border-radius: 8px; overflow-x: auto;">{
+  "template": "The client is at highest risk for [well1] due to [well2].",
+  "answer_wells": {
+    "well1": [
+      "Diabetic Ketoacidosis",
+      "Hyperosmolar Hyperglycemic State",
+      "Hypoglycemic Shock"
+    ],
+    "well2": [
+      "Insulin deficiency and fat metabolism",
+      "Excessive insulin administration",
+      "Fluid volume overload"
+    ]
+  }
+}</pre>
+                <p>💡 <strong>Tips:</strong></p>
+                <ul style="margin-left: 20px; line-height: 1.8;">
+                    <li>Use <code>[well1]</code>, <code>[well2]</code>, <code>[well3]</code> as placeholders in the template</li>
+                    <li>Each well must have a list of answer choices</li>
+                    <li>All options from all wells show in a single list (NCLEX format)</li>
+                    <li>Students can drag any option to any well</li>
+                </ul>
+            </div>
+
+            <div class="step">
+                <span class="step-number">4</span>
+                <h3>Set Correct Answers (Map Wells)</h3>
+                <p>Specify which option goes in which well:</p>
+                <pre style="background: #f5f5f5; padding: 15px; border-radius: 8px; overflow-x: auto;">{
+  "well1": "Diabetic Ketoacidosis",
+  "well2": "Insulin deficiency and fat metabolism"
+}</pre>
+                <p style="margin-top: 10px;">⚠️ <strong>Important:</strong> The values must <strong>exactly match</strong> the text in your answer_wells!</p>
+            </div>
+        </div>
+
+        <!-- TAB CONTENT: DROPDOWN -->
+        <div class="tab-content" id="tab-dropdown">
+            <h3 style="color: #004a99; margin-bottom: 20px;">▼ Dropdown Rationale Questions</h3>
+            
+            <div class="step">
+                <span class="step-number">1</span>
+                <h3>Select Question Type</h3>
+                <p>Choose <strong>Dropdown Rationale (DROPDOWN_RATIONALE)</strong></p>
+            </div>
+
+            <div class="step">
+                <span class="step-number">2</span>
+                <h3>Enter Question Text</h3>
+                <p><strong>Place question here:</strong></p>
+                <pre style="background: #fff3cd; padding: 12px; border-radius: 8px; border-left: 4px solid #ffc107;">A client is admitted with heart failure.
+Complete the sentence using the dropdown options.</pre>
+            </div>
+
+            <div class="step">
+                <span class="step-number">3</span>
+                <h3>Add Options (Template + Dropdowns)</h3>
+                <p>Use <strong>template</strong> with placeholders (<code>[dropdown1]</code>, <code>[dropdown2]</code>) and define options for each.</p>
+                <pre style="background: #f5f5f5; padding: 15px; border-radius: 8px; overflow-x: auto;">{
+  "template": "The client is experiencing [dropdown1] as evidenced by [dropdown2].",
+  "dropdowns": {
+    "dropdown1": [
+      "Fluid Overload",
+      "Dehydration",
+      "Anemia"
+    ],
+    "dropdown2": [
+      "Jugular Venous Distention",
+      "Dry Mucous Membranes",
+      "Pale Skin"
+    ]
+  }
+}</pre>
+                <p>💡 <strong>Tips:</strong></p>
+                <ul style="margin-left: 20px; line-height: 1.8;">
+                    <li>Use <code>[dropdown1]</code>, <code>[dropdown2]</code> as placeholders in the template</li>
+                    <li>Define the choices for each dropdown in the <code>dropdowns</code> object</li>
+                </ul>
+            </div>
+
+            <div class="step">
+                <span class="step-number">4</span>
+                <h3>Set Correct Answers</h3>
+                <p>Map each dropdown ID to its correct value:</p>
+                <pre style="background: #f5f5f5; padding: 15px; border-radius: 8px; overflow-x: auto;">{
+  "dropdown1": "Fluid Overload",
+  "dropdown2": "Jugular Venous Distention"
+}</pre>
+                <p style="margin-top: 10px;">⚠️ <strong>Important:</strong> The values must <strong>exactly match</strong> the text in your options!</p>
+            </div>
+        </div>
+
+        <!-- TAB CONTENT: MATRIX -->
+        <div class="tab-content" id="tab-matrix">
+            <h3 style="color: #004a99; margin-bottom: 20px;">田 Matrix Multiple Response Questions</h3>
+            
+            <div class="step">
+                <span class="step-number">1</span>
+                <h3>Select Question Type</h3>
+                <p>Choose <strong>Matrix Multiple Choice (MATRIX_MULTIPLE)</strong></p>
+            </div>
+
+            <div class="step">
+                <span class="step-number">2</span>
+                <h3>Enter Question Text</h3>
+                <p><strong>Place question here:</strong></p>
+                <pre style="background: #fff3cd; padding: 12px; border-radius: 8px; border-left: 4px solid #ffc107;">For each client finding below, click to specify whether the finding is consistent with DKA, UTI, or HHS. </pre>
+            </div>
+
+            <div class="step">
+                <span class="step-number">3</span>
+                <h3>Add Options (Rows & Columns)</h3>
+                <p>Define the <strong>rows</strong> (Findings) and <strong>columns</strong> (Conditions).</p>
+                <pre style="background: #f5f5f5; padding: 15px; border-radius: 8px; overflow-x: auto;">{
+  "rows": [
+    "Fever",
+    "Confusion",
+    "Urinary Frequency"
+  ],
+  "columns": [
+    "Diabetic Ketoacidosis",
+    "Urinary Tract Infection",
+    "Hyperosmolar Hyperglycemic Syndrome"
+  ]
+}</pre>
+                <p>💡 <strong>Info:</strong> Only include the text for the rows and columns. The grid will be generated automatically.</p>
+            </div>
+
+            <div class="step">
+                <span class="step-number">4</span>
+                <h3>Set Correct Answers</h3>
+                <p>Specify valid <strong>finding (row)</strong> and <strong>diagnosis (column)</strong> pairs:</p>
+                <pre style="background: #f5f5f5; padding: 15px; border-radius: 8px; overflow-x: auto;">[
+  { "finding": "Fever", "diagnosis": "Urinary Tract Infection" },
+  { "finding": "Fever", "diagnosis": "Hyperosmolar Hyperglycemic Syndrome" },
+  { "finding": "Confusion", "diagnosis": "Diabetic Ketoacidosis" },
+  { "finding": "Confusion", "diagnosis": "Urinary Tract Infection" },
+  { "finding": "Confusion", "diagnosis": "Hyperosmolar Hyperglycemic Syndrome" },
+  { "finding": "Urinary Frequency", "diagnosis": "Diabetic Ketoacidosis" },
+  { "finding": "Urinary Frequency", "diagnosis": "Urinary Tract Infection" },
+  { "finding": "Urinary Frequency", "diagnosis": "Hyperosmolar Hyperglycemic Syndrome" }
+]</pre>
+                <p style="margin-top: 10px;">⚠️ <strong>Note:</strong> List every correct checkmark as a separate object.</p>
+            </div>
+
+            <div class="step">
+                <span class="step-number">5</span>
+                <h3>Add Rationale</h3>
+                <p><strong>Rationale:</strong> Explain the connections (e.g., "Fever is classic for infection (UTI) but not typical for DKA...").</p>
+            </div>
+        </div>
+
+        <!-- TAB CONTENT: HIGHLIGHT -->
+        <div class="tab-content" id="tab-highlight">
+            <h3 style="color: #004a99; margin-bottom: 20px;">🖍️ Highlight Text Questions</h3>
+            
+            <div class="step">
+                <span class="step-number">1</span>
+                <h3>Select Question Type</h3>
+                <p>Choose <strong>Highlight Text (HIGHLIGHT_TEXT)</strong></p>
+            </div>
+
+            <div class="step">
+                <span class="step-number">2</span>
+                <h3>Enter Question Text</h3>
+                <p><strong>Place question here:</strong></p>
+                <pre style="background: #fff3cd; padding: 12px; border-radius: 8px; border-left: 4px solid #ffc107;">Read the findings below. Click to highlight the findings that require immediate intervention.</pre>
+            </div>
+
+            <div class="step">
+                <span class="step-number">3</span>
+                <h3>Add Options (Formatted Text)</h3>
+                <p>Wrap <strong>EVERY</strong> sentence or phrase (both correct and incorrect) in <code>&lt;span id="x" class="highlightable"&gt;...&lt;/span&gt;</code> tags.</p>
+                
+                <p style="margin-top: 10px;"><strong>For Example:</strong></p>
+                <pre style="background: #f5f5f5; padding: 15px; border-radius: 8px; overflow-x: auto; margin-top: 5px; white-space: pre-wrap;">{
+  "formatted_text": "&lt;p&gt;<span id='s1' class='highlightable'>10:00 AM: Client admitted with abdominal pain.</span> <span id='s2' class='highlightable'>Temperature 101.2°F (38.4°C).</span> <span id='s3' class='highlightable'>Heart rate 110 bpm.</span> <span id='s4' class='highlightable'>Blood pressure 124/76 mmHg.</span> <span id='s5' class='highlightable'>Abdomen rigid and board-like on palpation.</span> <span id='s6' class='highlightable'>Client reports pain is 8/10.</span> <span id='s7' class='highlightable'>Bowel sounds hypoactive in all quadrants.</span>&lt;/p&gt;"
+}</pre>
+                
+                <div class="alert alert-info" style="background: #e1f5fe; border-left: 5px solid #039be5; padding: 10px; margin-bottom: 10px; margin-top: 10px;">
+                    <strong>Tip:</strong> Notice how even normal findings like "Client admitted..." (s1) are wrapped so they are clickable distractors!
+                </div>
+            </div>
+
+            <div class="step">
+                <span class="step-number">4</span>
+                <h3>Set Correct Answers</h3>
+                <p>List the <strong>IDs</strong> of the correct spans ONLY:</p>
+                <pre style="background: #f5f5f5; padding: 15px; border-radius: 8px; overflow-x: auto;">["h2"]</pre>
+                <p style="margin-top: 10px;">⚠️ <strong>Note:</strong> 
+                    <br>• <strong>h2</strong> (Low BP) is Correct.
+                    <br>• <strong>h1</strong> and <strong>h3</strong> are Distractors (Clickable but Wrong).
+                </p>
+            </div>
+        </div>
+
+        <!-- TAB CONTENT: GENERAL SETTINGS -->
+        <div class="tab-content" id="tab-general">
+            <h3 style="color: #004a99; margin-bottom: 20px;">⚙️ General Settings (All Question Types)</h3>
+            
+            <div class="step">
+                <span class="step-number">1</span>
+                <h3>Add Rationale (Optional)</h3>
+                <p>Explain why the answer is correct. Example:</p>
+                <pre style="background: #f5f5f5; padding: 12px; border-radius: 6px;">DKA occurs when lack of insulin forces fat metabolism, 
+creating ketones (fruity breath) and acidosis.</pre>
+            </div>
+
+            <div class="step">
+                <span class="step-number">2</span>
+                <h3>Set Difficulty</h3>
+                <p>Range: <strong>-3.0 (very easy)</strong> to <strong>+3.0 (very hard)</strong></p>
+                <ul style="margin-left: 20px;">
+                    <li>-2.0 to -1.0: Easy</li>
+                    <li>-0.5 to 0.5: Medium</li>
+                    <li>1.0 to 2.0: Hard</li>
+                </ul>
+            </div>
+
+            <div class="step">
+                <span class="step-number">3</span>
+                <h3>Select Categories</h3>
+                <p>Choose relevant NCLEX categories (e.g., Pharmacology, Management of Care)</p>
+            </div>
+
+            <div class="step">
+                <span class="step-number">4</span>
+                <h3>Save Your Question</h3>
+                <p>Click <strong>"Save and add another"</strong> or <strong>"Save"</strong> at the bottom</p>
+            </div>
+        </div>
+    </div>
+</div>
+            <p>Click the green <strong>"Save"</strong> button at the bottom right!</p>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+(function() {
+    'use strict';
+    
+    function openHelpModal() {
+        var modal = document.getElementById('helpModal');
+        var overlay = document.getElementById('modalOverlay');
+        if (modal && overlay) {
+            modal.classList.add('active');
+            overlay.classList.add('active');
+        }
+    }
+
+    function closeHelpModal() {
+        var modal = document.getElementById('helpModal');
+        var overlay = document.getElementById('modalOverlay');
+        if (modal && overlay) {
+            modal.classList.remove('active');
+            overlay.classList.remove('active');
+        }
+    }
+    
+    function initModal() {
+        const helpBtn = document.getElementById('helpButton');
+        const modal = document.getElementById('helpModal');
+        const closeBtn = document.getElementById('modalCloseBtn');
+        const overlay = document.getElementById('modalOverlay');
+
+        // Ensure hidden on load
+        if (modal) modal.classList.remove('active');
+        if (overlay) overlay.classList.remove('active');
+        
+        if (helpBtn && modal && closeBtn) {
+            helpBtn.addEventListener('click', openHelpModal);
+            closeBtn.addEventListener('click', closeHelpModal);
+            // The instruction included this, but overlay already handles it. Keeping for faithfulness.
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) closeHelpModal();
+            });
+        }
+
+        // Overlay click (retained from original, as it's more robust for background clicks)
+        if (overlay) {
+            overlay.addEventListener('click', function(e) {
+                if (e.target === overlay) closeHelpModal();
+            });
+        }
+        
+        // ESC key (retained from original, using the modal and overlay variables defined above)
+        document.addEventListener('keydown', function(e) {
+            if ((e.key === 'Escape' || e.keyCode === 27) && modal && modal.classList.contains('active')) {
+                closeHelpModal();
+            }
+        });
+
+        // TAB SWITCHING
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const targetTab = btn.getAttribute('data-tab');
+                
+                // Remove active from all
+                tabBtns.forEach(b => b.classList.remove('active'));
+                tabContents.forEach(c => c.classList.remove('active'));
+                
+                // Add active to clicked
+                btn.classList.add('active');
+                document.getElementById(`tab-${targetTab}`).classList.add('active');
+            });
+        });
+    }
+    
+    // CRITICAL: Remove inline padding styles that Django adds
+    function removePaddingStyles() {
+        var fieldDivs = document.querySelectorAll('div.field-options, div.field-correct_option_ids, div.field-text, div.field-rationale, div[class*="field-"]');
+        fieldDivs.forEach(function(div) {
+            div.style.padding = '0';
+            div.style.marginBottom = '25px';
+        });
+        
+        var jsonEditors = document.querySelectorAll('.jsoneditor-outer, .jsoneditor');
+        jsonEditors.forEach(function(editor) {
+            editor.style.padding = '0';
+        });
+        
+        // CRITICAL: Ensure fieldsets have proper spacing
+        var fieldsets = document.querySelectorAll('fieldset.module');
+        fieldsets.forEach(function(fieldset) {
+            fieldset.style.marginBottom = '25px';
+        });
+        
+        // CRITICAL: Ensure individual form rows have spacing
+        var formRows = document.querySelectorAll('.form-row');
+        formRows.forEach(function(row) {
+            row.style.marginBottom = '25px';
+        });
+    }
+    
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() {
+            initModal();
+            removePaddingStyles();
+            // Run again after a short delay to catch dynamically added elements
+            setTimeout(removePaddingStyles, 500);
+            setTimeout(removePaddingStyles, 1000);
+        });
+    } else {
+        initModal();
+        removePaddingStyles();
+        setTimeout(removePaddingStyles, 500);
+        setTimeout(removePaddingStyles, 1000);
+    }
+})();
+</script>
+
+</div>
+{% endblock %}

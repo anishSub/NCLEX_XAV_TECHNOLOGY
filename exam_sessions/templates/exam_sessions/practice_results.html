@@ -53,9 +53,67 @@
                 <span><strong>{{ cat.name }}</strong></span>
                 <span>{{ cat.correct }}/{{ cat.total }} ({{ cat.percentage }}%)</span>
             </div>
+            {% empty %}
+            <p style="color: grey; font-style: italic;">No category data available.</p>
+            {% endfor %}
+        </div>
+
+        <div class="category-breakdown">
+            <h2 style="color: #004a99; margin-bottom: 1rem;">Performance by Question Type</h2>
+            {% for type in type_breakdown %}
+            <div class="category-item">
+                <span><strong>{{ type.name }}</strong></span>
+                <span>{{ type.correct }}/{{ type.total }} ({{ type.percentage }}%)</span>
+            </div>
+            {% empty %}
+            <p style="color: grey; font-style: italic;">No question type data available.</p>
             {% endfor %}
         </div>
         
+        <div style="margin-top: 3rem;">
+            <h2 style="color: #004a99; margin-bottom: 1.5rem; text-align: center;">Detailed Review</h2>
+            {% for q in detailed_review %}
+            <div style="background: #fff; border: 1px solid #e0e0e0; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+                    <span style="background: #004a99; color: white; padding: 4px 10px; border-radius: 6px; font-size: 0.9rem;">Q{{ q.num }} - {{ q.type }}</span>
+                    {% if q.is_correct %}
+                    <span style="color: #38a169; font-weight: bold;">✅ Correct</span>
+                    {% else %}
+                    <span style="color: #e53e3e; font-weight: bold;">❌ Incorrect</span>
+                    {% endif %}
+                </div>
+                
+                <h3 style="font-size: 1.1rem; margin-bottom: 1rem; color: #2d3748;">{{ q.text|safe }}</h3>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                    <div style="background: #f8fbff; padding: 10px; border-radius: 8px; border-left: 4px solid {% if q.is_correct %}#38a169{% else %}#e53e3e{% endif %};">
+                        <strong>Your Answer:</strong><br>
+                        <span style="color: #555;">
+                            {% for line in q.user_answer %}
+                                {{ line }}<br>
+                            {% endfor %}
+                        </span>
+                    </div>
+                    <div style="background: #f0fff4; padding: 10px; border-radius: 8px; border-left: 4px solid #38a169;">
+                        <strong>Correct Answer:</strong><br>
+                        <span style="color: #555;">
+                            {% for line in q.correct_answer %}
+                                {{ line }}<br>
+                            {% endfor %}
+                        </span>
+                    </div>
+                </div>
+                
+                {% if q.rationale %}
+                <div style="background: #fffbea; padding: 15px; border-radius: 8px; border-left: 4px solid #d69e2e;">
+                    <strong>💡 Rationale:</strong>
+                    <div style="margin-top: 5px; color: #4a5568;">{{ q.rationale|safe }}</div>
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+
         <div style="text-align: center;">
             <a href="{% url 'practice_categories' %}" class="btn-home">Practice Again</a>
             <a href="{% url 'home' %}" class="btn-home" style="background: #6c757d; margin-left: 1rem;">Home</a>

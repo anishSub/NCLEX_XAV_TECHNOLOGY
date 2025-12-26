@@ -18,7 +18,8 @@
             <span id="question-counter">Question: <span id="current-q">0</span> of {{ session.total_questions }}</span>
         </div>
     </div>
-    <div class="exam-container">
+    <div id="exam-layout" class="exam-container">
+        <div id="scenario-panel" class="hidden" style="display: none;"></div>
         <div id="question-panel">
             <div id="question-display-area"><div style="text-align: center; padding: 50px; color: #999;"><p>Loading your first question...</p></div></div>
             <button class="submit-btn" onclick="handlePracticeSubmit()">Submit Answer & Continue</button>

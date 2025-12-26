@@ -1,373 +1,243 @@
-/* ========================================
-   NCLEX Admin Panel - Modern Design
-   White Sidebar | Transparent Cards | Colorful Icons
-   ======================================== */
+/* Custom Admin CSS for Question Form - FULL WIDTH LAYOUT */
 
-/* ===== GLOBAL STYLES ===== */
-:root {
-  --primary-blue: #007bff;
-  --primary-light: #e3f2fd;
-  --success-green: #28a745;
-  --warning-yellow: #ffc107;
-  --danger-red: #dc3545;
-  --purple: #6f42c1;
-  --orange: #fd7e14;
-  --glass-bg: rgba(255, 255, 255, 0.85);
-  --shadow-soft: 0 4px 6px rgba(0, 0, 0, 0.07);
-  --shadow-medium: 0 10px 25px rgba(0, 0, 0, 0.1);
+/* ========== FORCE FULL WIDTH ON ALL ELEMENTS ========== */
+#content {
+    max-width: none !important;
+    width: 100% !important;
 }
 
-/* ===== BODY BACKGROUND ===== */
-body {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-  background-attachment: fixed !important;
+#content-main {
+    max-width: none !important;
+    width: 100% !important;
+    margin-right: 0 !important;
 }
 
-/* ===== CONTENT WRAPPER - Transparent Cards ===== */
-.content-wrapper {
-  background: transparent !important;
+.colM,
+.colMS {
+    width: 100% !important;
+    max-width: none !important;
 }
 
-/* ===== MAIN CARDS - Glass Morphism ===== */
-.card,
-.info-box,
-.small-box {
-  background: var(--glass-bg) !important;
-  backdrop-filter: blur(10px) !important;
-  border-radius: 15px !important;
-  border: 1px solid rgba(255, 255, 255, 0.2) !important;
-  box-shadow: var(--shadow-medium) !important;
-  transition: transform 0.3s ease, box-shadow 0.3s ease !important;
+/* ========== MODULE CONTAINERS - FULL WIDTH ========== */
+.module {
+    max-width: none !important;
+    width: 100% !important;
 }
 
-.card:hover,
-.info-box:hover,
-.small-box:hover {
-  transform: translateY(-5px) !important;
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15) !important;
+.change-form {
+    max-width: none !important;
+    width: 100% !important;
 }
 
-/* ===== SIDEBAR - White Modern ===== */
-.main-sidebar {
-  background: rgba(255, 255, 255, 0.95) !important;
-  backdrop-filter: blur(10px) !important;
-  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05) !important;
+/* ========== FIELDSETS - CONSISTENT WIDTH ========== */
+fieldset {
+    max-width: none !important;
+    width: 100% !important;
 }
 
-/* Sidebar Links */
-.sidebar-light-primary .nav-sidebar>.nav-item>.nav-link {
-  color: #495057 !important;
-  transition: all 0.3s ease !important;
-  border-radius: 8px !important;
-  margin: 2px 8px !important;
-  border: 1px solid rgba(0, 123, 255, 0.1) !important;
-  /* Light border */
-  background: rgba(255, 255, 255, 0.5) !important;
+.aligned fieldset {
+    max-width: none !important;
+    width: 100% !important;
 }
 
-.sidebar-light-primary .nav-sidebar>.nav-item>.nav-link:hover {
-  background: linear-gradient(135deg, var(--primary-light), #bbdefb) !important;
-  color: var(--primary-blue) !important;
-  transform: translateX(5px) !important;
-  border-color: rgba(0, 123, 255, 0.3) !important;
-  /* Slightly darker on hover */
+/* Force ALL fieldsets to be same width */
+fieldset.module {
+    max-width: none !important;
+    width: 100% !important;
 }
 
-.sidebar-light-primary .nav-sidebar>.nav-item>.nav-link.active {
-  background: linear-gradient(135deg, var(--primary-blue), #0056b3) !important;
-  color: white !important;
-  box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3) !important;
-  border-color: transparent !important;
+/* ========== FORM ROWS - FULL WIDTH ========== */
+.form-row {
+    max-width: none !important;
+    width: 100% !important;
+    clear: both;
 }
 
-/* ===== SIDEBAR SECTION SEPARATORS - MORE VISIBLE ===== */
-.nav-sidebar>.nav-item {
-  border: 1px solid rgba(0, 123, 255, 0.15) !important;
-  /* Border around EACH item */
-  border-radius: 8px !important;
-  padding: 3px !important;
-  margin: 8px 5px !important;
-  /* More spacing */
-  background: rgba(255, 255, 255, 0.3) !important;
-  /* Light background */
+.aligned .form-row {
+    max-width: none !important;
+    width: 100% !important;
 }
 
-.nav-sidebar>.nav-item:hover {
-  background: rgba(255, 255, 255, 0.5) !important;
-  /* Lighter on hover */
-  border-color: rgba(0, 123, 255, 0.25) !important;
+.wide .form-row {
+    max-width: none !important;
+    width: 100% !important;
 }
 
-/* Parent sections (like "Users", "Exam Sessions") - Make them stand out */
-.nav-sidebar>.nav-item.has-treeview {
-  border: 2px solid rgba(0, 123, 255, 0.25) !important;
-  /* Thicker border for parents */
-  background: rgba(255, 255, 255, 0.5) !important;
-  /* More opaque */
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05) !important;
-  /* Subtle shadow */
+/* Field containers inside form rows */
+.aligned .form-row>div,
+.aligned .form-row>p {
+    max-width: none !important;
+    width: calc(100% - 200px) !important;
+    /* Leave space for label */
+    padding-left: 220px;
 }
 
-.nav-sidebar>.nav-item.has-treeview>.nav-link {
-  font-weight: 600 !important;
-  /* Bolder text for parent items */
+/* Labels */
+.aligned label {
+    width: 200px !important;
+    float: left !important;
+    margin-left: 0 !important;
 }
 
-/* FIX: When child is active, parent should NOT have active styling */
-.nav-sidebar>.nav-item.has-treeview.menu-open>.nav-link {
-  background: rgba(255, 255, 255, 0.9) !important;
-  /* Lighter, not highlighted */
-  color: #495057 !important;
-  /* Normal text color */
-  box-shadow: none !important;
-  /* No shadow */
+/* ========== JSON EDITOR WIDGETS - MAXIMUM WIDTH ========== */
+.django-json-widget {
+    max-width: none !important;
+    width: 100% !important;
 }
 
-/* Only highlight parent if it's directly clicked (no active children) */
-.nav-sidebar>.nav-item.has-treeview:not(.menu-open)>.nav-link.active {
-  background: linear-gradient(135deg, var(--primary-blue), #0056b3) !important;
-  color: white !important;
+.django-json-widget .jsoneditor {
+    min-height: 450px !important;
+    max-height: 650px !important;
+    width: 100% !important;
 }
 
-/* ===== COLORFUL ICONS ===== */
-/* User Management - Purple */
-.sidebar .nav-icon.fa-shield-alt,
-.sidebar .nav-icon.fa-users,
-.sidebar .nav-icon.fa-user-nurse,
-.sidebar .nav-icon.fa-id-card-clip {
-  color: var(--purple) !important;
-  font-size: 1.1rem !important;
+.django-json-widget .jsoneditor-outer {
+    min-height: 450px !important;
+    max-height: 650px !important;
+    width: 100% !important;
 }
 
-/* Content Management - Blue */
-.sidebar .nav-icon.fa-clipboard-question,
-.sidebar .nav-icon.fa-folder-tree,
-.sidebar .nav-icon.fa-book-medical {
-  color: var(--primary-blue) !important;
-  font-size: 1.1rem !important;
+/* Specific fields - force full width */
+.form-row.field-options,
+.form-row.field-correct_option_ids {
+    width: 100% !important;
 }
 
-/* Exam System - Green */
-.sidebar .nav-icon.fa-laptop-medical,
-.sidebar .nav-icon.fa-file-signature {
-  color: var(--success-green) !important;
-  font-size: 1.1rem !important;
+.form-row.field-options .django-json-widget,
+.form-row.field-correct_option_ids .django-json-widget {
+    width: 100% !important;
+    max-width: none !important;
 }
 
-/* Social Auth - Orange */
-.sidebar .nav-icon.fa-share-nodes,
-.sidebar .nav-icon.fa-user-check {
-  color: var(--orange) !important;
-  font-size: 1.1rem !important;
+/* ========== TEXT FIELDS - MAXIMUM WIDTH ========== */
+.form-row.field-text textarea,
+.form-row textarea {
+    width: 100% !important;
+    max-width: none !important;
+    min-height: 150px;
+    box-sizing: border-box;
 }
 
-/* System - Gray */
-.sidebar .nav-icon.fa-globe {
-  color: #6c757d !important;
-  font-size: 1.1rem !important;
+.form-row.field-rationale textarea {
+    width: 100% !important;
+    max-width: none !important;
+    min-height: 200px;
+    box-sizing: border-box;
 }
 
-/* Active icon glow */
-.nav-link.active .nav-icon {
-  filter: drop-shadow(0 0 5px currentColor) !important;
+/* All textareas should be full width */
+textarea {
+    width: 100% !important;
+    max-width: none !important;
 }
 
-/* ===== NAVBAR - Clean White ===== */
-.main-header {
-  background: rgba(255, 255, 255, 0.95) !important;
-  backdrop-filter: blur(10px) !important;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05) !important;
-  border-bottom: none !important;
+/* ========== INPUT FIELDS ========== */
+input[type="text"],
+input[type="number"],
+select {
+    max-width: none !important;
 }
 
-/* ===== DROPDOWN SUBSECTIONS - Smooth Expand ===== */
-.nav-treeview {
-  background: rgba(0, 123, 255, 0.03) !important;
-  border-radius: 8px !important;
-  margin: 5px 8px !important;
-  padding: 5px 0 !important;
+/* ========== SUBMIT ROW - COMPACT BUTTONS ON RIGHT ========== */
+.submit-row {
+    display: flex !important;
+    justify-content: flex-end !important;
+    align-items: center !important;
+    gap: 10px !important;
+    padding: 15px 20px !important;
+    background: #f8f9fa !important;
+    border-top: 1px solid #ddd !important;
+    position: sticky !important;
+    bottom: 0 !important;
+    z-index: 100 !important;
 }
 
-.nav-treeview>.nav-item>.nav-link {
-  padding-left: 2.5rem !important;
-  color: #6c757d !important;
-  transition: all 0.2s ease !important;
+.submit-row input[type="submit"],
+.submit-row .button {
+    margin: 0 !important;
+    flex-shrink: 0 !important;
+    /* Don't let buttons shrink */
 }
 
-.nav-treeview>.nav-item>.nav-link:hover {
-  color: var(--primary-blue) !important;
-  background: rgba(0, 123, 255, 0.08) !important;
-  padding-left: 3rem !important;
+/* ========== BUTTON STYLING ========== */
+.submit-row .default {
+    background: #28a745 !important;
+    color: white !important;
+    border: none !important;
+    padding: 10px 24px !important;
+    border-radius: 5px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    white-space: nowrap !important;
 }
 
-.nav-treeview>.nav-item>.nav-link.active {
-  color: var(--primary-blue) !important;
-  font-weight: 600 !important;
-  background: rgba(0, 123, 255, 0.12) !important;
+.submit-row .default:hover {
+    background: #218838 !important;
 }
 
-/* ===== BUTTONS - Modern Gradient ===== */
-.btn-primary {
-  background: linear-gradient(135deg, var(--primary-blue), #0056b3) !important;
-  border: none !important;
-  box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3) !important;
-  transition: all 0.3s ease !important;
+.submit-row input[type="submit"]:not(.default) {
+    background: #007bff !important;
+    color: white !important;
+    border: none !important;
+    padding: 10px 24px !important;
+    border-radius: 5px !important;
+    cursor: pointer !important;
+    white-space: nowrap !important;
 }
 
-.btn-primary:hover {
-  transform: translateY(-2px) !important;
-  box-shadow: 0 6px 15px rgba(0, 123, 255, 0.4) !important;
+.submit-row input[type="submit"]:not(.default):hover {
+    background: #0056b3 !important;
 }
 
-.btn-success {
-  background: linear-gradient(135deg, var(--success-green), #1e7e34) !important;
-  border: none !important;
+.submit-row .deletelink {
+    background: #dc3545 !important;
+    color: white !important;
+    padding: 10px 24px !important;
+    border-radius: 5px !important;
+    white-space: nowrap !important;
 }
 
-.btn-warning {
-  background: linear-gradient(135deg, var(--warning-yellow), #e0a800) !important;
-  border: none !important;
+.submit-row .deletelink:hover {
+    background: #c82333 !important;
 }
 
-.btn-danger {
-  background: linear-gradient(135deg, var(--danger-red), #c82333) !important;
-  border: none !important;
+/* ========== PREVENT SHRINKING ON DIFFERENT TABS ========== */
+.module.aligned .form-row {
+    max-width: none !important;
 }
 
-/* ===== TABLES - Clean Design ===== */
-.table {
-  background: white !important;
-  border-radius: 10px !important;
-  overflow: hidden !important;
-  box-shadow: var(--shadow-soft) !important;
+/* Ensure tab panels are full width */
+.tab-content {
+    width: 100% !important;
+    max-width: none !important;
 }
 
-.table thead th {
-  background: linear-gradient(135deg, #f8f9fa, #e9ecef) !important;
-  color: #495057 !important;
-  font-weight: 600 !important;
-  border: none !important;
+/* ========== REMOVE ALL MAX-WIDTH CONSTRAINTS ========== */
+* {
+    max-width: none !important;
 }
 
-.table tbody tr:hover {
-  background: var(--primary-light) !important;
-  transition: background 0.2s ease !important;
+/* But keep reasonable max-width for specific UI elements */
+.submit-row,
+.breadcrumbs,
+.messagelist {
+    max-width: 100% !important;
 }
 
-/* ===== FORMS - Modern Input ===== */
-.form-control {
-  border-radius: 8px !important;
-  border: 1px solid #ced4da !important;
-  transition: all 0.3s ease !important;
+/* ========== RESPONSIVE IMPROVEMENTS ========== */
+@media (min-width: 768px) {
+    #content {
+        padding: 20px 30px !important;
+    }
+
+    .aligned .form-row>div {
+        width: calc(100% - 180px) !important;
+        padding-left: 200px !important;
+    }
 }
 
-.form-control:focus {
-  border-color: var(--primary-blue) !important;
-  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.15) !important;
-}
-
-/* ===== INFO BOXES - Dashboard Widgets ===== */
-.info-box {
-  padding: 1.5rem !important;
-}
-
-.info-box-icon {
-  border-radius: 12px !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-}
-
-.bg-info .info-box-icon {
-  background: linear-gradient(135deg, #17a2b8, #117a8b) !important;
-}
-
-.bg-success .info-box-icon {
-  background: linear-gradient(135deg, var(--success-green), #1e7e34) !important;
-}
-
-.bg-warning .info-box-icon {
-  background: linear-gradient(135deg, var(--warning-yellow), #e0a800) !important;
-}
-
-.bg-danger .info-box-icon {
-  background: linear-gradient(135deg, var(--danger-red), #c82333) !important;
-}
-
-/* ===== PAGINATION - Modern ===== */
-.pagination .page-link {
-  border-radius: 8px !important;
-  margin: 0 3px !important;
-  border: 1px solid #dee2e6 !important;
-  color: var(--primary-blue) !important;
-}
-
-.pagination .page-item.active .page-link {
-  background: var(--primary-blue) !important;
-  border-color: var(--primary-blue) !important;
-}
-
-/* ===== BREADCRUMB - Clean ===== */
-.content-header {
-  background: rgba(255, 255, 255, 0.8) !important;
-  backdrop-filter: blur(10px) !important;
-  border-radius: 10px !important;
-  margin-bottom: 1.5rem !important;
-  padding: 1rem 1.5rem !important;
-  box-shadow: var(--shadow-soft) !important;
-}
-
-/* ===== BRAND LOGO - Professional ===== */
-.brand-link {
-  background: linear-gradient(135deg, var(--primary-blue), #0056b3) !important;
-  color: white !important;
-  font-weight: 600 !important;
-  border-bottom: 2px solid rgba(255, 255, 255, 0.2) !important;
-}
-
-/* ===== SCROLLBAR - Custom ===== */
-.sidebar::-webkit-scrollbar {
-  width: 6px !important;
-}
-
-.sidebar::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.05) !important;
-}
-
-.sidebar::-webkit-scrollbar-thumb {
-  background: rgba(0, 123, 255, 0.3) !important;
-  border-radius: 10px !important;
-}
-
-.sidebar::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 123, 255, 0.5) !important;
-}
-
-/* ===== RESPONSIVE ADJUSTMENTS ===== */
-@media (max-width: 768px) {
-  .content-wrapper {
-    padding: 1rem !important;
-  }
-
-  .card {
-    margin-bottom: 1rem !important;
-  }
-}
-
-/* ===== ANIMATION ===== */
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.card,
-.info-box {
-  animation: fadeInUp 0.5s ease-out !important;
+@media (min-width: 1200px) {
+    #content {
+        padding: 20px 40px !important;
+    }
 }
