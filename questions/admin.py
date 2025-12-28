@@ -2,7 +2,6 @@ from django.contrib import admin
 from django.db import models
 from django_json_widget.widgets import JSONEditorWidget
 from .models import Questions, QuestionType
-from scenarios.models import Scenarios
 
 
 # ========== QUESTION TYPE ADMIN (Separate Page for Managing Types) ==========
@@ -222,43 +221,12 @@ class QuestionsAdmin(admin.ModelAdmin):
     export_questions.short_description = "Export selected questions"
 
 
-# ========== QUESTION INLINE FOR SCENARIOS ==========
-class QuestionInline(admin.StackedInline):
-    """Inline form for adding questions within a scenario"""
-    model = Questions
-    extra = 1
-    classes = ('collapse',)
-    
-    formfield_overrides = {
-        models.JSONField: {'widget': JSONEditorWidget},
-    }
-    
-    fields = (
-        'question_type',
-        'text',
-        'options',
-        'correct_option_ids',
-        'difficulty_logit',
-        'rationale',
-    )
-
 
 # ========== SCENARIOS ADMIN ==========
-@admin.register(Scenarios)
-class ScenariosAdmin(admin.ModelAdmin):
-    """Manage clinical scenarios with embedded questions"""
-    list_display = ('title', 'created_at', 'exhibit_count', 'question_count')
-    inlines = [QuestionInline]
-    search_fields = ('title',)
-    
-    formfield_overrides = {
-        models.JSONField: {'widget': JSONEditorWidget},
-    }
-
-    def exhibit_count(self, obj):
-        return len(obj.exhibits) if obj.exhibits else 0
-    exhibit_count.short_description = "Exhibits"
-    
-    def question_count(self, obj):
-        return obj.questions.count()
-    question_count.short_description = "Questions"
+# NOTE: Scenarios admin has been moved to scenarios/admin.py for better organization.
+# To manage clinical case studies, go to: /admin/scenarios/scenarios/
+# The enhanced admin panel includes:
+#   - Exhibit JSON templates and examples
+#   - Inline question editing
+#   - Help documentation for creating case studies
+#   - Preview of exhibit structure

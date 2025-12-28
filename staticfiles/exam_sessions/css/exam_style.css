@@ -263,3 +263,27 @@
     background: #004a99;
     color: white;
 }
+
+/* Highlight Text Questions - PERSISTENT HIGHLIGHTING */
+.highlightable {
+    cursor: pointer;
+    padding: 2px 4px;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+    border: 1px solid transparent;
+}
+
+.highlightable:hover {
+    background-color: #f0f0f0;
+    border-color: #ccc;
+}
+
+/* This is the key part for the YELLOW color */
+.highlightable.highlighted {
+    background-color: #ffeb3b !important;
+    /* Force Yellow Highlight */
+    color: #000 !important;
+    border-color: #fbc02d !important;
+    font-weight: 500;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}

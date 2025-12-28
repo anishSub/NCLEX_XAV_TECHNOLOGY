@@ -310,7 +310,7 @@ JAZZMIN_SETTINGS = {
     
     
     # ========== CUSTOM CSS FOR FULL-WIDTH FORMS ==========
-    "custom_css": None,  # Using custom_js to inject CSS instead
+    "custom_css": "admin/css/custom_admin.css",
     "custom_js": None,
     
     
@@ -320,13 +320,13 @@ JAZZMIN_SETTINGS = {
 
 
 # ========== INJECT CUSTOM CSS DIRECTLY ==========
-JAZZMIN_SETTINGS["custom_css"] = None  # Disable external file
+# NOTE: The JAZZMIN_SETTINGS_CUSTOM_CSS below will be injected into page headers
 JAZZMIN_SETTINGS["show_ui_builder"] = False
 
 # Add custom CSS to override Jazzmin styles
 JAZZMIN_SETTINGS_CUSTOM_CSS = """
 <style>
-/* FULL WIDTH FORM LAYOUT */
+/* ========== FULL WIDTH FORM LAYOUT ========== */
 #content, #content-main { max-width: none !important; width: 100% !important; margin-right: 0 !important; }
 .colM, .colMS, .module, .change-form { max-width: none !important; width: 100% !important; }
 fieldset, .aligned fieldset, fieldset.module { max-width: none !important; width: 100% !important; }
@@ -334,26 +334,168 @@ fieldset, .aligned fieldset, fieldset.module { max-width: none !important; width
 .aligned .form-row > div, .aligned .form-row > p { max-width: none !important; width: calc(100% - 200px) !important; padding-left: 220px; }
 .aligned label { width: 200px !important; float: left !important; margin-left: 0 !important; }
 
-/* JSON EDITORS - FULL WIDTH */
+
+/* ========== JSON EDITORS - FULL WIDTH ========== */
 .django-json-widget { max-width: none !important; width: 100% !important; }
 .django-json-widget .jsoneditor, .django-json-widget .jsoneditor-outer { min-height: 450px !important; max-height: 650px !important; width: 100% !important; }
 .form-row.field-options, .form-row.field-correct_option_ids { width: 100% !important; }
+.form-row.field-exhibits { width: 100% !important; }
+.form-row.field-exhibits .jsoneditor { min-height: 350px !important; }
 
-/* TEXTAREAS - FULL WIDTH */
+/* Hide the raw textarea that appears below JSON editor */
+.django-json-widget textarea[id*="exhibits"] { display: none !important; }
+.field-exhibits textarea {display: none !important; }
+
+/* ========== TEXTAREAS - FULL WIDTH ========== */
 textarea, .form-row textarea, .form-row.field-text textarea { width: 100% !important; max-width: none !important; min-height: 150px; box-sizing: border-box; }
 .form-row.field-rationale textarea { min-height: 200px; }
 
-/* BUTTONS - RIGHT ALIGNED */
+/* ========== BUTTONS - RIGHT ALIGNED ========== */
 .submit-row { display: flex !important; justify-content: flex-end !important; gap: 10px !important; padding: 15px 20px !important; background: #f8f9fa !important; border-top: 1px solid #ddd !important; position: sticky !important; bottom: 0 !important; z-index: 100 !important; }
 .submit-row input[type="submit"], .submit-row .button { margin: 0 !important; flex-shrink: 0 !important; }
 .submit-row .default { background: #28a745 !important; color: white !important; padding: 10px 24px !important; border-radius: 5px !important; font-weight: 600 !important; border: none !important; }
 .submit-row input[type="submit"]:not(.default) { background: #007bff !important; color: white !important; padding: 10px 24px !important; border-radius: 5px !important; border: none !important; }
 .submit-row .deletelink { background: #dc3545 !important; color: white !important; padding: 10px 24px !important; border-radius: 5px !important; }
 
-/* PREVENT TAB SHRINKING */
+/* ========== PREVENT TAB SHRINKING ========== */
 .module.aligned .form-row, .tab-content { max-width: none !important; width: 100% !important; }
+
+/* ========== FIX INLINE FORMSETS (SCENARIOS QUESTIONS) ========== */
+/* Remove outer wrapper - make questions use full width */
+.inline-group { 
+    width: 100% !important; 
+    max-width: 100% !important; 
+    margin-bottom: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    background: transparent !important;
+}
+
+/* Remove the extra card wrapper */
+.inline-related { 
+    width: 100% !important; 
+    max-width: 100% !important; 
+    margin-bottom: 20px !important; 
+    padding: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+/* The FIELDSETS inside get the styling, not the container */
+.inline-related fieldset { 
+    width: 100% !important; 
+    max-width: 100% !important; 
+    padding: 20px !important;
+    margin-bottom: 20px !important;
+    background: #ffffff !important;
+    border: 1px solid #dee2e6 !important;
+    border-radius: 5px !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08) !important;
+}
+
+/* Give each inline form its own space */
+.inline-related + .inline-related { margin-top: 0 !important; }
+
+/* Remove h3 header styling that creates extra card look */
+.inline-related h3 { 
+    background: transparent !important; 
+    padding: 0 0 15px 0 !important;
+    margin: 0 !important; 
+    border: none !important;
+    border-radius: 0 !important;
+    font-weight: 600 !important;
+    color: #17a2b8 !important;
+}
+
+/* Fix form rows in inline forms */
+.inline-related .form-row { 
+    width: 100% !important; 
+    max-width: 100% !important; 
+    margin-bottom: 15px !important;
+    clear: both !important;
+}
+
+/* Fix JSON editors in inline forms */
+.inline-related .django-json-widget { 
+    width: 100% !important; 
+    max-width: none !important; 
+}
+
+.inline-related .jsoneditor { 
+    min-height: 300px !important; 
+    max-height: 500px !important; 
+}
+
+/* Fix horizontal filters (category selection) in inline forms */
+.inline-related .selector { 
+    width: 100% !important; 
+    max-width: none !important; 
+}
+
+/* Spacing between add another button and forms */
+.add-row { 
+    margin-top: 15px !important; 
+    margin-bottom: 15px !important;
+    padding: 10px !important;
+    background: #e9ecef !important;
+    border-radius: 5px !important;
+}
+
+/* ========== FIELDSET DESCRIPTIONS (HELP TEXT) ========== */
+fieldset .description, .inline-group .description { 
+    background: #e7f3ff !important; 
+    border-left: 4px solid #0066cc !important; 
+    padding: 12px 15px !important; 
+    margin-bottom: 15px !important; 
+    font-size: 14px !important;
+    color: #495057 !important;
+    border-radius: 4px !important;
+}
+
+/* ========== SCENARIO SPECIFIC - MAKE CARDS WIDER ========== */
+/* Force scenario admin to use full width */
+.model-scenarios #content-main { max-width: none !important; width: 100% !important; padding: 20px 40px !important; }
+.model-scenarios fieldset { max-width: none !important; width: 100% !important; }
+.model-scenarios .form-row { max-width: none !important; width: 100% !important; }
+
+/* Exhibits field should be extra wide */
+.model-scenarios .field-exhibits { width: 100% !important; }
+.model-scenarios .field-exhibits .jsoneditor-outer { min-height: 400px !important; }
+
+/* Title field should also be wide */
+.model-scenarios .field-title input { width: 100% !important; max-width: 800px !important; }
+
+/* ========== COLLAPSED INLINE FORMS ========== */
+.inline-related.tabular { width: 100% !important; overflow-x: auto !important; }
+
+/* When inline is collapsed, show nicer header */
+.collapse .inline-related h3 { cursor: pointer !important; }
+.collapse .inline-related h3:hover { background: #e9ecef !important; }
+
+/* ========== RESPONSIVE ADJUSTMENTS ========== */
+@media (max-width: 1200px) {
+    .aligned .form-row > div, .aligned .form-row > p { 
+        width: calc(100% - 150px) !important; 
+        padding-left: 160px !important; 
+    }
+    .aligned label { width: 150px !important; }
+}
+
+@media (max-width: 768px) {
+    .aligned .form-row > div, .aligned .form-row > p { 
+        width: 100% !important; 
+        padding-left: 0 !important; 
+    }
+    .aligned label { 
+        width: 100% !important; 
+        float: none !important; 
+        margin-bottom: 5px !important; 
+    }
+}
 </style>
 """
+
 
 
 # ========== JAZZMIN UI TWEAKS (MODERN WHITE THEME) ==========

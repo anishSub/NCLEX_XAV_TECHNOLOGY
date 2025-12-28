@@ -297,38 +297,77 @@ form .aligned .form-row.field-rationale > div,
     opacity: 1 !important;
 }
 
-/* TAB NAVIGATION */
+/* TAB NAVIGATION - BUTTON STYLE */
 .tab-nav {
     display: flex;
-    gap: 10px;
-    margin-bottom: 30px;
-    border-bottom: 2px solid #e0e0e0;
-    padding-bottom: 10px;
+    gap: 12px; /* Space between buttons */
+    margin-bottom: 25px;
+    border-bottom: 1px solid #e0e0e0;
+    padding: 15px 25px;
+    background: #f1f3f4; /* Light gray background for the bar */
+    flex-wrap: wrap; /* Allow wrapping on small screens */
 }
 
 .tab-btn {
-    background: none;
-    border: none;
-    padding: 12px 24px;
-    font-size: 1.1rem;
+    background: white;
+    border: 1px solid #d1d5db;
+    padding: 10px 20px;
+    font-size: 14px;
     font-weight: 600;
-    color: #666;
+    color: #4b5563;
     cursor: pointer;
-    border-bottom: 3px solid transparent;
-    transition: all 0.3s ease;
+    border-radius: 6px; /* Rounded corners */
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
     position: relative;
-    bottom: -12px;
+    top: 0;
 }
 
 .tab-btn:hover {
-    color: #004a99;
-    background: #f8f9fa;
+    background: #f9fafb;
+    border-color: #9ca3af;
+    color: #1f2937;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .tab-btn.active {
-    color: #004a99;
-    border-bottom-color: #004a99;
+    background: #007bff; /* Blue active state */
+    color: white;
+    border-color: #0056b3;
+    box-shadow: 0 2px 4px rgba(0, 123, 255, 0.3);
 }
+
+/* ... existing styles ... */
+
+/* 2. TAB NAVIGATION (Fixed) */
+.tab-nav {
+    flex: 0 0 auto; /* Don't shrink */
+    display: flex;
+    gap: 10px;
+    margin: 0;
+    border-bottom: 1px solid #e0e0e0;
+    padding: 15px 25px;
+    background: #f8f9fa;
+    overflow-x: auto;
+}
+
+/* ... */
+    <!-- 2. TAB NAVIGATION (Fixed) -->
+    <div class="tab-nav">
+        <!-- SCENARIO TAB (Only for Scenarios) -->
+        {% if opts.model_name == 'scenarios' %}
+        <button class="tab-btn active" data-tab="scenario">Scenario Setup</button>
+        {% endif %}
+        
+        <!-- QUESTION TABS (Reusable) -->
+        <button class="tab-btn {% if opts.model_name == 'questions' %}active{% endif %}" data-tab="mcq-sata">MCQ / SATA</button>
+        <button class="tab-btn" data-tab="drag-drop">Drag & Drop</button>
+        <button class="tab-btn" data-tab="dropdown">Dropdown</button>
+        <button class="tab-btn" data-tab="matrix">Matrix</button>
+        <button class="tab-btn" data-tab="highlight">Highlight</button>
+        <button class="tab-btn" data-tab="general">General Settings</button>
+    </div>
 
 .tab-content {
     display: none;
@@ -520,10 +559,12 @@ form .aligned .form-row.field-rationale > div,
 </div>
 </form>
 
-<!-- HELP BUTTON - Fixed position, won't interfere with form -->
+<!-- HELP BUTTON - Show only for Questions and Scenarios -->
+{% if opts.model_name == 'questions' or opts.model_name == 'scenarios' %}
 <button type="button" class="help-guide-btn" id="helpButton">
-    📚 How to Add Questions
+    {% if opts.model_name == 'scenarios' %}🏥 Scenario Guide{% else %}📚 Question Guide{% endif %}
 </button>
+{% endif %}
 
 <!-- MODAL OVERLAY -->
 <div class="modal-overlay" id="modalOverlay"></div>
@@ -532,12 +573,24 @@ form .aligned .form-row.field-rationale > div,
 <div class="help-modal" id="helpModal">
     <!-- 1. HEADER (Fixed) -->
     <div class="modal-header">
-        <h3>📝 How to Add Questions - By Question Type</h3>
+        <h3>
+            {% if opts.model_name == 'scenarios' %}
+                🏥 How to Create Scenarios & Questions
+            {% else %}
+                📝 How to Add Questions
+            {% endif %}
+        </h3>
         <button class="modal-close" id="modalCloseBtn">&times;</button>
     </div>
-    <!-- 2. TAB NAVIGATION (Fixed - Now Outside Body) -->
+    <!-- 2. TAB NAVIGATION (Fixed) -->
     <div class="tab-nav">
-        <button class="tab-btn active" data-tab="mcq-sata">📋 MCQ / SATA</button>
+        <!-- SCENARIO TAB (Only for Scenarios) -->
+        {% if opts.model_name == 'scenarios' %}
+        <button class="tab-btn active" data-tab="scenario">🏥 Scenario Setup</button>
+        {% endif %}
+        
+        <!-- QUESTION TABS (Reusable) -->
+        <button class="tab-btn {% if opts.model_name == 'questions' %}active{% endif %}" data-tab="mcq-sata">📋 MCQ / SATA</button>
         <button class="tab-btn" data-tab="drag-drop">🎯 Drag & Drop</button>
         <button class="tab-btn" data-tab="dropdown">▼ Dropdown</button>
         <button class="tab-btn" data-tab="matrix">田 Matrix</button>
@@ -546,8 +599,49 @@ form .aligned .form-row.field-rationale > div,
     </div>
 
     <div class="modal-body">
+        
+        <!-- TAB CONTENT: SCENARIO SETUP (New) -->
+        {% if opts.model_name == 'scenarios' %}
+        <div class="tab-content active" id="tab-scenario">
+             <h3 style="color: #004a99; margin-bottom: 20px;">🏥 Setting Up a Case Study Scenario</h3>
+             
+             <div class="step">
+                <span class="step-number">1</span>
+                <h3>Enter Title</h3>
+                <p>Give the scenario a clear, descriptive name (e.g., <strong>"Case Study 12: Diabetic Ketoacidosis"</strong>).</p>
+            </div>
+
+            <div class="step">
+                <span class="step-number">2</span>
+                <h3>Define Exhibits (Tabs)</h3>
+                <p>The <strong>Exhibits</strong> field creates the tabs (History, Vitals, Labs, etc.) that students see on the left side.</p>
+                <p><strong>Copy & Paste this Template:</strong></p>
+                <pre class="code-example">{
+  "History": "Patient presentation and medical history...",
+  "Vitals": "BP: __, HR: __, RR: __, Temp: __, O2 Sat: __%",
+  "Labs": "Relevant laboratory values...",
+  "Nurses_Notes": "Time-stamped nursing observations..."
+}</pre>
+                <div class="alert alert-info" style="background: #e1f5fe; border-left: 5px solid #039be5; padding: 10px; margin-top: 10px;">
+                    <strong>Tip:</strong> You can rename the keys (e.g., change "History" to "Background"). The key becomes the tab name.
+                </div>
+            </div>
+
+            <div class="step">
+                <span class="step-number">3</span>
+                <h3>Add Linked Questions</h3>
+                <p>Scroll down to the <strong>"Questions"</strong> section.</p>
+                <ul>
+                    <li>Click <strong>"+ Add another Question"</strong> to create a new item.</li>
+                    <li>This opens the inline form (blue border).</li>
+                    <li>Follow the guide tabs above (MCQ, Drag & Drop, etc.) for specific question types.</li>
+                </ul>
+            </div>
+        </div>
+        {% endif %}
+
         <!-- TAB CONTENT: MCQ/SATA -->
-        <div class="tab-content active" id="tab-mcq-sata">
+        <div class="tab-content {% if opts.model_name == 'questions' %}active{% endif %}" id="tab-mcq-sata">
             <h3 style="color: #004a99; margin-bottom: 20px;">Multiple Choice (MCQ) & Select All That Apply (SATA)</h3>
             
             <div class="step">
