@@ -61,6 +61,9 @@ def get_first_question_api(request, session_id):
                 'type': question.type,
                 'options': question.options,
                 'is_case_study': bool(question.parent_scenario),
+                'exhibit_updates': question.exhibit_updates,
+                'scenario_question_number': question.scenario_question_number,
+                'clinical_judgment_function': question.clinical_judgment_function,
             }
         }
         
@@ -143,15 +146,30 @@ class SubmitMockAnswerAPI(APIView):
 
         # 7. Fetch Next Question for the 5-hour loop
         next_q = get_next_question(session)
+        
+        # Build response with new fields
+        next_question_data = {
+            "id": next_q.id,
+            "text": next_q.text,
+            "type": next_q.type,
+            "options": next_q.options,
+            "is_case_study": bool(next_q.parent_scenario),
+            "exhibit_updates": next_q.exhibit_updates,
+            "scenario_question_number": next_q.scenario_question_number,
+            "clinical_judgment_function": next_q.clinical_judgment_function,
+        }
+        
+        # If case study, include scenario data
+        if next_q.parent_scenario:
+            next_question_data['scenario'] = {
+                'id': next_q.parent_scenario.id,
+                'title': next_q.parent_scenario.title,
+                'exhibits': next_q.parent_scenario.exhibits
+            }
+        
         return Response({
             "status": "CONTINUE",
-            "next_question": {
-                "id": next_q.id,
-                "text": next_q.text,
-                "type": next_q.type,
-                "options": next_q.options,
-                "is_case_study": bool(next_q.parent_scenario)
-            }
+            "next_question": next_question_data
         })
 
 

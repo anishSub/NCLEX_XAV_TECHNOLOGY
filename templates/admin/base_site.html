@@ -178,6 +178,7 @@ body {
 }
 
 /* DASHBOARD GRID - BALANCED 2 COLUMNS */
+/* NOTE: This is overridden by JavaScript on form pages */
 body.sidebar-mini-md .content-wrapper .content .row,
 .content-wrapper .content > .row,
 .content > .container-fluid > .row,
@@ -193,6 +194,14 @@ body.sidebar-mini-md .content-wrapper .content .row,
     flex-wrap: nowrap !important;
     flex-direction: unset !important;
 }
+
+/* DISABLE GRID ON FORM PAGES */
+body[class*="change-"] .content-wrapper .content .row,
+body[class*="add-"] .content-wrapper .content .row {
+    display: block !important;
+    grid-template-columns: none !important;
+}
+
 
 /* Force ALL dashboard children to be grid items */
 .content .row > *,
@@ -420,6 +429,18 @@ console.log('🚀 Admin customization loaded!');
 console.log('🔧 Forcing dashboard 2-column layout...');
 
 function forceDashboardGrid() {
+    // SKIP if this is a form page (add/change)
+    const isFormPage = window.location.pathname.includes('/add/') || 
+                       window.location.pathname.includes('/change/') ||
+                       document.querySelector('form#questions_form') ||
+                       document.querySelector('form#scenarios_form') ||
+                       document.querySelector('form[id$="_form"]');
+    
+    if (isFormPage) {
+        console.log('⏭️ Skipping grid on form page');
+        return;
+    }
+    
     // Find the dashboard row
     const dashboardRows = document.querySelectorAll('.content .row');
     
@@ -431,10 +452,9 @@ function forceDashboardGrid() {
             // Force grid styles directly on the element
             row.style.display = 'grid';
             row.style.gridTemplateColumns = 'repeat(2, 1fr)';
-            row.style.columnGap = '30px';
-            row.style.rowGap = '25px';
-            row.style.margin = '0';
-            row.style.padding = '0';
+            row.style.gap = '25px 30px';
+            row.style.margin = '0px';
+            row.style.padding = '0px';
             
             // Fix all children (the Bootstrap cols)
             const children = row.children;
@@ -442,9 +462,9 @@ function forceDashboardGrid() {
                 child.style.gridColumn = 'span 1';
                 child.style.maxWidth = '100%';
                 child.style.width = '100%';
-                child.style.padding = '0';
-                child.style.margin = '0';
-                child.style.flex = 'none';
+                child.style.padding = '0px';
+                child.style.margin = '0px';
+                child.style.flex = '0 0 auto';
                 
                 console.log('📦 Fixed child:', child);
             }

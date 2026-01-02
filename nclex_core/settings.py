@@ -10,7 +10,6 @@ ALLOWED_HOSTS = ['0.0.0.0', 'localhost', '127.0.0.1']
 
 INSTALLED_APPS = [
     'jazzmin',
-    'django_json_widget',  # Add this BEFORE admin to ensure templates load
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -110,6 +109,8 @@ USE_TZ = True
 
 AUTH_USER_MODEL = 'users.Users'
 STATIC_URL = 'static/'
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
@@ -230,6 +231,9 @@ JAZZMIN_SETTINGS = {
             "new_window": True,
             "icon": "fas fa-book"
         },
+        
+        # Scenario Practice Link
+        {"name": "Practice Scenarios", "url": "scenario_practice", "icon": "fas fa-stethoscope"},
     ],
     
     
@@ -270,6 +274,13 @@ JAZZMIN_SETTINGS = {
                 "name": "Completed Exams",
                 "url": "/admin/exam_sessions/examsessions/?status__exact=PASS",
                 "icon": "fas fa-check-circle",
+            },
+        ],
+        "scenarios": [
+            {
+                "name": "Practice Scenarios",
+                "url": "scenario_practice",
+                "icon": "fas fa-play",
             },
         ],
     },
@@ -342,9 +353,39 @@ fieldset, .aligned fieldset, fieldset.module { max-width: none !important; width
 .form-row.field-exhibits { width: 100% !important; }
 .form-row.field-exhibits .jsoneditor { min-height: 350px !important; }
 
-/* Hide the raw textarea that appears below JSON editor */
-.django-json-widget textarea[id*="exhibits"] { display: none !important; }
-.field-exhibits textarea {display: none !important; }
+/* ENSURE TEXTAREAS ARE VISIBLE - EMERGENCY OVERRIDE */
+.django-json-widget textarea,
+.field-options textarea,
+.field-correct_option_ids textarea,
+.field-exhibits textarea,
+.field-exhibit_updates textarea,
+textarea { 
+    display: block !important; 
+    visibility: visible !important; 
+    opacity: 1 !important;
+    width: 100% !important; 
+    min-height: 200px !important; 
+    height: auto !important;
+    position: static !important;
+    z-index: 1 !important;
+    background: white !important;
+    color: black !important;
+    border: 1px solid #ccc !important;
+}
+
+/* Ensure the containers are visible */
+.form-row.field-options, 
+.form-row.field-correct_option_ids,
+.form-row.field-exhibits, 
+.form-row.field-exhibit_updates,
+.form-row.field-options > div,
+.form-row.field-correct_option_ids > div {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    height: auto !important;
+    overflow: visible !important;
+}
 
 /* ========== TEXTAREAS - FULL WIDTH ========== */
 textarea, .form-row textarea, .form-row.field-text textarea { width: 100% !important; max-width: none !important; min-height: 150px; box-sizing: border-box; }

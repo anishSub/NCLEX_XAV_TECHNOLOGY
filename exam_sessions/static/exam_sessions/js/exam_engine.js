@@ -6,6 +6,10 @@ function renderQuestion(questionData) {
     try {
         console.log('🎯 renderQuestion called with ID:', questionData.id, 'Type:', questionData.type);
 
+        // NORMALIZE QUESTION TYPE: Handle "HOT SPOT", "hot_spot", etc.
+        const normalizedType = questionData.type.toUpperCase().replace(/\s+/g, '_');
+        console.log(`🔄 Normalized Type: ${questionData.type} -> ${normalizedType}`);
+
         // Increment and update question counter
         window.currentQuestionNumber++;
         const counterElement = document.getElementById('current-q');
@@ -15,22 +19,47 @@ function renderQuestion(questionData) {
 
         // CRITICAL: Update global question metadata for validation
         window.activeQuestionId = questionData.id;
-        window.activeQuestionType = questionData.type;
+        window.activeQuestionType = normalizedType; // Use normalized type
 
         const layout = document.getElementById('exam-layout');
         const scenarioPanel = document.getElementById('scenario-panel');
         const displayArea = document.getElementById('question-display-area');
 
         if (questionData.is_case_study) {
-            layout.classList.add('split-layout');
-            scenarioPanel.classList.remove('hidden');
-            renderExhibits(questionData.scenario.exhibits);
+            // SAFETY CHECK: Ensure scenario data exists
+            if (!questionData.scenario) {
+                console.error('❌ Case Study flag is TRUE but scenario data is MISSING!', questionData);
+                // Fallback to standard layout to prevent crash
+                layout.classList.remove('split-layout');
+                scenarioPanel.classList.add('hidden');
+            } else {
+                layout.classList.add('split-layout');
+                scenarioPanel.classList.remove('hidden');
+
+                // Render exhibits with updates
+                renderExhibits(
+                    questionData.scenario.exhibits,
+                    questionData.exhibit_updates || {}
+                );
+
+                // Show intro modal on first question of scenario
+                if (questionData.scenario_question_number === 1) {
+                    showScenarioIntro(questionData.scenario.title);
+                }
+
+                // Update progress indicator
+                updateScenarioProgress(
+                    questionData.scenario_question_number,
+                    questionData.scenario.title,
+                    questionData.clinical_judgment_function
+                );
+            }
         } else {
             layout.classList.remove('split-layout');
             scenarioPanel.classList.add('hidden');
         }
 
-        switch (questionData.type) {
+        switch (normalizedType) {
             case 'DRAG_DROP_RATIONALE':
                 displayArea.innerHTML = createDragDropHTML(questionData);
                 initDragAndDropLogic();
@@ -49,6 +78,7 @@ function renderQuestion(questionData) {
                 break;
 
             case 'HOT_SPOT':
+                console.log('🔥 Rendering HOT_SPOT question');
                 displayArea.innerHTML = createHotSpotHTML(questionData);
                 initHotSpotLogic();
                 break;
@@ -57,6 +87,16 @@ function renderQuestion(questionData) {
                 displayArea.innerHTML = createHighlightTextHTML(questionData);
                 initHighlightTextLogic();
                 break;
+
+            default:
+                console.error(`❌ Unknown Question Type: ${normalizedType}`);
+                displayArea.innerHTML = `
+                    <div class="alert alert-danger">
+                        <h4>Error: Unknown Question Type</h4>
+                        <p>The system received a question type it doesn't know how to render: <strong>${normalizedType}</strong> (Original: ${questionData.type})</p>
+                        <p>ID: ${questionData.id}</p>
+                    </div>
+                `;
         }
 
         console.log('✅ renderQuestion SUCCESS');
@@ -137,6 +177,7 @@ function createSATAHTML(data) {
     return `
         <div class="q-header">
             <span class="badge sata-badge">Select All That Apply</span>
+            <hr style="border: 0; border-top: 1px solid #e1e4e8; margin: 12px 0;">
             <p class="q-text">${data.text}</p>
         </div>
         <div class="sata-options-container">
@@ -210,6 +251,7 @@ function createMatrixMultipleHTML(data) {
     return `
         <div class="q-header">
             <span class="badge">Matrix Multiple Response</span>
+            <hr style="border: 0; border-top: 1px solid #e1e4e8; margin: 12px 0;">
             <p class="q-text">${data.text}</p>
         </div>
         <div class="matrix-scroll-container">
@@ -252,6 +294,7 @@ function createDropdownRationaleHTML(data) {
     return `
         <div class="q-header">
             <span class="badge">Cloze Dropdown Rationale</span>
+            <hr style="border: 0; border-top: 1px solid #e1e4e8; margin: 12px 0;">
             <p class="q-text">${data.text}</p>
         </div>
         <div class="cloze-container">
@@ -264,17 +307,35 @@ function createDropdownRationaleHTML(data) {
 /* --- PART 2: THE HOT SPOT BUILDER --- */
 function createHotSpotHTML(data) {
     // data.options format: { image_url: "/media/anatomy/chest.jpg" }
+
+    // AUTO-FIX: Legacy images might be missing /media/ prefix
+    let imageUrl = data.options.image_url;
+    if (imageUrl && !imageUrl.startsWith('/media/') && !imageUrl.startsWith('http') && !imageUrl.startsWith('data:')) {
+        if (imageUrl.startsWith('/')) {
+            imageUrl = '/media' + imageUrl;
+        } else {
+            imageUrl = '/media/' + imageUrl;
+        }
+        console.log('🔧 Auto-fixed Hot Spot Image URL:', imageUrl);
+    }
+
     return `
         <div class="q-header">
             <span class="badge">Hot Spot</span>
+            <hr style="border: 0; border-top: 1px solid #e1e4e8; margin: 12px 0;">
             <p class="q-text">${data.text}</p>
         </div>
-        <div class="hotspot-wrapper">
-            <img src="${data.options.image_url}" id="hotspot-img" alt="Clinical Diagram">
-            <div id="click-marker" style="display: none;"></div>
+        <div class="hotspot-frame">
+            <div class="hotspot-instruction">🖱️ Point and click on the specific area in the diagram below to select your answer.</div>
+            <div class="hotspot-wrapper">
+                <img src="${imageUrl}" id="hotspot-img" alt="Clinical Diagram">
+                <div id="click-marker" style="display: none;"></div>
+            </div>
         </div>
     `;
 }
+
+
 
 
 
@@ -298,6 +359,9 @@ function initHotSpotLogic() {
         marker.style.left = xPercent + "%";
         marker.style.top = yPercent + "%";
         marker.style.display = "block";
+
+        console.log(`🎯 Hot Spot Clicked: x=${xPercent.toFixed(2)}%, y=${yPercent.toFixed(2)}%`);
+        console.log(`💡 Copy this for Admin: {"center_x": ${xPercent.toFixed(2)}, "center_y": ${yPercent.toFixed(2)}, "radius": 5}`);
     });
 }
 
@@ -305,7 +369,11 @@ function initHotSpotLogic() {
 /* --- PART 2: THE BUILDERS & INITIALIZERS --- */
 function createHighlightTextHTML(data) {
     return `
-        <div class="q-header"><span class="badge">Highlight Text</span><p>${data.text}</p></div>
+        <div class="q-header">
+            <span class="badge">Highlight Text</span>
+            <hr style="border: 0; border-top: 1px solid #e1e4e8; margin: 12px 0;">
+            <p>${data.text}</p>
+        </div>
         <div class="chart-container">
             <div class="chart-header">Orders: 1215</div>
             <div class="chart-content">${data.options.formatted_text}</div>
@@ -313,30 +381,109 @@ function createHighlightTextHTML(data) {
 }
 
 function initHighlightTextLogic() {
-    document.querySelectorAll('.highlightable').forEach(span => {
+    document.querySelectorAll('.highlightable').forEach((span, index) => {
+        // CRITICAL FIX: Ensure span has an ID for the collector
+        if (!span.id) {
+            span.id = `hl-span-${index}`;
+        }
         span.addEventListener('click', function () { this.classList.toggle('highlighted'); });
     });
 }
 
 
 
-// for scenario based questions
-function renderExhibits(exhibits) {
+// ========== SCENARIO EXHIBIT RENDERING ==========
+function renderExhibits(baseExhibits, exhibitUpdates = {}) {
     const tabs = document.getElementById('scenario-tabs');
     const content = document.getElementById('scenario-content');
 
-    // Create Tab Buttons for each key in the JSON (History, Vitals, etc.)
-    tabs.innerHTML = Object.keys(exhibits).map(tabName =>
-        `<button class="tab-btn" onclick="showTab('${tabName}')">${tabName.replace('_', ' ')}</button>`
-    ).join('');
+    // Merge base exhibits with question-specific updates
+    const mergedExhibits = { ...baseExhibits, ...exhibitUpdates };
+
+    // Track which tabs are new/updated for highlighting
+    const updatedTabNames = Object.keys(exhibitUpdates);
+
+    // Create Tab Buttons with "NEW" badges for updated tabs
+    tabs.innerHTML = Object.keys(mergedExhibits).map(tabName => {
+        const isNew = updatedTabNames.includes(tabName);
+        const badgeHTML = isNew ? '<span class="new-badge">NEW</span>' : '';
+        const tabClass = isNew ? 'tab-btn tab-updated' : 'tab-btn';
+
+        return `
+            <button class="${tabClass}" onclick="showTab('${tabName}')">
+                ${tabName.replace(/_/g, ' ')} ${badgeHTML}
+            </button>
+        `;
+    }).join('');
+
+    // Store merged exhibits globally
+    window.currentExhibits = mergedExhibits;
 
     // Default to show the first tab
-    window.currentExhibits = exhibits;
-    showTab(Object.keys(exhibits)[0]);
+    showTab(Object.keys(mergedExhibits)[0]);
 }
 
 function showTab(name) {
-    document.getElementById('scenario-content').innerHTML = window.currentExhibits[name];
+    const content = document.getElementById('scenario-content');
+    const allTabs = document.querySelectorAll('.tab-btn');
+
+    // Remove active class from all tabs
+    allTabs.forEach(tab => tab.classList.remove('active'));
+
+    // Add active class to clicked tab
+    const clickedTab = Array.from(allTabs).find(tab =>
+        tab.textContent.replace('NEW', '').trim() === name.replace(/_/g, ' ')
+    );
+    if (clickedTab) {
+        clickedTab.classList.add('active');
+    }
+
+    // Display content
+    content.innerHTML = window.currentExhibits[name];
+}
+
+// ========== SCENARIO UI ENHANCEMENTS ==========
+function showScenarioIntro(title) {
+    Swal.fire({
+        icon: 'info',
+        title: 'Unfolding Case Study',
+        html: `
+            <p><strong>${title}</strong></p>
+            <p>You will answer 6 questions about this patient scenario.</p>
+            <p>Review the exhibit tabs for clinical information.</p>
+            <p style="font-size: 0.9em; color: #666; margin-top: 15px;">
+                💡 Tip: New information may appear as you progress through the questions.
+            </p>
+        `,
+        confirmButtonText: 'Begin Case Study',
+        confirmButtonColor: '#004a99',
+        allowOutsideClick: false
+    });
+}
+
+function updateScenarioProgress(questionNum, scenarioTitle, cjFunction) {
+    const scenarioPanel = document.getElementById('scenario-panel');
+
+    // Remove existing progress indicator if any
+    const existingProgress = scenarioPanel.querySelector('.scenario-progress');
+    if (existingProgress) {
+        existingProgress.remove();
+    }
+
+    // Create new progress indicator
+    const progressHTML = `
+        <div class="scenario-progress">
+            <div class="scenario-title">📋 ${scenarioTitle}</div>
+            <div class="scenario-question-num">Question ${questionNum} of 6</div>
+            ${cjFunction ? `<div class="cj-function-badge"><strong>CJ Function:</strong> ${cjFunction}</div>` : ''}
+            <div class="progress-bar-container">
+                <div class="progress-bar" style="width: ${(questionNum / 6) * 100}%"></div>
+            </div>
+        </div>
+    `;
+
+    // Insert at the top of scenario panel
+    scenarioPanel.insertAdjacentHTML('afterbegin', progressHTML);
 }
 
 
@@ -368,8 +515,8 @@ function startTimer() {
 /* 2. How this fits into your Mock Test workflowStudent Clicks "Submit": Your JS captures the answer (e.g., which boxes were checked in a SATA question).fetch() kicks in: It sends the data to the API URL you defined in urls.py.Django Processes: The NCLEXScoringService grades the answer, and the NCLEXAdaptiveEngine updates the student's Theta ($\theta$) and Standard Error.Stopping Rule Check: Django checks if the 95% Confidence Interval has cleared the passing line.Response: Django sends back a JSON package. Your JS receives it and either changes the question on the screen or ends the test. */
 
 
-async function submitAnswer(sessionId, questionId, userAnswer) {
-    const url = `/exam/api/session/${sessionId}/submit/`;
+async function submitAnswer(sessionId, questionId, userAnswer, customUrl = null) {
+    const url = customUrl || `/exam/api/session/${sessionId}/submit/`;
 
     try {
         const response = await fetch(url, {
@@ -399,16 +546,29 @@ async function submitAnswer(sessionId, questionId, userAnswer) {
             renderQuestion(data.next_question);
 
         } else if (data.status === "FINISHED") {
-            // --- UPDATED: Beautiful Success Modal ---
+            // --- UPDATED: Success Modal ---
+            let titleText = 'Exam Completed';
+            let bodyText = 'The computer has determined your performance level with 95% certainty.';
+
+            // Customize for Practice Mode
+            if (window.practiceMode) {
+                titleText = 'Practice Session Completed';
+                bodyText = 'You have completed all questions in this session.';
+            }
+
             Swal.fire({
                 icon: 'success',
-                title: 'Exam Completed',
-                text: 'The computer has determined your performance level with 95% certainty.',
+                title: titleText,
+                text: bodyText,
                 timer: 3000,
                 showConfirmButton: false,
                 allowOutsideClick: false
             }).then(() => {
-                window.location.href = `/exam/results/${sessionId}/`;
+                if (window.practiceMode) {
+                    window.location.href = `/exam/practice/results/${sessionId}/`;
+                } else {
+                    window.location.href = `/exam/results/${sessionId}/`;
+                }
             });
 
         } else if (data.status === "EXPIRED") {
@@ -435,7 +595,7 @@ async function submitAnswer(sessionId, questionId, userAnswer) {
 /* --- We will modify your submission trigger. Instead of just sending the data, we will first check if the answer is empty. If it is, we show a beautiful warning. If the student has selected an answer, we can even show a "Processing..." loader while your 95% Confidence Engine calculates the next question.--- */
 /* --- UPDATED SUBMISSION TRIGGER --- */
 
-async function handleUserSubmit() {
+async function handleUserSubmit(customUrl = null) {
     const currentQuestionType = window.activeQuestionType; // Ensure you store this on render
     const sessionId = window.activeSessionId;
     const questionId = window.activeQuestionId;
@@ -475,7 +635,7 @@ async function handleUserSubmit() {
     `;
 
     // 4. Send to your Django API
-    await submitAnswer(sessionId, questionId, answers);
+    await submitAnswer(sessionId, questionId, answers, customUrl);
 
     // 5. Restore the button after the response
     submitBtn.disabled = false;

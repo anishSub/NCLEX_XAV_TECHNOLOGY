@@ -1,0 +1,201 @@
+/* ========== SCENARIO ENHANCEMENT STYLES ========== */
+
+/* Tab highlighting for new/updated exhibits */
+.tab-updated {
+    animation: pulse 1.5s ease-in-out 3;
+    border: 2px solid #ffd700 !important;
+    position: relative;
+}
+
+@keyframes pulse {
+    0%, 100% { 
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.7);
+    }
+    50% { 
+        transform: scale(1.05);
+        box-shadow: 0 0 10px 5px rgba(255, 215, 0, 0.3);
+    }
+}
+
+/* NEW badge for updated tabs */
+.new-badge {
+    background: linear-gradient(135deg, #ff4444, #ff6b6b);
+    color: white;
+    font-size: 10px;
+    font-weight: bold;
+    padding: 3px 8px;
+    border-radius: 12px;
+    margin-left: 8px;
+    display: inline-block;
+    animation: badge-bounce 0.5s ease-out;
+    box-shadow: 0 2px 4px rgba(255, 68, 68, 0.3);
+}
+
+@keyframes badge-bounce {
+    0% { transform: scale(0); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+/* Active tab styling */
+.tab-btn.active {
+    background: #004a99;
+    color: white;
+    border-bottom: 3px solid #ffd700;
+}
+
+/* Scenario progress indicator */
+.scenario-progress {
+    background: linear-gradient(135deg, #004a99, #0066cc);
+    color: white;
+    padding: 15px 20px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.scenario-title {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.scenario-question-num {
+    font-size: 13px;
+    opacity: 0.9;
+    margin-bottom: 10px;
+}
+
+/* Progress bar container */
+.progress-bar-container {
+    width: 100%;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #ffd700, #ffed4e);
+    border-radius: 10px;
+    transition: width 0.5s ease-out;
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+/* Slide-in animation for scenario panel */
+.slide-in {
+    animation: slideInRight 0.4s ease-out;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Slide-out animation for scenario panel */
+.slide-out {
+    animation: slideOutRight 0.3s ease-in;
+}
+
+@keyframes slideOutRight {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
+
+/* Enhanced tab button styling */
+.tab-btn {
+    background: #f5f5f5;
+    border: 2px solid #ddd;
+    padding: 10px 16px;
+    margin: 5px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.tab-btn:hover {
+    background: #e8e8e8;
+    border-color: #004a99;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Scenario content area */
+#scenario-content {
+    padding: 20px;
+    background: white;
+    border-radius: 8px;
+    min-height: 300px;
+    line-height: 1.6;
+    font-size: 15px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .scenario-progress {
+        padding: 12px 15px;
+    }
+    
+    .scenario-title {
+        font-size: 14px;
+    }
+    
+    .scenario-question-num {
+        font-size: 12px;
+    }
+    
+    .tab-btn {
+        padding: 8px 12px;
+        font-size: 13px;
+    }
+    
+    .new-badge {
+        font-size: 9px;
+        padding: 2px 6px;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .tab-btn {
+        background: #2a2a2a;
+        border-color: #444;
+        color: #e0e0e0;
+    }
+    
+    .tab-btn:hover {
+        background: #333;
+        border-color: #0066cc;
+    }
+    
+    .tab-btn.active {
+        background: #0066cc;
+        color: white;
+    }
+    
+    #scenario-content {
+        background: #1e1e1e;
+        color: #e0e0e0;
+    }
+}

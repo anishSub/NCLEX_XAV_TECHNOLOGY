@@ -31,7 +31,8 @@ def start_practice_session(request):
         
         # Count available questions in selected categories
         available_count = Questions.objects.filter(
-            category_ids__id__in=category_ids
+            category_ids__id__in=category_ids,
+            parent_scenario__isnull=True
         ).distinct().count()
         
         # Use available count or user-specified, whichever is smaller
@@ -81,19 +82,19 @@ def get_practice_first_question(request, session_id):
     try:
         session = ExamSessions.objects.get(id=session_id, user=request.user, session_type='PRACTICE')
         
-        # Get random question from selected categories
-        questions = Questions.objects.filter(
-            category_ids__id__in=session.selected_categories
-        ).distinct()
+        # Get first random question (excluding scenarios)
+        question = Questions.objects.filter(
+            category_ids__id__in=session.selected_categories,
+            parent_scenario__isnull=True
+        ).order_by('?').first()
         
-        if not questions.exists():
+        if not question:
             return JsonResponse({
                 'error': 'No questions available',
                 'message': 'No questions found for selected categories. Please contact administrator.'
             }, status=404)
         
-        # Select a random question
-        question = random.choice(questions)
+
         
         # Prepare response
         response_data = {
@@ -103,6 +104,10 @@ def get_practice_first_question(request, session_id):
                 'type': question.question_type.code if question.question_type else 'MCQ',
                 'options': question.options,
                 'is_case_study': bool(question.parent_scenario),
+                # MISSING FIELDS ADDED:
+                'scenario_question_number': question.scenario_question_number if question.parent_scenario else None,
+                'clinical_judgment_function': question.clinical_judgment_function if question.parent_scenario else None,
+                'exhibit_updates': question.exhibit_updates if question.parent_scenario else None,
             }
         }
         
@@ -167,11 +172,33 @@ def submit_practice_answer(request, session_id):
         
         # Get next random question (excluding already answered)
         answered_ids = [h['question_id'] for h in session.question_history]
-        next_question = Questions.objects.filter(
-            category_ids__id__in=session.selected_categories
-        ).exclude(id__in=answered_ids).distinct().order_by('?').first()
         
+        # DEBUG LOGGING FOR PREMATURE COMPLETION
+        print(f"🔍 DEBUG SESSION {session.id}: Total {session.total_questions}, Answered {len(answered_ids)}")
+        # Get next random question (excluding already answered and scenarios)
+        answered_ids = [h['question_id'] for h in session.question_history]
+        
+        # DEBUG LOGGING
+        print(f"🔍 DEBUG SESSION {session.id}: Total {session.total_questions}, Answered {len(answered_ids)}")
+        
+        candidates = Questions.objects.filter(
+            category_ids__id__in=session.selected_categories,
+            parent_scenario__isnull=True
+        ).exclude(id__in=answered_ids).distinct()
+        
+        candidate_count = candidates.count()
+        print(f"🔍 Standalone Candidates Count: {candidate_count}")
+        
+        next_question = None
+        if candidate_count > 0:
+            # Use Python random choice
+            candidate_ids = list(candidates.values_list('id', flat=True))
+            random_id = random.choice(candidate_ids)
+            next_question = Questions.objects.get(id=random_id)
+
         if not next_question:
+            print("❌ No next question found! Finishing exam.")
+            print(f"DEBUG: Session {session.id}, Total {session.total_questions}, Answered {len(answered_ids)}, Available {candidate_count}")
             # No more questions available
             session.status = 'COMPLETED'
             session.completed_at = timezone.now()
@@ -186,7 +213,11 @@ def submit_practice_answer(request, session_id):
                 'text': next_question.text,
                 'type': next_question.question_type.code if next_question.question_type else 'MCQ',
                 'options': next_question.options,
-                'is_case_study': bool(next_question.parent_scenario)
+                'is_case_study': bool(next_question.parent_scenario),
+                # MISSING FIELDS ADDED:
+                'scenario_question_number': next_question.scenario_question_number if next_question.parent_scenario else None,
+                'clinical_judgment_function': next_question.clinical_judgment_function if next_question.parent_scenario else None,
+                'exhibit_updates': next_question.exhibit_updates if next_question.parent_scenario else None
             }
         }
         
@@ -252,6 +283,19 @@ def format_answer_display(answer, q_type, question_obj=None):
 
     # 4. Standard List (MCQ/SATA: ['Option A', 'Option B'])
     if isinstance(answer, list):
+        # IMPROVEMENT: Lookup the text if possible
+        if question_obj and isinstance(question_obj.options, list):
+            readable = []
+            for ans_id in answer:
+                # Find matching option
+                # options format: [{'id': 'A', 'text': '...'}, ...]
+                match = next((opt for opt in question_obj.options if opt.get('id') == ans_id), None)
+                if match:
+                    readable.append(f"({ans_id}) {match.get('text', '')}")
+                else:
+                    readable.append(str(ans_id))
+            return readable
+        
         return [str(a) for a in answer]
 
     return [str(answer)]
@@ -317,7 +361,11 @@ def practice_results_view(request, session_id):
                 'correct_answer': format_answer_display(entry.get('correct_answer'), q_code, question_obj),
                 'rationale': question_obj.rationale,
                 'is_correct': entry['is_correct'],
-                'type': q_type
+                'type': q_type,
+                # PRESERVE RAW DATA FOR VISUALIZATION
+                'raw_user_answer': user_ans_raw,
+                'raw_correct_answer': entry.get('correct_answer') or question_obj.correct_option_ids,
+                'image_url': question_obj.options.get('image_url') if question_obj and isinstance(question_obj.options, dict) else None
             })
     
     # Format category data
@@ -354,3 +402,203 @@ def practice_results_view(request, session_id):
     }
     
     return render(request, 'exam_sessions/practice_results.html', context)
+
+
+# ==================== SCENARIO PRACTICE VIEWS ====================
+
+@login_required
+def scenario_practice_view(request):
+    """Display list of available scenarios for practice."""
+    from scenarios.models import Scenarios
+    
+    scenarios = Scenarios.objects.all().order_by('-created_at')
+    
+    return render(request, 'exam_sessions/scenario_practice.html', {
+        'scenarios': scenarios
+    })
+
+
+@login_required
+def start_scenario_session(request, scenario_id):
+    """Start a practice session for a specific scenario."""
+    from scenarios.models import Scenarios
+    
+    scenario = get_object_or_404(Scenarios, id=scenario_id)
+    
+    # Get all questions for this scenario
+    scenario_questions = scenario.questions.all().order_by('scenario_question_number')
+    
+    if not scenario_questions.exists():
+        return render(request, 'exam_sessions/scenario_practice.html', {
+            'error': 'This scenario has no questions yet.'
+        })
+    
+    # Create a practice session (reusing PRACTICE type to avoid migrations)
+    # Use selected_categories as a container for our scenario ID
+    session = ExamSessions.objects.create(
+        user=request.user,
+        session_type='PRACTICE',
+        status='Ongoing',
+        total_questions=scenario_questions.count(),
+        current_theta=0.0,
+        total_information=0.01,
+        standard_error=1.0,
+        selected_categories=[f"SCENARIO_{scenario.id}"]
+    )
+    
+    # Redirect to scenario exam page
+    return redirect('take_scenario_exam', session_id=session.id)
+
+
+@login_required
+def take_scenario_exam(request, session_id):
+    """Render the scenario exam interface."""
+    from scenarios.models import Scenarios
+    
+    session = get_object_or_404(ExamSessions, id=session_id, user=request.user)
+    
+    # Extract scenario ID from selected_categories
+    scenario_id_str = session.selected_categories[0] if session.selected_categories else ""
+    if not scenario_id_str.startswith("SCENARIO_"):
+        return redirect('home')
+        
+    scenario_id = int(scenario_id_str.replace("SCENARIO_", ""))
+    scenario = get_object_or_404(Scenarios, id=scenario_id)
+    
+    return render(request, 'exam_sessions/take_scenario.html', {
+        'session': session,
+        'scenario': scenario
+    })
+
+
+@login_required
+def get_scenario_first_question(request, session_id):
+    """Get the first question for a specific scenario session."""
+    try:
+        session = ExamSessions.objects.get(id=session_id, user=request.user)
+        scenario_id_str = session.selected_categories[0]
+        scenario_id = int(scenario_id_str.replace("SCENARIO_", ""))
+        
+        from scenarios.models import Scenarios
+        scenario = Scenarios.objects.get(id=scenario_id)
+        
+        # Get first question by scenario_question_number
+        question = scenario.questions.all().order_by('scenario_question_number').first()
+        
+        if not question:
+            return JsonResponse({'error': 'No questions found in this scenario'}, status=404)
+            
+        # Accumulate exhibits up to this question
+        all_exhibits = scenario.exhibits.copy()
+        if question.exhibit_updates:
+            all_exhibits.update(question.exhibit_updates)
+            
+        response_data = {
+            'question': {
+                'id': question.id,
+                'text': question.text,
+                'type': question.question_type.code if question.question_type else 'MCQ',
+                'options': question.options,
+                'scenario_question_number': question.scenario_question_number,
+                'clinical_judgment_function': question.clinical_judgment_function,
+                'exhibit_updates': question.exhibit_updates,
+                'is_case_study': True,
+                'scenario': {
+                    'id': scenario.id,
+                    'title': scenario.title,
+                    'exhibits': all_exhibits  # Send merged exhibits
+                }
+            }
+        }
+        return JsonResponse(response_data)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+@login_required
+@require_POST
+def submit_scenario_answer(request, session_id):
+    """Submit answer and get next question in scenario progression."""
+    try:
+        session = ExamSessions.objects.get(id=session_id, user=request.user)
+        data = json.loads(request.body)
+        user_answer = data.get('user_answer')
+        question_id = data.get('question_id')
+        
+        question = Questions.objects.get(id=question_id)
+        
+        # Scoring
+        from .scoring import NCLEXScoringService
+        raw_score = NCLEXScoringService.calculate_raw_score(
+            question.type, user_answer, question.correct_option_ids
+        )
+        is_correct = 1 if raw_score > 0 else 0
+        
+        # Log to history
+        cat_name = question.category_ids.first().name if question.category_ids.exists() else "Clinical Judgment"
+        session.question_history.append({
+            'question_id': question.id,
+            'is_correct': bool(is_correct),
+            'category': cat_name,
+            'user_answer': user_answer,
+            'correct_answer': question.correct_option_ids
+        })
+        session.save()
+        
+        # Check if complete
+        if len(session.question_history) >= session.total_questions:
+            session.status = 'COMPLETED'
+            session.completed_at = timezone.now()
+            session.save()
+            return JsonResponse({'status': 'FINISHED'})
+            
+        # Get next question by progression order
+        scenario_id_str = session.selected_categories[0]
+        scenario_id = int(scenario_id_str.replace("SCENARIO_", ""))
+        
+        from scenarios.models import Scenarios
+        scenario = Scenarios.objects.get(id=scenario_id)
+        current_order = question.scenario_question_number
+        next_question = scenario.questions.filter(scenario_question_number__gt=current_order).order_by('scenario_question_number').first()
+        
+        if not next_question:
+            # Fallback if orders are messy
+            answered_ids = [h['question_id'] for h in session.question_history]
+            next_question = scenario.questions.exclude(id__in=answered_ids).order_by('scenario_question_number').first()
+            
+        if not next_question:
+            session.status = 'COMPLETED'
+            session.completed_at = timezone.now()
+            session.save()
+            return JsonResponse({'status': 'FINISHED'})
+            
+        # Accumulate exhibits up to next_question
+        all_exhibits = scenario.exhibits.copy()
+        past_questions = scenario.questions.filter(
+            scenario_question_number__lte=next_question.scenario_question_number
+        ).order_by('scenario_question_number')
+        for pq in past_questions:
+            if pq.exhibit_updates:
+                all_exhibits.update(pq.exhibit_updates)
+
+        response_data = {
+            'status': 'CONTINUE',
+            'next_question': {
+                'id': next_question.id,
+                'text': next_question.text,
+                'type': next_question.question_type.code if next_question.question_type else 'MCQ',
+                'options': next_question.options,
+                'scenario_question_number': next_question.scenario_question_number,
+                'clinical_judgment_function': next_question.clinical_judgment_function,
+                'exhibit_updates': next_question.exhibit_updates,
+                'is_case_study': True,
+                'scenario': {
+                    'id': scenario.id,
+                    'title': scenario.title,
+                    'exhibits': all_exhibits  # Send merged exhibits
+                }
+            }
+        }
+        return JsonResponse(response_data)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)

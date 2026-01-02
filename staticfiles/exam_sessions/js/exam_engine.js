@@ -24,7 +24,23 @@ function renderQuestion(questionData) {
         if (questionData.is_case_study) {
             layout.classList.add('split-layout');
             scenarioPanel.classList.remove('hidden');
-            renderExhibits(questionData.scenario.exhibits);
+            
+            // Render exhibits with updates
+            renderExhibits(
+                questionData.scenario.exhibits,
+                questionData.exhibit_updates || {}
+            );
+            
+            // Show intro modal on first question of scenario
+            if (questionData.scenario_question_number === 1) {
+                showScenarioIntro(questionData.scenario.title);
+            }
+            
+            // Update progress indicator
+            updateScenarioProgress(
+                questionData.scenario_question_number,
+                questionData.scenario.title
+            );
         } else {
             layout.classList.remove('split-layout');
             scenarioPanel.classList.add('hidden');
@@ -320,23 +336,97 @@ function initHighlightTextLogic() {
 
 
 
-// for scenario based questions
-function renderExhibits(exhibits) {
+// ========== SCENARIO EXHIBIT RENDERING ==========
+function renderExhibits(baseExhibits, exhibitUpdates = {}) {
     const tabs = document.getElementById('scenario-tabs');
     const content = document.getElementById('scenario-content');
 
-    // Create Tab Buttons for each key in the JSON (History, Vitals, etc.)
-    tabs.innerHTML = Object.keys(exhibits).map(tabName =>
-        `<button class="tab-btn" onclick="showTab('${tabName}')">${tabName.replace('_', ' ')}</button>`
-    ).join('');
+    // Merge base exhibits with question-specific updates
+    const mergedExhibits = { ...baseExhibits, ...exhibitUpdates };
+    
+    // Track which tabs are new/updated for highlighting
+    const updatedTabNames = Object.keys(exhibitUpdates);
 
+    // Create Tab Buttons with "NEW" badges for updated tabs
+    tabs.innerHTML = Object.keys(mergedExhibits).map(tabName => {
+        const isNew = updatedTabNames.includes(tabName);
+        const badgeHTML = isNew ? '<span class="new-badge">NEW</span>' : '';
+        const tabClass = isNew ? 'tab-btn tab-updated' : 'tab-btn';
+        
+        return `
+            <button class="${tabClass}" onclick="showTab('${tabName}')">
+                ${tabName.replace(/_/g, ' ')} ${badgeHTML}
+            </button>
+        `;
+    }).join('');
+
+    // Store merged exhibits globally
+    window.currentExhibits = mergedExhibits;
+    
     // Default to show the first tab
-    window.currentExhibits = exhibits;
-    showTab(Object.keys(exhibits)[0]);
+    showTab(Object.keys(mergedExhibits)[0]);
 }
 
 function showTab(name) {
-    document.getElementById('scenario-content').innerHTML = window.currentExhibits[name];
+    const content = document.getElementById('scenario-content');
+    const allTabs = document.querySelectorAll('.tab-btn');
+    
+    // Remove active class from all tabs
+    allTabs.forEach(tab => tab.classList.remove('active'));
+    
+    // Add active class to clicked tab
+    const clickedTab = Array.from(allTabs).find(tab => 
+        tab.textContent.replace('NEW', '').trim() === name.replace(/_/g, ' ')
+    );
+    if (clickedTab) {
+        clickedTab.classList.add('active');
+    }
+    
+    // Display content
+    content.innerHTML = window.currentExhibits[name];
+}
+
+// ========== SCENARIO UI ENHANCEMENTS ==========
+function showScenarioIntro(title) {
+    Swal.fire({
+        icon: 'info',
+        title: 'Unfolding Case Study',
+        html: `
+            <p><strong>${title}</strong></p>
+            <p>You will answer 6 questions about this patient scenario.</p>
+            <p>Review the exhibit tabs for clinical information.</p>
+            <p style="font-size: 0.9em; color: #666; margin-top: 15px;">
+                💡 Tip: New information may appear as you progress through the questions.
+            </p>
+        `,
+        confirmButtonText: 'Begin Case Study',
+        confirmButtonColor: '#004a99',
+        allowOutsideClick: false
+    });
+}
+
+function updateScenarioProgress(questionNum, scenarioTitle) {
+    const scenarioPanel = document.getElementById('scenario-panel');
+    
+    // Remove existing progress indicator if any
+    const existingProgress = scenarioPanel.querySelector('.scenario-progress');
+    if (existingProgress) {
+        existingProgress.remove();
+    }
+    
+    // Create new progress indicator
+    const progressHTML = `
+        <div class="scenario-progress">
+            <div class="scenario-title">📋 ${scenarioTitle}</div>
+            <div class="scenario-question-num">Question ${questionNum} of 6</div>
+            <div class="progress-bar-container">
+                <div class="progress-bar" style="width: ${(questionNum / 6) * 100}%"></div>
+            </div>
+        </div>
+    `;
+    
+    // Insert at the top of scenario panel
+    scenarioPanel.insertAdjacentHTML('afterbegin', progressHTML);
 }
 
 

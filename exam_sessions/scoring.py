@@ -25,11 +25,33 @@ class NCLEXScoringService:
 
         # GROUP 3: Coordinate Check (Hot Spot)
         elif question_type == 'HOT_SPOT':
-            # correct_data: {"x_min": 40, "x_max": 50, "y_min": 30, "y_max": 40}
+            # Support both Bounding Box and Euclidean Distance (ML-like)
             ux, uy = user_data.get('x'), user_data.get('y')
-            if (correct_data['x_min'] <= ux <= correct_data['x_max'] and 
-                correct_data['y_min'] <= uy <= correct_data['y_max']):
-                return 1
+            
+            # Method A: Bounding Box
+            if 'x_min' in correct_data:
+                if (correct_data['x_min'] <= ux <= correct_data['x_max'] and 
+                    correct_data['y_min'] <= uy <= correct_data['y_max']):
+                    return 1
+            
+            # Method B: Euclidean Distance (Center + Radius)
+            # FIX: correct_data might be a list [{'center_x':...}]
+            target = correct_data
+            if isinstance(correct_data, list) and len(correct_data) > 0:
+                target = correct_data[0]
+
+            if isinstance(target, dict) and 'center_x' in target:
+                import math
+                cx, cy = target['center_x'], target['center_y']
+                radius = target.get('radius', 5) # Default 5% radius
+                distance = math.sqrt((ux - cx)**2 + (uy - cy)**2)
+                
+                # Debug logging
+                print(f"🎯 HotSpot Calc: Usr({ux},{uy}) vs Tgt({cx},{cy}) Rad({radius}) Dist({distance})")
+                
+                if distance <= radius:
+                    return 1
+                    
             return 0
 
         # GROUP 4: Simple MCQ

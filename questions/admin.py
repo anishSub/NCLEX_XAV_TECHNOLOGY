@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.db import models
-from django_json_widget.widgets import JSONEditorWidget
+from django import forms
 from .models import Questions, QuestionType
 
 
@@ -148,17 +148,25 @@ class QuestionsAdmin(admin.ModelAdmin):
     
     readonly_fields = ('type',)
     filter_horizontal = ('category_ids',)
-    
-    # JSON Editor Widget - CODE MODE with full editing enabled
+
+    # Standard Textarea for JSON fields - Proven to work in Scenarios
     formfield_overrides = {
-        models.JSONField: {'widget': JSONEditorWidget(options={
-            'mode': 'code',  # Code mode with syntax highlighting
-            'modes': ['code', 'tree'],  # Allow switching between code and tree view
-            'mainMenuBar': True,  # Show menu bar
-            'indentation': 2,  # 2-space indentation
-            'escapeUnicode': False,
+        models.JSONField: {'widget': forms.Textarea(attrs={
+            'rows': 15, 
+            'style': 'width: 100%; font-family: monospace;',
+            'placeholder': 'Enter JSON data here...'
         })},
     }
+
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        # Force Textarea for specific fields
+        if db_field.name in ['options', 'correct_option_ids', 'exhibit_updates']:
+            kwargs['widget'] = forms.Textarea(attrs={
+                'rows': 10, 
+                'style': 'width: 100%; font-family: monospace;',
+                'placeholder': f'Enter JSON for {db_field.name}...'
+            })
+        return super().formfield_for_dbfield(db_field, request, **kwargs)
     
     # List per page
     list_per_page = 25
@@ -189,6 +197,10 @@ class QuestionsAdmin(admin.ModelAdmin):
         return obj.text[:75] + "..." if len(obj.text) > 75 else obj.text
     short_text.short_description = "Question"
     
+    # Custom Media
+    class Media:
+        js = ('questions/js/hotspot_coordinator.js',)
+
     def get_category_count(self, obj):
         """Show number of categories"""
         count = obj.category_ids.count()
@@ -220,6 +232,13 @@ class QuestionsAdmin(admin.ModelAdmin):
         self.message_user(request, f"{queryset.count()} questions selected for export.")
     export_questions.short_description = "Export selected questions"
 
+    class Media:
+        """Force load custom CSS and JS for questions admin"""
+        css = {
+            'all': ('admin/css/custom_admin.css',)
+        }
+        js = ('questions/js/hotspot_coordinator.js',)
+
 
 
 # ========== SCENARIOS ADMIN ==========
@@ -230,3 +249,127 @@ class QuestionsAdmin(admin.ModelAdmin):
 #   - Inline question editing
 #   - Help documentation for creating case studies
 #   - Preview of exhibit structure
+# ========== HOT SPOT MODULE ADMIN (Dedicated Interface) ==========
+from .models import HotSpotQuestion
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
+import os
+import base64
+import uuid
+
+class HotSpotQuestionForm(forms.ModelForm):
+    """
+    Custom form for Hot Spot Questions that includes a virtual 'image_file' field.
+    This field uploads the file to storage and saves the URL in the 'options' JSON.
+    """
+    image_file = forms.ImageField(
+        label="Upload Hot Spot Image",
+        required=False, 
+        help_text="Upload the main image for the question. It will be saved and linked automatically."
+    )
+
+    class Meta:
+        model = HotSpotQuestion
+        fields = '__all__'
+        widgets = {
+            'options': forms.Textarea(attrs={'rows': 3, 'readonly': 'readonly', 'style': 'background-color: #fff3cd;'}),
+            'correct_option_ids': forms.Textarea(attrs={'rows': 3, 'readonly': 'readonly', 'style': 'background-color: #d1ecf1;'}),
+        }
+        
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        # Force Question Type to HOT_SPOT and hide it
+        try:
+            hs_type = QuestionType.objects.get(code='HOT_SPOT')
+            self.fields['question_type'].initial = hs_type
+            self.fields['question_type'].widget = forms.HiddenInput()
+        except QuestionType.DoesNotExist:
+            pass
+        
+        # Make both fields visible but readonly for verification
+        if 'options' in self.fields:
+            self.fields['options'].required = False
+            self.fields['options'].label = "Image Data (Auto-filled)"
+            self.fields['options'].help_text = "The image URL is stored here automatically when you upload."
+        if 'correct_option_ids' in self.fields:
+            self.fields['correct_option_ids'].required = False
+            self.fields['correct_option_ids'].label = "Answer Coordinates (Auto-filled)"
+            self.fields['correct_option_ids'].help_text = "These coordinates are set automatically when you click the image above."
+
+    def save(self, *args, **kwargs):
+        """
+        Handle the virtual image upload and update the options JSON field.
+        """
+        # Call the parent save with commit=False initially so we can modify the instance before saving to DB
+        commit = kwargs.get('commit', True)
+        instance = super().save(commit=False)
+        
+        # 1. Handle Image Upload
+        image_file = self.cleaned_data.get('image_file')
+        if image_file:
+            # Save file to media/hotspot_images/ (Standard Django Storage)
+            # Use a unique name or overwrite? Standard behavior is unique.
+            path = default_storage.save(f'hotspot_images/{image_file.name}', ContentFile(image_file.read()))
+            image_url = default_storage.url(path)
+            
+            # Update options JSON
+            if not isinstance(instance.options, dict):
+                instance.options = {}
+            instance.options['image_url'] = image_url
+            
+            
+        if commit:
+            instance.save()
+            self.save_m2m() # Important for ManyToMany fields logic if any
+            
+        return instance
+    
+    def save_m2m(self):
+        """Required when using commit=False in ModelForm"""
+        super().save_m2m()
+
+@admin.register(HotSpotQuestion)
+class HotSpotQuestionAdmin(admin.ModelAdmin):
+    """
+    Dedicated Admin Interface for Hot Spot Questions.
+    Hides the complexity of JSON fields and focuses on the Visual Tool.
+    """
+    form = HotSpotQuestionForm
+    list_display = ('text', 'get_image_status', 'question_type')
+    search_fields = ('text',)
+    
+    # Custom Fieldsets - Simplified UI for "Module" feel
+    fieldsets = (
+        ('Hot Spot Setup', {
+            'fields': (
+                'question_type', # Hidden by form logic
+                'text',
+                'image_file',     # Virtual field for upload
+                'options',        # Hidden field (JS writes to this) - HiddenInput so no label
+                'correct_option_ids',  # Hidden field (JS writes to this) - HiddenInput so no label
+            ),
+            'description': '<strong>Step 1:</strong> Upload an Image. <br><strong>Step 2:</strong> Click the image below (in the blue box) to set the answer.<br><strong>Step 3:</strong> Verify coordinates appear in "Answer Coordinates" field below.'
+        }),
+        ('Metadata', {
+            'fields': ('rationale', 'difficulty_logit', 'parent_scenario', 'category_ids'),
+            'classes': ('collapse',),
+            'description': 'Optional extra details.'
+        }),
+    )
+    
+    class Media:
+        css = {
+            'all': ('admin/css/custom_admin.css',)
+        }
+        js = ('questions/js/hotspot_coordinator.js',)
+
+    def get_image_status(self, obj):
+        if obj.options and isinstance(obj.options, dict) and obj.options.get('image_url'):
+            return "✅ Image Present"
+        return "❌ No Image"
+    get_image_status.short_description = "Image Status"
+
+    def get_queryset(self, request):
+        """Only show Hot Spot questions in this list"""
+        return super().get_queryset(request).filter(question_type__code__in=['HOT_SPOT', 'HOT SPOT'])

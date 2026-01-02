@@ -1,0 +1,162 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scenario Practice - {{ scenario.title }}</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="{% static 'exam_sessions/css/exam_style.css' %}">
+    <script src="{% static 'exam_sessions/js/exam_engine.js' %}"></script>
+    <style>
+        body { margin: 0; font-family: Arial, Helvetica, sans-serif; background-color: #f4f6f9; overflow: hidden; }
+        .exam-header { background: linear-gradient(135deg, #17a2b8 0%, #138496 100%); color: white; padding: 10px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); z-index: 1000; position: relative; }
+        .exam-title h1 { margin: 0; font-size: 1.2rem; font-weight: 600; }
+        .exam-info { display: flex; gap: 30px; align-items: center; }
+        #question-counter { font-size: 1rem; background: rgba(255,255,255,0.2); padding: 5px 15px; border-radius: 20px; }
+        
+        .exam-container { 
+            display: grid; 
+            grid-template-columns: 40% 1fr; 
+            height: calc(100vh - 50px);
+            overflow: hidden;
+        }
+        
+        #scenario-panel { 
+            background: white; 
+            border-right: 2px solid #e0e0e0; 
+            overflow-y: auto; 
+            padding: 20px;
+        }
+        
+        #question-panel { 
+            padding: 30px; 
+            overflow-y: auto; 
+            background: #fff;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        #question-display-area { flex-grow: 1; }
+        
+        .submit-btn { 
+            width: 100%; max-width: 400px; margin: 20px auto 0; display: block; padding: 15px; 
+            background: linear-gradient(135deg, #17a2b8 0%, #138496 100%); color: white; 
+            border: none; border-radius: 8px; font-size: 1.1rem; font-weight: 600; 
+            cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 10px rgba(23, 162, 184, 0.3); 
+        }
+        .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(23, 162, 184, 0.4); }
+        .submit-btn:disabled { opacity: 0.7; cursor: not-allowed; }
+        
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        
+        /* Exhibit Tabs Styling */
+        .exhibit-tabs { display: flex; gap: 5px; margin-bottom: 15px; border-bottom: 2px solid #eee; padding-bottom: 5px; }
+        .exhibit-tab { padding: 8px 15px; background: #f8f9fa; border: 1px solid #ddd; border-bottom: none; cursor: pointer; border-radius: 5px 5px 0 0; font-size: 0.9rem; font-weight: 600; }
+        .exhibit-tab.active { background: #17a2b8; color: white; border-color: #17a2b8; }
+        .exhibit-content { display: none; padding: 15px; background: #f8f9fa; border: 1px solid #eee; border-radius: 0 0 5px 5px; font-size: 0.95rem; line-height: 1.6; }
+        .exhibit-content.active { display: block; }
+    </style>
+</head>
+<body>
+    <div class="exam-header">
+        <div class="exam-title"><h1>🏥 Scenario Practice: {{ scenario.title }}</h1></div>
+        <div class="exam-info">
+            <span id="question-counter">Question: <span id="current-q">0</span> of {{ session.total_questions }}</span>
+            <a href="{% url 'scenario_practice' %}" style="color: white; text-decoration: none; font-size: 0.9rem;">Exit</a>
+        </div>
+    </div>
+    
+    <div id="exam-layout" class="exam-container split-layout">
+        <div id="scenario-panel">
+            <div id="scenario-tabs"></div>
+            <div id="scenario-content"></div>
+            <div id="exhibits-area" style="display:none;">
+                <!-- Hide legacy area -->
+            </div>
+        </div>
+        
+        <div id="question-panel">
+            <div id="question-display-area">
+                <div style="text-align: center; padding: 50px; color: #999;">
+                    <p>Loading first question...</p>
+                </div>
+            </div>
+            <button class="submit-btn" onclick="handleScenarioSubmit()">Submit Answer & Continue</button>
+        </div>
+    </div>
+
+    <script>
+    window.practiceMode = true;
+    window.activeSessionId = {{ session.id }};
+    window.totalQuestions = {{ session.total_questions }};
+    window.currentQuestionNumber = 0;
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        fetch(`/exam/scenario/api/session/{{ session.id }}/first-question/`)
+            .then(res => res.json())
+            .then(data => { 
+                if (data.question) { 
+                    renderQuestion(data.question);
+                } 
+            })
+            .catch(err => console.error('Error:', err));
+    });
+    
+    async function handleScenarioSubmit() {
+        const questionType = window.activeQuestionType;
+        const sessionId = window.activeSessionId;
+        const questionId = window.activeQuestionId;
+        const answers = getSelectedAnswers(questionType);
+        
+        if (!answers || answers === '' || (Array.isArray(answers) && answers.length === 0)) {
+            Swal.fire({ icon: 'warning', title: 'Empty Answer', text: 'Please select an answer before proceeding.' });
+            return;
+        }
+        
+        const submitBtn = document.querySelector('.submit-btn');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = 'Processing...';
+        
+        try {
+            const response = await fetch(`/exam/scenario/api/session/${sessionId}/submit/`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+                body: JSON.stringify({ question_id: questionId, user_answer: answers })
+            });
+            const data = await response.json();
+            
+            if (data.status === "CONTINUE") {
+                // renderQuestion handles everything: layout, exhibits, and question rendering
+                renderQuestion(data.next_question);
+                document.getElementById('question-panel').scrollTop = 0;
+            } else if (data.status === "FINISHED") {
+                Swal.fire({ icon: 'success', title: 'Scenario Complete!', text: 'You\'ve completed the case study!', timer: 2000, showConfirmButton: false }).then(() => {
+                    window.location.href = `/exam/practice/results/${sessionId}/`;
+                });
+            }
+        } catch (error) {
+            console.error("Error:", error);
+        }
+        
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Submit Answer & Continue';
+    }
+    
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    </script>
+</body>
+</html>

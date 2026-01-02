@@ -85,6 +85,27 @@
                 
                 <h3 style="font-size: 1.1rem; margin-bottom: 1rem; color: #2d3748;">{{ q.text|safe }}</h3>
                 
+                <!-- VISUAL HOT SPOT FEEDBACK -->
+                {% if q.type == 'Hot Spot' and q.image_url %}
+                <div style="position: relative; max-width: 100%; width: fit-content; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; overflow: hidden;">
+                    <img src="{{ q.image_url }}" style="max-height: 400px; max-width: 100%; display: block;">
+                    
+                    <!-- User Click (Red X) -->
+                    {% if q.raw_user_answer.x %}
+                    <div style="position: absolute; left: {{ q.raw_user_answer.x }}%; top: {{ q.raw_user_answer.y }}%; width: 20px; height: 20px; background: rgba(229, 62, 62, 0.8); border: 2px solid white; border-radius: 50%; transform: translate(-50%, -50%); box-shadow: 0 2px 5px rgba(0,0,0,0.3);" title="Your Answer">
+                        <span style="display: block; width: 100%; height: 100%; text-align: center; line-height: 16px; color: white; font-weight: bold; font-size: 12px;">✖</span>
+                    </div>
+                    {% endif %}
+
+                    <!-- Correct Zone (Green Circle) -->
+                    {% with target=q.raw_correct_answer.0|default:q.raw_correct_answer %}
+                    {% if target.center_x %}
+                    <div style="position: absolute; left: {{ target.center_x }}%; top: {{ target.center_y }}%; width: {{ target.radius|add:target.radius }}%; height: {{ target.radius|add:target.radius }}%; background: rgba(56, 161, 105, 0.3); border: 2px solid #38a169; border-radius: 50%; transform: translate(-50%, -50%); pointer-events: none;" title="Correct Zone"></div>
+                    {% endif %}
+                    {% endwith %}
+                </div>
+                {% endif %}
+
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
                     <div style="background: #f8fbff; padding: 10px; border-radius: 8px; border-left: 4px solid {% if q.is_correct %}#38a169{% else %}#e53e3e{% endif %};">
                         <strong>Your Answer:</strong><br>

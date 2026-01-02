@@ -1,6 +1,7 @@
 from django.contrib import admin
+from django import forms
 from django.db import models
-from django_json_widget.widgets import JSONEditorWidget
+
 from .models import Scenarios
 from questions.models import Questions
 
@@ -31,18 +32,38 @@ class QuestionInline(admin.StackedInline):
             'fields': ('difficulty_logit', 'category_ids'),
             'description': 'Set difficulty level (-3.0 to +3.0) and assign categories'
         }),
+        ('Scenario Progression (For Unfolding Case Studies)', {
+            'fields': ('scenario_question_number', 'clinical_judgment_function', 'exhibit_updates'),
+            'classes': ('collapse',),
+            'description': '''
+                <strong>Configure how this question fits into the scenario:</strong><br>
+                • <strong>Question Number</strong>: Set 1-6 to control delivery order<br>
+                • <strong>Clinical Judgment Function</strong>: Which NCJMM function this tests<br>
+                • <strong>Exhibit Updates</strong>: New/updated tabs to show (JSON format)<br><br>
+                <em>Example exhibit_updates:</em><br>
+                <code>{"Labs_1200": "Glucose: 180 mg/dL (↓ from 340)", "Vitals_1400": "BP: 142/84, HR: 88"}</code>
+            '''
+        }),
     )
     
-    # JSON Editor Widget for better editing experience
+    # Use standard Textarea to avoid blank fields on "Add Another Question"
     formfield_overrides = {
-        models.JSONField: {'widget': JSONEditorWidget(options={
-            'mode': 'code',
-            'modes': ['code', 'tree'],
-            'mainMenuBar': True,
-            'indentation': 2,
-            'escapeUnicode': False,
+        models.JSONField: {'widget': forms.Textarea(attrs={
+            'rows': 8, 
+            'style': 'width: 100%; font-family: monospace;',
+            'placeholder': 'Enter JSON data here...'
         })},
     }
+
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        # Override widgets to use standard Textarea for all JSON fields
+        if db_field.name in ['options', 'correct_option_ids', 'exhibit_updates']:
+            kwargs['widget'] = forms.Textarea(attrs={
+                'rows': 5, 
+                'style': 'width: 100%; font-family: monospace;',
+                'placeholder': f'Enter JSON for {db_field.name}...'
+            })
+        return super().formfield_for_dbfield(db_field, request, **kwargs)
     
     # Enable horizontal filter for categories
     filter_horizontal = ('category_ids',)
@@ -85,7 +106,27 @@ class QuestionInline(admin.StackedInline):
         if 'category_ids' in form.base_fields:
             form.base_fields['category_ids'].help_text = 'Select all relevant content categories'
         
+        # ========== NEW: Scenario Enhancement Fields ==========
+        if 'scenario_question_number' in form.base_fields:
+            form.base_fields['scenario_question_number'].label = 'Question Number in Scenario'
+            form.base_fields['scenario_question_number'].help_text = 'Enter 1-6. Questions will be delivered in this order within the scenario.'
+        
+        if 'clinical_judgment_function' in form.base_fields:
+            form.base_fields['clinical_judgment_function'].label = 'Clinical Judgment Function (NCJMM)'
+            form.base_fields['clinical_judgment_function'].help_text = 'Select which NCLEX Clinical Judgment function this question tests'
+        
+        if 'exhibit_updates' in form.base_fields:
+            form.base_fields['exhibit_updates'].label = 'Exhibit Updates (JSON)'
+            form.base_fields['exhibit_updates'].help_text = '''
+                New or updated exhibit tabs to show with this question. Leave empty if no updates needed.
+                Example: {"Labs_1200": "New lab results at 12:00", "Vitals_1400": "Updated vitals at 14:00"}
+            '''
+            form.base_fields['exhibit_updates'].initial = {}
+        
         return formset
+
+    class Media:
+        js = ('questions/js/hotspot_coordinator.js',)
 
 
 # ========== SCENARIOS ADMIN ==========
@@ -101,35 +142,38 @@ class ScenariosAdmin(admin.ModelAdmin):
     search_fields = ('title',)
     inlines = [QuestionInline]
     
-    # SIMPLIFIED: Just list the fields, no complex fieldsets
-    # This matches how Questions admin works
-    fields = ('title', 'exhibits')
+    # Use fieldsets to ensure proper CSS styling (matches QuestionsAdmin structure)
+    fieldsets = (
+        (None, {
+            'fields': ('title', 'exhibits'),
+            'classes': ('wide', 'extrapretty'),
+        }),
+    )
+    # fields = ('title', 'exhibits') removed to use fieldsets
     
-    # JSON Editor Widget with enhanced options
+    # JSON Editor Widget matching QuestionsAdmin exactly
+    # Use standard Textarea to guarantee editability (Pre-fill works better with Textarea)
     formfield_overrides = {
-        models.JSONField: {'widget': JSONEditorWidget(options={
-            'mode': 'code',  # Code mode for better editing
-            'modes': ['code', 'tree', 'view'],  # Allow switching views
-            'mainMenuBar': True,
-            'indentation': 2,
-            'escapeUnicode': False,
+        models.JSONField: {'widget': forms.Textarea(attrs={
+            'rows': 20, 
+            'style': 'width: 100%; font-family: monospace; font-size: 13px;',
+            'placeholder': 'Enter JSON data here...'
         })},
     }
     
-    def get_form(self, request, obj=None, **kwargs):
+    # get_changeform_initial_data removed to allow Model default to work
+    
+    
+    def get_changeform_initial_data(self, request):
         """Pre-fill exhibits with template for new scenarios"""
-        form = super().get_form(request, obj, **kwargs)
-        
-        # Only pre-fill for new scenarios (not editing existing)
-        if not obj and 'exhibits' in form.base_fields:
-            form.base_fields['exhibits'].initial = {
+        return {
+            'exhibits': {
                 "History": "Patient presentation and medical history...",
                 "Vitals": "BP: __, HR: __, RR: __, Temp: __, O2 Sat: __%",
                 "Labs": "Relevant laboratory values...",
                 "Nurses_Notes": "Time-stamped nursing observations..."
             }
-        
-        return form
+        }
     
     def exhibit_count(self, obj):
         """Display number of exhibit tabs"""
@@ -168,7 +212,8 @@ class ScenariosAdmin(admin.ModelAdmin):
     duplicate_scenario.short_description = "Duplicate selected scenarios"
     
     class Media:
-        """Force load custom CSS for scenarios admin"""
+        """Force load custom CSS and JS for scenarios admin"""
         css = {
             'all': ('admin/css/custom_admin.css',)
         }
+        js = ('questions/js/hotspot_coordinator.js',)

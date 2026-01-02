@@ -29,4 +29,11 @@ urlpatterns = [
     path('practice/api/session/<int:session_id>/first-question/', practice_views.get_practice_first_question, name='practice_first_question'),
     path('practice/api/session/<int:session_id>/submit/', practice_views.submit_practice_answer, name='practice_submit_answer'),
     path('practice/results/<int:session_id>/', practice_views.practice_results_view, name='practice_results'),
+    
+    # ==================== SCENARIO PRACTICE ROUTES ====================
+    path('scenario/', practice_views.scenario_practice_view, name='scenario_practice'),
+    path('scenario/<int:scenario_id>/start/', practice_views.start_scenario_session, name='start_scenario'),
+    path('scenario/session/<int:session_id>/', practice_views.take_scenario_exam, name='take_scenario_exam'),
+    path('scenario/api/session/<int:session_id>/first-question/', practice_views.get_scenario_first_question, name='scenario_first_question'),
+    path('scenario/api/session/<int:session_id>/submit/', practice_views.submit_scenario_answer, name='scenario_submit_answer'),
 ]
