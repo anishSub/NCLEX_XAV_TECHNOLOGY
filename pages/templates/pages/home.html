@@ -6,7 +6,9 @@
 {% block body_class %}home-page{% endblock %}
 
 {% block extra_head %}
-<link rel="stylesheet" href="{% static 'pages/css/home.css' %}">
+    .home-wrapper {
+        padding: 0.75rem 1.25rem 0;
+    }
     .home-container {
         max-width: 1320px;
         margin: 0 auto;
@@ -110,56 +112,6 @@
         height: 10px;
         right: 40px;
         bottom: 9px;
-    }
-    .hero-side-decor {
-        position: absolute;
-        width: 118px;
-        height: 118px;
-        pointer-events: none;
-        z-index: 1;
-        opacity: 0.68;
-    }
-    .hero-side-decor .orb {
-        position: absolute;
-        border-radius: 999px;
-    }
-    .hero-side-decor .orb-main {
-        width: 118px;
-        height: 118px;
-        border: 2px solid rgba(0, 74, 153, 0.1);
-        background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.5), rgba(214, 243, 244, 0.2) 65%, rgba(164, 227, 255, 0.05));
-    }
-    .hero-side-decor .orb-ring {
-        width: 72px;
-        height: 72px;
-        left: 23px;
-        top: 23px;
-        border: 1px dashed rgba(0, 74, 153, 0.2);
-    }
-    .hero-side-decor .orb-dot-1,
-    .hero-side-decor .orb-dot-2 {
-        background: linear-gradient(135deg, rgba(0, 74, 153, 0.2), rgba(31, 102, 126, 0.12));
-        box-shadow: 0 8px 18px rgba(0, 52, 111, 0.1);
-    }
-    .hero-side-decor .orb-dot-1 {
-        width: 14px;
-        height: 14px;
-        top: 9px;
-        right: 15px;
-    }
-    .hero-side-decor .orb-dot-2 {
-        width: 10px;
-        height: 10px;
-        left: 10px;
-        bottom: 16px;
-    }
-    .hero-side-left {
-        left: 2.8%;
-        top: 22%;
-    }
-    .hero-side-right {
-        right: 2.2%;
-        top: 62%;
     }
     .hero-chip {
         display: inline-flex;
@@ -739,14 +691,10 @@
             url("{% static 'nurse2.jpg' %}") center top / cover no-repeat;
     }
     .insight-cover.gradient-blue {
-        background:
-            linear-gradient(180deg, rgba(0, 52, 111, 0.16), rgba(0, 52, 111, 0.8)),
-            url("{% static 'nurse1.jpeg' %}") center top / cover no-repeat;
+        background: linear-gradient(135deg, rgba(0, 52, 111, 0.94), rgba(31, 102, 126, 0.84));
     }
     .insight-cover.gradient-mint {
-        background:
-            linear-gradient(180deg, rgba(31, 102, 126, 0.2), rgba(0, 52, 111, 0.74)),
-            url("{% static 'nurse6.jpg' %}") center top / cover no-repeat;
+        background: linear-gradient(135deg, rgba(31, 102, 126, 0.92), rgba(164, 227, 255, 0.82));
     }
     .insight-body {
         padding: 1.25rem;
@@ -870,20 +818,6 @@
             left: 25px;
             top: 25px;
         }
-        .hero-side-decor {
-            width: 102px;
-            height: 102px;
-        }
-        .hero-side-decor .orb-main {
-            width: 102px;
-            height: 102px;
-        }
-        .hero-side-decor .orb-ring {
-            width: 62px;
-            height: 62px;
-            left: 20px;
-            top: 20px;
-        }
     }
     @media (min-width: 1280px) and (max-width: 1399px) and (max-height: 820px) {
         .hero-shell {
@@ -963,8 +897,7 @@
         }
     }
     @media (max-width: 900px) {
-        .hero-center-decor,
-        .hero-side-decor {
+        .hero-center-decor {
             display: none;
         }
         .hero-grid {
@@ -1063,20 +996,6 @@
                     <span class="orb orb-dot-1"></span>
                     <span class="orb orb-dot-2"></span>
                     <span class="orb orb-dot-3"></span>
-                </div>
-
-                <div class="hero-side-decor hero-side-left" aria-hidden="true">
-                    <span class="orb orb-main"></span>
-                    <span class="orb orb-ring"></span>
-                    <span class="orb orb-dot-1"></span>
-                    <span class="orb orb-dot-2"></span>
-                </div>
-
-                <div class="hero-side-decor hero-side-right" aria-hidden="true">
-                    <span class="orb orb-main"></span>
-                    <span class="orb orb-ring"></span>
-                    <span class="orb orb-dot-1"></span>
-                    <span class="orb orb-dot-2"></span>
                 </div>
 
                 <div class="hero-visual">

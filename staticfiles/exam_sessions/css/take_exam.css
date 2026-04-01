@@ -1,7 +1,0 @@
-/* ── Reset & base ── */
-*, *::before, *::after { box-sizing: border-box; }
-
-body {
-    /* ... [FULL extracted from take_exam.html <style> - all exam-header to @keyframes spin] ... */
-}
- /* Complete exam styles */
