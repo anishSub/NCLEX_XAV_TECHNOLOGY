@@ -1,0 +1,822 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NCLEX Battle Arena - Play Now</title>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.70.0/dist/phaser.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #game-container {
+            width: 100%;
+            max-width: 1200px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #phaser-game {
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            margin-bottom: 1rem;
+        }
+
+        /* Category Selection */
+        .category-selection {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 3000;
+        }
+
+        .category-selection.hidden {
+            display: none;
+        }
+
+        .category-content {
+            max-width: 900px;
+            padding: 3rem;
+        }
+
+        .category-title {
+            font-size: 3rem;
+            color: white;
+            text-align: center;
+            margin-bottom: 2rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .category-card {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            padding: 2rem;
+            border-radius: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: white;
+            border: 3px solid transparent;
+        }
+
+        .category-card:hover {
+            transform: translateY(-10px) scale(1.05);
+            box-shadow: 0 15px 40px rgba(59, 130, 246, 0.5);
+            border-color: #fbbf24;
+        }
+
+        .category-card.empty {
+            background: linear-gradient(135deg, #374151 0%, #1f2937 100%);
+            cursor: not-allowed;
+            opacity: 0.55;
+        }
+
+        .category-card.empty:hover {
+            transform: none;
+            box-shadow: none;
+            border-color: transparent;
+        }
+
+        .category-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .category-name {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .category-count {
+            font-size: 0.8rem;
+            margin-top: 0.5rem;
+            opacity: 0.8;
+            font-weight: 600;
+        }
+
+        /* Loading Screen */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 4000;
+            flex-direction: column;
+            color: white;
+        }
+
+        .loading-screen.hidden {
+            display: none;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            border-top-color: #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-size: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        /* Back Button */
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .back-button:hover {
+            background: rgba(0, 0, 0, 0.9);
+            transform: translateX(-5px);
+        }
+    </style>
+</head>
+<body>
+    <!-- Back Button -->
+    <a href="{% url 'home' %}" class="back-button">
+        <i class="fas fa-arrow-left"></i>
+        Back to Home
+    </a>
+
+    <!-- Loading Screen -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Loading Battle Arena...</div>
+    </div>
+
+    <!-- Category Selection Screen -->
+    <div class="category-selection" id="categorySelection">
+        <div class="category-content">
+            <h1 class="category-title">⚔️ Choose Your Battle Arena ⚔️</h1>
+            <div class="category-grid" id="categoryGrid">
+                <!-- Categories will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Container -->
+    <div id="game-container">
+        <div id="phaser-game"></div>
+    </div>
+
+    <script>
+        // Game configuration
+        const config = {
+            type: Phaser.AUTO,
+            width: 1000,
+            height: 700,
+            parent: 'phaser-game',
+            backgroundColor: '#2d3748',
+            physics: {
+                default: 'arcade',
+                arcade: {
+                    gravity: { y: 0 },
+                    debug: false
+                }
+            },
+            scene: {
+                preload: preload,
+                create: create,
+                update: update
+            }
+        };
+
+        // Game state
+        let gameState = {
+            playerHealth: 100,
+            enemyHealth: 100,
+            score: 0,
+            streak: 0,
+            currentQuestion: 0,
+            questions: [],
+            selectedCategory: null,
+            waitingForAnswer: false
+        };
+
+        // Game objects
+        let game;
+        let knight, bandit;
+        let playerHealthBar, enemyHealthBar;
+        let questionText, answerButtons = [];
+        let scoreText, streakText, questionCountText;
+
+        // Initialize Phaser game
+        function initGame() {
+            game = new Phaser.Game(config);
+        }
+
+        function preload() {
+            // Add loading progress
+            const progressBar = this.add.graphics();
+            const progressBox = this.add.graphics();
+            progressBox.fillStyle(0x222222, 0.8);
+            progressBox.fillRect(240, 270, 520, 50);
+
+            const loadingText = this.make.text({
+                x: 500,
+                y: 250,
+                text: 'Loading...',
+                style: {
+                    font: '20px monospace',
+                    fill: '#ffffff'
+                }
+            });
+            loadingText.setOrigin(0.5, 0.5);
+
+            const percentText = this.make.text({
+                x: 500,
+                y: 295,
+                text: '0%',
+                style: {
+                    font: '18px monospace',
+                    fill: '#ffffff'
+                }
+            });
+            percentText.setOrigin(0.5, 0.5);
+
+            this.load.on('progress', function (value) {
+                percentText.setText(parseInt(value * 100) + '%');
+                progressBar.clear();
+                progressBar.fillStyle(0x3b82f6, 1);
+                progressBar.fillRect(250, 280, 500 * value, 30);
+            });
+
+            this.load.on('complete', function () {
+                progressBar.destroy();
+                progressBox.destroy();
+                loadingText.destroy();
+                percentText.destroy();
+            });
+
+            // Load Knight sprites using Django static URLs
+            const STATIC_BASE = '{% static "game/img" %}';
+            for (let i = 0; i < 8; i++) {
+                this.load.image(`knight_idle_${i}`, `${STATIC_BASE}/Knight/Idle/${i}.png`);
+                this.load.image(`knight_attack_${i}`, `${STATIC_BASE}/Knight/Attack/${i}.png`);
+                this.load.image(`knight_hurt_${i}`, `${STATIC_BASE}/Knight/Hurt/${i}.png`);
+            }
+
+            // Load Bandit sprites
+            for (let i = 0; i < 8; i++) {
+                this.load.image(`bandit_idle_${i}`, `${STATIC_BASE}/Bandit/Idle/${i}.png`);
+                this.load.image(`bandit_attack_${i}`, `${STATIC_BASE}/Bandit/Attack/${i}.png`);
+                this.load.image(`bandit_hurt_${i}`, `${STATIC_BASE}/Bandit/Hurt/${i}.png`);
+            }
+
+            // Handle load errors
+            this.load.on('loaderror', function (file) {
+                console.error('Error loading file:', file.key);
+            });
+        }
+
+        function create() {
+            const scene = this;
+
+            // Hide loading screen when create starts
+            document.getElementById('loadingScreen').classList.add('hidden');
+
+            // Create background
+            const bg = scene.add.rectangle(500, 350, 1000, 700, 0x1a202c);
+
+            // Create ground
+            const ground = scene.add.rectangle(500, 600, 1000, 200, 0x2d3748);
+
+            // Create Knight (Player)
+            knight = scene.add.sprite(250, 450, 'knight_idle_0').setScale(3);
+
+            // Create Knight idle animation
+            scene.anims.create({
+                key: 'knight_idle',
+                frames: Array.from({length: 8}, (_, i) => ({ key: `knight_idle_${i}` })),
+                frameRate: 10,
+                repeat: -1
+            });
+
+            scene.anims.create({
+                key: 'knight_attack',
+                frames: Array.from({length: 8}, (_, i) => ({ key: `knight_attack_${i}` })),
+                frameRate: 12,
+                repeat: 0
+            });
+
+            scene.anims.create({
+                key: 'knight_hurt',
+                frames: Array.from({length: 8}, (_, i) => ({ key: `knight_hurt_${i}` })),
+                frameRate: 12,
+                repeat: 0
+            });
+
+            // Create Bandit (Enemy)
+            bandit = scene.add.sprite(750, 450, 'bandit_idle_0').setScale(3).setFlipX(true);
+
+            scene.anims.create({
+                key: 'bandit_idle',
+                frames: Array.from({length: 8}, (_, i) => ({ key: `bandit_idle_${i}` })),
+                frameRate: 10,
+                repeat: -1
+            });
+
+            scene.anims.create({
+                key: 'bandit_attack',
+                frames: Array.from({length: 8}, (_, i) => ({ key: `bandit_attack_${i}` })),
+                frameRate: 12,
+                repeat: 0
+            });
+
+            scene.anims.create({
+                key: 'bandit_hurt',
+                frames: Array.from({length: 8}, (_, i) => ({ key: `bandit_hurt_${i}` })),
+                frameRate: 12,
+                repeat: 0
+            });
+
+            // Play idle animations
+            knight.play('knight_idle');
+            bandit.play('bandit_idle');
+
+            // Create UI
+            createUI(scene);
+
+            // Hide loading screen
+            document.getElementById('loadingScreen').classList.add('hidden');
+
+            // Load first question
+            if (gameState.questions.length > 0) {
+                loadQuestion(scene);
+            } else {
+                // Show a friendly in-game message if no questions were loaded
+                scene.add.text(500, 350,
+                    'No questions found for this category.\nPlease add questions in the Admin panel.',
+                    {
+                        fontSize: '22px',
+                        fill: '#fbbf24',
+                        align: 'center',
+                        wordWrap: { width: 800 }
+                    }
+                ).setOrigin(0.5);
+            }
+        }
+
+        function createUI(scene) {
+            // Health bars background
+            const playerHealthBg = scene.add.rectangle(200, 50, 300, 30, 0x333333);
+            const enemyHealthBg = scene.add.rectangle(800, 50, 300, 30, 0x333333);
+
+            // Health bars
+            playerHealthBar = scene.add.rectangle(200, 50, 300, 30, 0x22c55e);
+            enemyHealthBar = scene.add.rectangle(800, 50, 300, 30, 0xef4444);
+
+            // Labels
+            scene.add.text(200, 20, 'Knight (You)', {
+                fontSize: '20px',
+                fill: '#fff',
+                fontStyle: 'bold'
+            }).setOrigin(0.5);
+
+            scene.add.text(800, 20, 'Dark Bandit', {
+                fontSize: '20px',
+                fill: '#fff',
+                fontStyle: 'bold'
+            }).setOrigin(0.5);
+
+            // Stats
+            scoreText = scene.add.text(500, 20, 'Score: 0', {
+                fontSize: '24px',
+                fill: '#fbbf24',
+                fontStyle: 'bold'
+            }).setOrigin(0.5);
+
+            streakText = scene.add.text(500, 50, 'Streak: 0', {
+                fontSize: '20px',
+                fill: '#60a5fa'
+            }).setOrigin(0.5);
+
+            questionCountText = scene.add.text(500, 80, 'Question: 0/10', {
+                fontSize: '18px',
+                fill: '#fff'
+            }).setOrigin(0.5);
+
+            // Question panel background
+            const questionPanel = scene.add.rectangle(500, 600, 950, 180, 0x1e293b, 0.95);
+
+            // Question text
+            questionText = scene.add.text(500, 530, '', {
+                fontSize: '18px',
+                fill: '#fff',
+                wordWrap: { width: 900 },
+                align: 'center'
+            }).setOrigin(0.5);
+
+            // Answer buttons (will be created dynamically)
+        }
+
+        function loadQuestion(scene) {
+            if (gameState.currentQuestion >= gameState.questions.length) {
+                endGame(scene, true);
+                return;
+            }
+
+            const question = gameState.questions[gameState.currentQuestion];
+            questionText.setText(question.text);
+
+            // Clear old buttons
+            answerButtons.forEach(btn => {
+                btn.button.destroy();
+                btn.text.destroy();
+            });
+            answerButtons = [];
+
+            // Create answer buttons
+            const labels = ['A', 'B', 'C', 'D'];
+            const startX = 150;
+            const buttonWidth = 400;
+            const buttonHeight = 50;
+
+            question.options.forEach((option, index) => {
+                const row = Math.floor(index / 2);
+                const col = index % 2;
+                const x = startX + col * 500;
+                const y = 620 + row * 60;
+
+                const button = scene.add.rectangle(x, y, buttonWidth, buttonHeight, 0x3b82f6)
+                    .setInteractive({ useHandCursor: true })
+                    .on('pointerover', () => button.setFillStyle(0x2563eb))
+                    .on('pointerout', () => button.setFillStyle(0x3b82f6))
+                    .on('pointerdown', () => {
+                        if (!gameState.waitingForAnswer) {
+                            checkAnswer(scene, labels[index], question.correct_answer, button);
+                        }
+                    });
+
+                const text = scene.add.text(x, y, `${labels[index]}. ${option}`, {
+                    fontSize: '16px',
+                    fill: '#fff',
+                    wordWrap: { width: buttonWidth - 20 }
+                }).setOrigin(0.5);
+
+                answerButtons.push({ button, text, label: labels[index] });
+            });
+
+            // Update question count
+            questionCountText.setText(`Question: ${gameState.currentQuestion + 1}/${gameState.questions.length}`);
+            gameState.waitingForAnswer = false;
+        }
+
+        function checkAnswer(scene, selected, correct, button) {
+            gameState.waitingForAnswer = true;
+
+            const isCorrect = selected === correct;
+
+            // Highlight correct/incorrect
+            answerButtons.forEach(btn => {
+                if (btn.label === correct) {
+                    btn.button.setFillStyle(0x22c55e);
+                } else if (btn.label === selected && !isCorrect) {
+                    btn.button.setFillStyle(0xef4444);
+                }
+                btn.button.disableInteractive();
+            });
+
+            if (isCorrect) {
+                handleCorrectAnswer(scene);
+            } else {
+                handleIncorrectAnswer(scene);
+            }
+
+            // Next question after delay
+            scene.time.delayedCall(2000, () => {
+                gameState.currentQuestion++;
+                loadQuestion(scene);
+            });
+        }
+
+        function handleCorrectAnswer(scene) {
+            gameState.score += 10;
+            gameState.streak++;
+            gameState.enemyHealth -= 20;
+
+            // Update UI
+            scoreText.setText(`Score: ${gameState.score}`);
+            streakText.setText(`Streak: ${gameState.streak}`);
+            updateHealthBar(enemyHealthBar, gameState.enemyHealth);
+
+            // Knight attacks
+            knight.play('knight_attack');
+            knight.once('animationcomplete', () => {
+                knight.play('knight_idle');
+            });
+
+            // Bandit hurt
+            scene.time.delayedCall(300, () => {
+                bandit.play('bandit_hurt');
+                showDamageNumber(scene, bandit.x, bandit.y - 100, '-20', 0xef4444);
+
+                // Screen shake
+                scene.cameras.main.shake(200, 0.005);
+
+                bandit.once('animationcomplete', () => {
+                    bandit.play('bandit_idle');
+                });
+            });
+
+            // Show feedback
+            showFeedback(scene, '✅ Correct! +10 points', 0x22c55e);
+
+            if (gameState.enemyHealth <= 0) {
+                scene.time.delayedCall(1000, () => endGame(scene, true));
+            }
+        }
+
+        function handleIncorrectAnswer(scene) {
+            gameState.streak = 0;
+            gameState.playerHealth -= 15;
+
+            // Update UI
+            streakText.setText(`Streak: ${gameState.streak}`);
+            updateHealthBar(playerHealthBar, gameState.playerHealth);
+
+            // Bandit attacks
+            bandit.play('bandit_attack');
+            bandit.once('animationcomplete', () => {
+                bandit.play('bandit_idle');
+            });
+
+            // Knight hurt
+            scene.time.delayedCall(300, () => {
+                knight.play('knight_hurt');
+                showDamageNumber(scene, knight.x, knight.y - 100, '-15', 0xef4444);
+
+                // Screen shake
+                scene.cameras.main.shake(200, 0.005);
+
+                knight.once('animationcomplete', () => {
+                    knight.play('knight_idle');
+                });
+            });
+
+            // Show feedback
+            showFeedback(scene, '❌ Incorrect!', 0xef4444);
+
+            if (gameState.playerHealth <= 0) {
+                scene.time.delayedCall(1000, () => endGame(scene, false));
+            }
+        }
+
+        function updateHealthBar(bar, health) {
+            const maxWidth = 300;
+            const newWidth = Math.max(0, (health / 100) * maxWidth);
+            bar.width = newWidth;
+        }
+
+        function showDamageNumber(scene, x, y, text, color) {
+            const damageText = scene.add.text(x, y, text, {
+                fontSize: '48px',
+                fill: `#${color.toString(16)}`,
+                fontStyle: 'bold',
+                stroke: '#000',
+                strokeThickness: 4
+            }).setOrigin(0.5);
+
+            scene.tweens.add({
+                targets: damageText,
+                y: y - 100,
+                alpha: 0,
+                scale: 1.5,
+                duration: 1000,
+                ease: 'Power2',
+                onComplete: () => damageText.destroy()
+            });
+        }
+
+        function showFeedback(scene, text, color) {
+            const feedback = scene.add.text(500, 350, text, {
+                fontSize: '36px',
+                fill: `#${color.toString(16)}`,
+                fontStyle: 'bold',
+                stroke: '#000',
+                strokeThickness: 6
+            }).setOrigin(0.5).setAlpha(0);
+
+            scene.tweens.add({
+                targets: feedback,
+                alpha: 1,
+                duration: 200,
+                yoyo: true,
+                hold: 1500,
+                onComplete: () => feedback.destroy()
+            });
+        }
+
+        function endGame(scene, victory) {
+            // Clear everything
+            scene.scene.pause();
+
+            // Create game over screen
+            const overlay = scene.add.rectangle(500, 350, 1000, 700, 0x000000, 0.9);
+
+            const title = scene.add.text(500, 200, victory ? '🎉 VICTORY! 🎉' : '💀 DEFEAT 💀', {
+                fontSize: '64px',
+                fill: victory ? '#22c55e' : '#ef4444',
+                fontStyle: 'bold'
+            }).setOrigin(0.5);
+
+            const stats = scene.add.text(500, 320,
+                `Final Score: ${gameState.score}\n` +
+                `Best Streak: ${gameState.streak}\n` +
+                `Questions Answered: ${gameState.currentQuestion}/${gameState.questions.length}`,
+                {
+                    fontSize: '28px',
+                    fill: '#fff',
+                    align: 'center',
+                    lineSpacing: 10
+                }
+            ).setOrigin(0.5);
+
+            // Buttons
+            const playAgainBtn = scene.add.rectangle(400, 500, 250, 60, 0x3b82f6)
+                .setInteractive({ useHandCursor: true })
+                .on('pointerover', function() { this.setFillStyle(0x2563eb); })
+                .on('pointerout', function() { this.setFillStyle(0x3b82f6); })
+                .on('pointerdown', () => location.reload());
+
+            scene.add.text(400, 500, 'Play Again', {
+                fontSize: '24px',
+                fill: '#fff',
+                fontStyle: 'bold'
+            }).setOrigin(0.5);
+
+            const menuBtn = scene.add.rectangle(600, 500, 250, 60, 0x6b7280)
+                .setInteractive({ useHandCursor: true })
+                .on('pointerover', function() { this.setFillStyle(0x4b5563); })
+                .on('pointerout', function() { this.setFillStyle(0x6b7280); })
+                .on('pointerdown', () => window.location.href = '{% url "home" %}');
+
+            scene.add.text(600, 500, 'Main Menu', {
+                fontSize: '24px',
+                fill: '#fff',
+                fontStyle: 'bold'
+            }).setOrigin(0.5);
+        }
+
+        function update() {
+            // Game loop (if needed)
+        }
+
+        // Load categories
+        async function loadCategories() {
+            try {
+                console.log('Fetching categories...');
+                const response = await fetch('/game/api/categories/');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch categories');
+                }
+                const categories = await response.json();
+                console.log('Categories loaded:', categories);
+
+                const categoryGrid = document.getElementById('categoryGrid');
+                categoryGrid.innerHTML = '';
+
+                const icons = ['❤️', '💊', '🏥', '🧠', '🫁', '👶', '🤰', '🩺'];
+
+                if (categories.length === 0) {
+                    categoryGrid.innerHTML = '<div style="color: white; grid-column: 1/-1; text-align: center;">No categories available. Please add some categories in the admin panel.</div>';
+                }
+
+                categories.forEach((category, index) => {
+                    const isEmpty = category.question_count === 0;
+                    const card = document.createElement('div');
+                    card.className = `category-card${isEmpty ? ' empty' : ''}`;
+                    if (!isEmpty) {
+                        card.onclick = () => startGame(category.id, category.name);
+                    }
+                    card.innerHTML = `
+                        <div class="category-icon">${icons[index % icons.length]}</div>
+                        <div class="category-name">${category.name}</div>
+                        <div class="category-count">
+                            ${isEmpty
+                                ? '⚠️ No questions yet'
+                                : `${category.question_count} question${category.question_count !== 1 ? 's' : ''}`
+                            }
+                        </div>
+                    `;
+                    categoryGrid.appendChild(card);
+                });
+
+                // Hide loading screen after categories are loaded
+                document.getElementById('loadingScreen').classList.add('hidden');
+                console.log('Loading screen hidden, categories displayed');
+            } catch (error) {
+                console.error('Error loading categories:', error);
+                document.getElementById('loadingScreen').innerHTML = `
+                    <div style="text-align: center; color: white; padding: 2rem;">
+                        <i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: #ef4444; margin-bottom: 1rem;"></i>
+                        <h2>Failed to load categories</h2>
+                        <p>${error.message}</p>
+                        <button onclick="location.reload()" style="margin-top: 1rem; padding: 0.5rem 1rem; background: #3b82f6; border: none; border-radius: 5px; color: white; cursor: pointer;">
+                            Try Again
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        // Start game with selected category
+        async function startGame(categoryId, categoryName) {
+            gameState.selectedCategory = categoryId;
+            document.getElementById('categorySelection').classList.add('hidden');
+            document.getElementById('loadingScreen').classList.remove('hidden');
+
+            // Load questions
+            await loadQuestions(categoryId);
+
+            // Add timeout for loading
+            setTimeout(() => {
+                const loadingScreen = document.getElementById('loadingScreen');
+                if (!loadingScreen.classList.contains('hidden')) {
+                    console.log('Loading timeout - initializing game anyway');
+                    loadingScreen.classList.add('hidden');
+                }
+            }, 5000);
+
+            // Initialize Phaser game
+            setTimeout(() => {
+                initGame();
+            }, 500);
+        }
+
+        // Load questions from database
+        async function loadQuestions(categoryId) {
+            try {
+                console.log('Loading questions for category:', categoryId);
+                const response = await fetch(`/game/api/questions/?category=${categoryId}&limit=10`);
+                const data = await response.json();
+                gameState.questions = data.questions;
+                console.log('Questions loaded:', gameState.questions.length);
+            } catch (error) {
+                console.error('Error loading questions:', error);
+                gameState.questions = [];
+            }
+        }
+
+        // Initialize
+        window.onload = () => {
+            console.log('Page loaded, loading categories...');
+            loadCategories();
+        };
+    </script>
+</body>
+</html>

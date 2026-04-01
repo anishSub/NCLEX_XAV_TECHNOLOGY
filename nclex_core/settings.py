@@ -27,14 +27,15 @@ INSTALLED_APPS = [
     "study_planner",  # NEW: Study Planner with calendar and to-do list
     "subscriptions",  # NEW: Subscription & Payment System
     "gamification",   # NEW: Gamification System (Streaks, Badges, Points)
-    
+    "game",           # NEW: NCLEX Adventure Game Download
+
     # ALLAUTH (Social Login)
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',   # Google
     'allauth.socialaccount.providers.facebook', # Facebook
-    
+
     'rest_framework',
 ]
 
@@ -94,6 +95,7 @@ DATABASES = {
         'PORT': os.environ.get('DB_PORT', '5433'),
     }
 }
+
 
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},

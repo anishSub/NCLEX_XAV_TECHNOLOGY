@@ -1,0 +1,837 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NCLEX Battle Arena - Play Now</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        #game-container {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Top HUD */
+        .game-hud {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+        }
+
+        .health-bar-container {
+            flex: 1;
+            max-width: 300px;
+        }
+
+        .health-label {
+            font-size: 0.9rem;
+            margin-bottom: 0.3rem;
+            font-weight: bold;
+        }
+
+        .health-bar {
+            width: 100%;
+            height: 25px;
+            background: #333;
+            border-radius: 15px;
+            overflow: hidden;
+            border: 2px solid #555;
+        }
+
+        .health-fill {
+            height: 100%;
+            transition: width 0.5s ease;
+            border-radius: 15px;
+        }
+
+        .player-health {
+            background: linear-gradient(90deg, #4ade80 0%, #22c55e 100%);
+        }
+
+        .enemy-health {
+            background: linear-gradient(90deg, #ef4444 0%, #dc2626 100%);
+        }
+
+        .game-stats {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #fbbf24;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: #ccc;
+        }
+
+        /* Battle Arena */
+        .battle-arena {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            padding: 2rem;
+            position: relative;
+        }
+
+        .character {
+            text-align: center;
+            position: relative;
+        }
+
+        .character-sprite {
+            width: 200px;
+            height: 200px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 6rem;
+            margin-bottom: 1rem;
+            transition: transform 0.3s ease;
+            position: relative;
+        }
+
+        .character-sprite img {
+            width: 180px;
+            height: 180px;
+            object-fit: contain;
+        }
+
+        .character-sprite canvas {
+            width: 200px;
+            height: 200px;
+        }
+
+        .character-sprite.attacking {
+            animation: attack 0.5s ease;
+        }
+
+        .character-sprite.hurt {
+            animation: hurt 0.5s ease;
+        }
+
+        @keyframes attack {
+            0%, 100% { transform: translateX(0) scale(1); }
+            25% { transform: translateX(20px) scale(1.1); }
+            50% { transform: translateX(40px) scale(1.15) rotate(10deg); }
+            75% { transform: translateX(20px) scale(1.1); }
+        }
+
+        @keyframes hurt {
+            0%, 100% { transform: translateX(0) rotate(0deg); filter: brightness(1); }
+            25% { transform: translateX(-15px) rotate(-5deg); filter: brightness(1.5) hue-rotate(320deg); }
+            50% { transform: translateX(15px) rotate(5deg); filter: brightness(1.5) hue-rotate(320deg); }
+            75% { transform: translateX(-10px) rotate(-3deg); filter: brightness(1.5) hue-rotate(320deg); }
+        }
+
+        /* Damage numbers */
+        .damage-number {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 3rem;
+            font-weight: bold;
+            color: #ef4444;
+            animation: floatUp 1s ease-out forwards;
+            pointer-events: none;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+        }
+
+        .damage-number.heal {
+            color: #22c55e;
+        }
+
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+            100% { opacity: 0; transform: translate(-50%, -150%) scale(1.5); }
+        }
+
+        .character-name {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Question Panel */
+        .question-panel {
+            background: rgba(0, 0, 0, 0.9);
+            padding: 2rem;
+            color: white;
+            max-height: 40vh;
+            overflow-y: auto;
+        }
+
+        .question-text {
+            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .answers-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .answer-btn {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            border: none;
+            padding: 1.5rem;
+            border-radius: 15px;
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+            position: relative;
+        }
+
+        .answer-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.5);
+        }
+
+        .answer-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .answer-btn.correct {
+            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+        }
+
+        .answer-btn.incorrect {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        }
+
+        .answer-label {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+
+        /* Feedback Message */
+        .feedback-message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.95);
+            padding: 3rem 4rem;
+            border-radius: 20px;
+            color: white;
+            font-size: 2rem;
+            font-weight: bold;
+            z-index: 1000;
+            display: none;
+            text-align: center;
+        }
+
+        .feedback-message.show {
+            display: block;
+            animation: fadeInOut 2s ease;
+        }
+
+        @keyframes fadeInOut {
+            0%, 100% { opacity: 0; }
+            20%, 80% { opacity: 1; }
+        }
+
+        /* Game Over Screen */
+        .game-over-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .game-over-screen.show {
+            display: flex;
+        }
+
+        .game-over-content {
+            text-align: center;
+            color: white;
+        }
+
+        .game-over-title {
+            font-size: 4rem;
+            margin-bottom: 2rem;
+        }
+
+        .game-over-stats {
+            font-size: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .game-over-btn {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            border: none;
+            padding: 1.5rem 3rem;
+            border-radius: 50px;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            margin: 0 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .game-over-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.5);
+        }
+
+        /* Category Selection */
+        .category-selection {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 3000;
+        }
+
+        .category-selection.hidden {
+            display: none;
+        }
+
+        .category-content {
+            max-width: 800px;
+            padding: 3rem;
+        }
+
+        .category-title {
+            font-size: 2.5rem;
+            color: white;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .category-card {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            padding: 2rem;
+            border-radius: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: white;
+        }
+
+        .category-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(59, 130, 246, 0.5);
+        }
+
+        .category-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .category-name {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <!-- Category Selection Screen -->
+    <div class="category-selection" id="categorySelection">
+        <div class="category-content">
+            <h1 class="category-title">Choose Your Battle Arena</h1>
+            <div class="category-grid" id="categoryGrid">
+                <!-- Categories will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Container -->
+    <div id="game-container">
+        <!-- Top HUD -->
+        <div class="game-hud">
+            <div class="health-bar-container">
+                <div class="health-label">🛡️ Your Health</div>
+                <div class="health-bar">
+                    <div class="health-fill player-health" id="playerHealth" style="width: 100%;"></div>
+                </div>
+            </div>
+
+            <div class="game-stats">
+                <div class="stat-item">
+                    <div class="stat-value" id="scoreValue">0</div>
+                    <div class="stat-label">Score</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="streakValue">0</div>
+                    <div class="stat-label">Streak</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="questionCount">0/10</div>
+                    <div class="stat-label">Questions</div>
+                </div>
+            </div>
+
+            <div class="health-bar-container">
+                <div class="health-label">⚔️ Enemy Health</div>
+                <div class="health-bar">
+                    <div class="health-fill enemy-health" id="enemyHealth" style="width: 100%;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Battle Arena -->
+        <div class="battle-arena">
+            <div class="character">
+                <div class="character-sprite" id="playerSprite">
+                    <canvas id="knightCanvas" width="200" height="200"></canvas>
+                </div>
+                <div class="character-name">Knight (You)</div>
+            </div>
+
+            <div style="font-size: 4rem; color: white; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">⚔️</div>
+
+            <div class="character">
+                <div class="character-sprite" id="enemySprite">
+                    <canvas id="banditCanvas" width="200" height="200"></canvas>
+                </div>
+                <div class="character-name">Dark Bandit</div>
+            </div>
+        </div>
+
+        <!-- Question Panel -->
+        <div class="question-panel">
+            <div class="question-text" id="questionText">Loading question...</div>
+            <div class="answers-grid" id="answersGrid">
+                <!-- Answers will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Feedback Message -->
+    <div class="feedback-message" id="feedbackMessage"></div>
+
+    <!-- Game Over Screen -->
+    <div class="game-over-screen" id="gameOverScreen">
+        <div class="game-over-content">
+            <div class="game-over-title" id="gameOverTitle">Victory!</div>
+            <div class="game-over-stats" id="gameOverStats"></div>
+            <button class="game-over-btn" onclick="restartGame()">Play Again</button>
+            <button class="game-over-btn" onclick="window.location.href='{% url 'home' %}'">Main Menu</button>
+        </div>
+    </div>
+
+    <script>
+        // Character Animation System
+        class CharacterAnimator {
+            constructor(canvasId, spritePath, scale = 2) {
+                this.canvas = document.getElementById(canvasId);
+                this.ctx = this.canvas.getContext('2d');
+                this.spritePath = spritePath;
+                this.scale = scale;
+                this.currentFrame = 0;
+                this.currentAction = 'Idle';
+                this.frameCount = 8;
+                this.animationSpeed = 100;
+                this.lastFrameTime = Date.now();
+                this.sprites = {
+                    'Idle': [],
+                    'Attack': [],
+                    'Hurt': []
+                };
+                this.loaded = false;
+            }
+
+            async loadSprites() {
+                const actions = ['Idle', 'Attack', 'Hurt'];
+                const frameCounts = { 'Idle': 8, 'Attack': 8, 'Hurt': 8 };
+
+                for (const action of actions) {
+                    for (let i = 0; i < frameCounts[action]; i++) {
+                        const img = new Image();
+                        img.src = `/static/game/img/${this.spritePath}/${action}/${i}.png`;
+                        await new Promise((resolve) => {
+                            img.onload = resolve;
+                            img.onerror = () => {
+                                console.log(`Failed to load: ${img.src}`);
+                                resolve();
+                            };
+                        });
+                        this.sprites[action].push(img);
+                    }
+                }
+                this.loaded = true;
+                this.animate();
+            }
+
+            animate() {
+                if (!this.loaded) return;
+
+                const now = Date.now();
+                if (now - this.lastFrameTime > this.animationSpeed) {
+                    this.currentFrame++;
+                    if (this.currentFrame >= this.sprites[this.currentAction].length) {
+                        this.currentFrame = 0;
+                        if (this.currentAction !== 'Idle') {
+                            this.currentAction = 'Idle';
+                        }
+                    }
+                    this.lastFrameTime = now;
+                }
+
+                this.draw();
+                requestAnimationFrame(() => this.animate());
+            }
+
+            draw() {
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                const sprite = this.sprites[this.currentAction][this.currentFrame];
+                if (sprite && sprite.complete) {
+                    const width = sprite.width * this.scale;
+                    const height = sprite.height * this.scale;
+                    const x = (this.canvas.width - width) / 2;
+                    const y = (this.canvas.height - height) / 2;
+                    this.ctx.drawImage(sprite, x, y, width, height);
+                }
+            }
+
+            playAction(action) {
+                if (this.sprites[action] && this.sprites[action].length > 0) {
+                    this.currentAction = action;
+                    this.currentFrame = 0;
+                }
+            }
+        }
+
+        // Initialize character animators
+        let knightAnimator, banditAnimator;
+
+        // Game State
+        let gameState = {
+            playerHealth: 100,
+            enemyHealth: 100,
+            score: 0,
+            streak: 0,
+            currentQuestion: 0,
+            totalQuestions: 10,
+            questions: [],
+            selectedCategory: null
+        };
+
+        // Load categories
+        async function loadCategories() {
+            try {
+                const response = await fetch('/game/api/categories/');
+                const categories = await response.json();
+
+                const categoryGrid = document.getElementById('categoryGrid');
+                categoryGrid.innerHTML = '';
+
+                const icons = ['❤️', '💊', '🏥', '🧠', '🫁', '👶', '🤰', '🩺'];
+
+                categories.forEach((category, index) => {
+                    const card = document.createElement('div');
+                    card.className = 'category-card';
+                    card.onclick = () => startGame(category.id, category.name);
+                    card.innerHTML = `
+                        <div class="category-icon">${icons[index % icons.length]}</div>
+                        <div class="category-name">${category.name}</div>
+                    `;
+                    categoryGrid.appendChild(card);
+                });
+            } catch (error) {
+                console.error('Error loading categories:', error);
+            }
+        }
+
+        // Start game with selected category
+        async function startGame(categoryId, categoryName) {
+            gameState.selectedCategory = categoryId;
+            document.getElementById('categorySelection').classList.add('hidden');
+
+            // Load questions for this category
+            await loadQuestions(categoryId);
+            loadNextQuestion();
+        }
+
+        // Load questions from database
+        async function loadQuestions(categoryId) {
+            try {
+                const response = await fetch(`/game/api/questions/?category=${categoryId}&limit=10`);
+                const data = await response.json();
+                gameState.questions = data.questions;
+            } catch (error) {
+                console.error('Error loading questions:', error);
+                gameState.questions = [];
+            }
+        }
+
+        // Load next question
+        function loadNextQuestion() {
+            if (gameState.currentQuestion >= gameState.questions.length) {
+                endGame(true);
+                return;
+            }
+
+            const question = gameState.questions[gameState.currentQuestion];
+            document.getElementById('questionText').textContent = question.text;
+            document.getElementById('questionCount').textContent =
+                `${gameState.currentQuestion + 1}/${gameState.questions.length}`;
+
+            const answersGrid = document.getElementById('answersGrid');
+            answersGrid.innerHTML = '';
+
+            const labels = ['A', 'B', 'C', 'D'];
+            question.options.forEach((option, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'answer-btn';
+                btn.innerHTML = `<span class="answer-label">${labels[index]}</span>${option}`;
+                btn.onclick = () => checkAnswer(labels[index], question.correct_answer);
+                answersGrid.appendChild(btn);
+            });
+        }
+
+        // Check answer
+        function checkAnswer(selected, correct) {
+            const buttons = document.querySelectorAll('.answer-btn');
+            buttons.forEach(btn => btn.disabled = true);
+
+            const isCorrect = selected === correct;
+
+            buttons.forEach(btn => {
+                const label = btn.querySelector('.answer-label').textContent;
+                if (label === correct) {
+                    btn.classList.add('correct');
+                } else if (label === selected && !isCorrect) {
+                    btn.classList.add('incorrect');
+                }
+            });
+
+            if (isCorrect) {
+                handleCorrectAnswer();
+            } else {
+                handleIncorrectAnswer();
+            }
+
+            setTimeout(() => {
+                gameState.currentQuestion++;
+                loadNextQuestion();
+            }, 2000);
+        }
+
+        // Handle correct answer
+        function handleCorrectAnswer() {
+            gameState.score += 10;
+            gameState.streak++;
+            gameState.enemyHealth -= 20;
+
+            document.getElementById('scoreValue').textContent = gameState.score;
+            document.getElementById('streakValue').textContent = gameState.streak;
+            updateHealthBar('enemyHealth', gameState.enemyHealth);
+
+            // Knight attacks with sprite animation
+            if (knightAnimator) knightAnimator.playAction('Attack');
+            document.getElementById('playerSprite').classList.add('attacking');
+
+            // Show damage on enemy
+            showDamageNumber('enemySprite', '-20', false);
+
+            // Enemy hurt animation
+            setTimeout(() => {
+                if (banditAnimator) banditAnimator.playAction('Hurt');
+                document.getElementById('enemySprite').classList.add('hurt');
+                setTimeout(() => {
+                    document.getElementById('enemySprite').classList.remove('hurt');
+                }, 500);
+            }, 300);
+
+            setTimeout(() => {
+                document.getElementById('playerSprite').classList.remove('attacking');
+            }, 500);
+
+            showFeedback('✅ Correct! +10 points', '#22c55e');
+
+            if (gameState.enemyHealth <= 0) {
+                setTimeout(() => endGame(true), 1000);
+            }
+        }
+
+        // Handle incorrect answer
+        function handleIncorrectAnswer() {
+            gameState.streak = 0;
+            gameState.playerHealth -= 15;
+
+            document.getElementById('streakValue').textContent = gameState.streak;
+            updateHealthBar('playerHealth', gameState.playerHealth);
+
+            // Enemy attacks with sprite animation
+            if (banditAnimator) banditAnimator.playAction('Attack');
+            const enemySprite = document.getElementById('enemySprite');
+            enemySprite.classList.add('attacking');
+
+            // Show damage on player
+            showDamageNumber('playerSprite', '-15', false);
+
+            // Player hurt animation
+            setTimeout(() => {
+                if (knightAnimator) knightAnimator.playAction('Hurt');
+                document.getElementById('playerSprite').classList.add('hurt');
+                setTimeout(() => {
+                    document.getElementById('playerSprite').classList.remove('hurt');
+                }, 500);
+            }, 300);
+
+            setTimeout(() => {
+                enemySprite.classList.remove('attacking');
+            }, 500);
+
+            showFeedback('❌ Incorrect!', '#ef4444');
+
+            if (gameState.playerHealth <= 0) {
+                setTimeout(() => endGame(false), 1000);
+            }
+        }
+
+        // Show damage number
+        function showDamageNumber(spriteId, text, isHeal) {
+            const sprite = document.getElementById(spriteId);
+            const damageNum = document.createElement('div');
+            damageNum.className = 'damage-number' + (isHeal ? ' heal' : '');
+            damageNum.textContent = text;
+            sprite.appendChild(damageNum);
+
+            setTimeout(() => {
+                damageNum.remove();
+            }, 1000);
+        }
+
+        // Update health bar
+        function updateHealthBar(id, health) {
+            const healthBar = document.getElementById(id);
+            healthBar.style.width = Math.max(0, health) + '%';
+        }
+
+        // Show feedback
+        function showFeedback(message, color) {
+            const feedback = document.getElementById('feedbackMessage');
+            feedback.textContent = message;
+            feedback.style.color = color;
+            feedback.classList.add('show');
+            setTimeout(() => {
+                feedback.classList.remove('show');
+            }, 2000);
+        }
+
+        // End game
+        function endGame(victory) {
+            const screen = document.getElementById('gameOverScreen');
+            const title = document.getElementById('gameOverTitle');
+            const stats = document.getElementById('gameOverStats');
+
+            if (victory) {
+                title.textContent = '🎉 Victory!';
+                title.style.color = '#22c55e';
+            } else {
+                title.textContent = '💀 Defeat!';
+                title.style.color = '#ef4444';
+            }
+
+            stats.innerHTML = `
+                Final Score: ${gameState.score}<br>
+                Best Streak: ${gameState.streak}<br>
+                Questions Answered: ${gameState.currentQuestion}/${gameState.questions.length}
+            `;
+
+            screen.classList.add('show');
+        }
+
+        // Restart game
+        function restartGame() {
+            gameState = {
+                playerHealth: 100,
+                enemyHealth: 100,
+                score: 0,
+                streak: 0,
+                currentQuestion: 0,
+                totalQuestions: 10,
+                questions: [],
+                selectedCategory: null
+            };
+
+            document.getElementById('gameOverScreen').classList.remove('show');
+            document.getElementById('categorySelection').classList.remove('hidden');
+
+            updateHealthBar('playerHealth', 100);
+            updateHealthBar('enemyHealth', 100);
+            document.getElementById('scoreValue').textContent = '0';
+            document.getElementById('streakValue').textContent = '0';
+
+            loadCategories();
+        }
+
+        // Initialize game
+        window.onload = () => {
+            // Initialize character animations
+            knightAnimator = new CharacterAnimator('knightCanvas', 'Knight', 1.5);
+            banditAnimator = new CharacterAnimator('banditCanvas', 'Bandit', 1.5);
+
+            knightAnimator.loadSprites();
+            banditAnimator.loadSprites();
+
+            loadCategories();
+        };
+    </script>
+</body>
+</html>

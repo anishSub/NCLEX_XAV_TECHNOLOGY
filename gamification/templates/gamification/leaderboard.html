@@ -1,124 +1,153 @@
+{% extends "base.html" %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Leaderboard - NCLEX Prep</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); min-height: 100vh; padding: 2rem 1rem; }
+
+{% block title %}Leaderboard – NCLEX XAV Technology{% endblock %}
+
+{% block extra_head %}
+<style>
+    .leaderboard-page { padding: 6rem 2rem 8rem; background: transparent; min-height: 100vh; }
+    .leaderboard-container { max-width: 1000px; margin: 0 auto; }
+
+    .leaderboard-header { text-align: center; margin-bottom: 4rem; }
+    .leaderboard-header h1 { font-size: 2.5rem; font-weight: 900; color: var(--primary); letter-spacing: -.03em; margin-bottom: .75rem; }
+    .leaderboard-header p { color: var(--secondary); font-size: 1.1rem; }
+
+    .top-three {
+        display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem;
+        margin-bottom: 4rem; align-items: end;
+    }
+    .podium-card {
+        background: var(--surface-container-lowest);
+        border-radius: 1.5rem; padding: 2.5rem 1.5rem;
+        text-align: center; box-shadow: 0 10px 30px var(--shadow-color);
+        border: 1px solid var(--surface-container-high);
+        position: relative; transition: all .3s;
+    }
+    .podium-card:hover { transform: translateY(-8px); }
+    .podium-card.rank-1 {
+        padding: 3.5rem 2rem; border: 2px solid #fbbf24;
+        background: linear-gradient(to bottom, #fffbeb, #fff);
+    }
+    .rank-badge {
+        position: absolute; top: 0; left: 50%; transform: translate(-50%, -50%);
+        width: 48px; height: 48px; border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font-weight: 900; font-size: 1.25rem; color: #fff;
+        box-shadow: 0 4px 12px rgba(0,0,0,.1);
+    }
+    .rank-1 .rank-badge { background: #fbbf24; }
+    .rank-2 .rank-badge { background: #94a3b8; }
+    .rank-3 .rank-badge { background: #b45309; }
+
+    .avatar-wrap {
+        width: 80px; height: 80px; border-radius: 50%;
+        margin: 0 auto 1.25rem; overflow: hidden;
+        border: 3px solid #fff; box-shadow: 0 4px 10px rgba(0,0,0,.1);
+    }
+    .rank-1 .avatar-wrap { width: 100px; height: 100px; }
+    .avatar-wrap img { width: 100%; height: 100%; object-fit: cover; }
+
+    .user-name { font-weight: 800; font-size: 1.1rem; color: var(--on-surface); margin-bottom: .25rem; }
+    .user-points { font-weight: 700; color: var(--primary); font-size: .9rem; }
+
+    .leaderboard-list {
+        background: var(--surface-container-lowest);
+        border-radius: 1.5rem; overflow: hidden;
+        box-shadow: 0 1px 3px var(--shadow-color);
+        border: 1px solid var(--surface-container-high);
+    }
+    .list-row {
+        display: grid; grid-template-columns: 60px 1fr 120px;
+        align-items: center; padding: 1.25rem 2rem;
+        border-bottom: 1px solid var(--surface-container);
+        transition: background .2s;
+    }
+    .list-row:last-child { border-bottom: none; }
+    .list-row:hover { background: var(--surface-container-low); }
+    .list-row.current-user { background: rgba(0,74,153,.05); border-left: 4px solid var(--primary); }
+
+    .list-rank { font-weight: 800; color: var(--secondary); font-size: .95rem; }
+    .list-user { display: flex; align-items: center; gap: 1rem; }
+    .list-avatar { width: 40px; height: 40px; border-radius: 50%; overflow: hidden; background: var(--surface-container); }
+    .list-name { font-weight: 700; color: var(--on-surface); }
+    .list-points { font-weight: 800; color: var(--primary); text-align: right; }
+
+    @media (max-width: 640px) {
+        .top-three { grid-template-columns: 1fr; gap: 3rem; }
+        .podium-card.rank-1 { order: -1; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="leaderboard-page main-with-sidenav">
+    <div class="leaderboard-container">
         
-        .header { background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border-radius: 20px; padding: 1.5rem 2rem; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; }
-        .header h1 { color: white; font-size: 2rem; }
-        .header a { color: white; text-decoration: none; padding: 0.8rem 1.5rem; background: rgba(255,255,255,0.2); border-radius: 50px; transition: all 0.3s; }
-        .header a:hover { background: rgba(255,255,255,0.3); }
-        
-        .container { max-width: 1000px; margin: 0 auto; }
-        
-        .leaderboard-card { background: white; border-radius: 20px; padding: 2rem; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
-        
-        .leaderboard-header { text-align: center; margin-bottom: 2rem; }
-        .leaderboard-header h2 { font-size: 2rem; color: #2c3e50; margin-bottom: 0.5rem; }
-        .leaderboard-header p { color: #7f8c8d; }
-        
-        .user-rank-highlight { background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%); border-radius: 15px; padding: 1.5rem; margin-bottom: 2rem; text-align: center; }
-        .user-rank-highlight .rank { font-size: 3rem; font-weight: 800; color: #1e3c72; }
-        .user-rank-highlight .label { color: #666; font-size: 1.1rem; margin-top: 0.5rem; }
-        
-        .leaderboard-list { list-style: none; }
-        .leaderboard-item { display: flex; align-items: center; padding: 1.2rem; margin-bottom: 1rem; background: #f8f9fa; border-radius: 12px; transition: all 0.3s; border-left: 4px solid transparent; }
-        .leaderboard-item:hover { transform: translateX(5px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        
-        .leaderboard-item.rank-1 { background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%); border-left-color: #ffd700; }
-        .leaderboard-item.rank-2 { background: linear-gradient(135deg, #c0c0c0 0%, #e8e8e8 100%); border-left-color: #c0c0c0; }
-        .leaderboard-item.rank-3 { background: linear-gradient(135deg, #cd7f32 0%, #e6a75e 100%); border-left-color: #cd7f32; }
-        .leaderboard-item.current-user { border: 3px solid #1e3c72; background: #e3f2fd; }
-        
-        .rank-number { font-size: 1.5rem; font-weight: 800; min-width: 60px; text-align: center; color: #2c3e50; }
-        .rank-medal { font-size: 2rem; min-width: 60px; text-align: center; }
-        
-        .user-info { flex: 1; margin-left: 1rem; }
-        .user-name { font-size: 1.2rem; font-weight: 700; color: #2c3e50; }
-        .user-level { color: #7f8c8d; font-size: 0.9rem; margin-top: 0.3rem; }
-        
-        .user-points { text-align: right; }
-        .points-value { font-size: 1.5rem; font-weight: 800; color: #1e3c72; }
-        .points-label { color: #7f8c8d; font-size: 0.85rem; }
-        
-        @media (max-width: 768px) {
-            .header { flex-direction: column; text-align: center; gap: 1rem; }
-            .leaderboard-item { flex-direction: column; text-align: center; }
-            .rank-number, .rank-medal { min-width: auto; margin-bottom: 0.5rem; }
-            .user-info { margin-left: 0; margin-bottom: 0.5rem; }
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>🏆 प्रतियोगीहरु (Leaderboard)</h1>
-            <div>
-                <a href="{% url 'home' %}">Home</a>
-                <a href="{% url 'gamification:badges' %}" style="margin-left: 1rem;">Badges</a>
-            </div>
+        <div class="leaderboard-header">
+            <h1>Global Hall of Fame</h1>
+            <p>Compete with nursing students worldwide. Earn points by passing exams and maintaining streaks.</p>
         </div>
-        
-        <div class="leaderboard-card">
-            <div class="leaderboard-header">
-                <h2>Top Champions</h2>
-                <p>Compete with the best NCLEX prep students!</p>
-            </div>
-            
-            {% if user_rank %}
-            <div class="user-rank-highlight">
-                <div class="rank">#{{ user_rank }}</div>
-                <div class="label">Your Current Rank</div>
-                <div style="margin-top: 1rem; font-size: 1.2rem; font-weight: 700; color: #1e3c72;">
-                    {{ user_profile.total_points }} points · Level {{ user_profile.level }}
+
+        {% if top_users %}
+            <!-- Top 3 Podium -->
+            <div class="top-three">
+                {% if top_users|length >= 2 %}
+                <div class="podium-card rank-2">
+                    <div class="rank-badge">2</div>
+                    <div class="avatar-wrap">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed={{ top_users.1.user.username }}" alt="Avatar">
+                    </div>
+                    <div class="user-name">{{ top_users.1.user.username }}</div>
+                    <div class="user-points">{{ top_users.1.total_points }} XP</div>
                 </div>
+                {% endif %}
+
+                {% if top_users|length >= 1 %}
+                <div class="podium-card rank-1">
+                    <div class="rank-badge">1</div>
+                    <div class="avatar-wrap">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed={{ top_users.0.user.username }}" alt="Avatar">
+                    </div>
+                    <div class="user-name">{{ top_users.0.user.username }}</div>
+                    <div class="user-points">{{ top_users.0.total_points }} XP</div>
+                </div>
+                {% endif %}
+
+                {% if top_users|length >= 3 %}
+                <div class="podium-card rank-3">
+                    <div class="rank-badge">3</div>
+                    <div class="avatar-wrap">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed={{ top_users.2.user.username }}" alt="Avatar">
+                    </div>
+                    <div class="user-name">{{ top_users.2.user.username }}</div>
+                    <div class="user-points">{{ top_users.2.total_points }} XP</div>
+                </div>
+                {% endif %}
             </div>
-            {% endif %}
-            
-            <ul class="leaderboard-list">
+
+            <!-- Full List -->
+            <div class="leaderboard-list">
                 {% for profile in top_users %}
-                <li class="leaderboard-item rank-{{ forloop.counter }} {% if profile.user == user %}current-user{% endif %}">
-                    {% if forloop.counter == 1 %}
-                        <div class="rank-medal">👑</div>
-                    {% elif forloop.counter == 2 %}
-                        <div class="rank-medal">🥈</div>
-                    {% elif forloop.counter == 3 %}
-                        <div class="rank-medal">🥉</div>
-                    {% else %}
-                        <div class="rank-number">{{ forloop.counter }}</div>
-                    {% endif %}
-                    
-                    <div class="user-info">
-                        <div class="user-name">
-                            {{ profile.user.username }}
-                            {% if profile.user == user %}<span style="color: #1e3c72;">(You)</span>{% endif %}
+                {% if forloop.counter > 3 %}
+                <div class="list-row {% if profile.user == request.user %}current-user{% endif %}">
+                    <div class="list-rank">#{{ forloop.counter }}</div>
+                    <div class="list-user">
+                        <div class="list-avatar">
+                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed={{ profile.user.username }}" alt="Avatar" style="width:100%; height:100%;">
                         </div>
-                        <div class="user-level">
-                            Level {{ profile.level }} · 
-                            {% if profile.current_streak > 0 %}
-                                🔥 {{ profile.current_streak }} day streak
-                            {% endif %}
-                        </div>
+                        <div class="list-name">{{ profile.user.username }}</div>
                     </div>
-                    
-                    <div class="user-points">
-                        <div class="points-value">{{ profile.total_points }}</div>
-                        <div class="points-label">points</div>
-                    </div>
-                </li>
-                {% empty %}
-                <li style="text-align: center; padding: 3rem; color: #999;">
-                    No users yet. Be the first to earn points!
-                </li>
+                    <div class="list-points">{{ profile.total_points }} XP</div>
+                </div>
+                {% endif %}
                 {% endfor %}
-            </ul>
-        </div>
+            </div>
+        {% else %}
+            <div style="text-align:center; padding:5rem 2rem;">
+                <span class="material-symbols-outlined" style="font-size:4rem; color:var(--surface-container-high); margin-bottom:1.5rem;">leaderboard</span>
+                <p style="color:var(--secondary);">No rankings available yet. Be the first to earn points!</p>
+            </div>
+        {% endif %}
     </div>
-</body>
-</html>
+</div>
+{% endblock %}

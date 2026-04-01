@@ -40,8 +40,21 @@ def planner_dashboard(request):
         'upcoming_tasks': upcoming_tasks,
         'days_until_exam': days_until_exam,
         'completion_rate': completion_rate,
-        'today': today,  # For the add task modal date input
+        'today': today,
     }
+
+    # Inject gamification profile so streak / points show correctly
+    try:
+        from gamification.services import GamificationService
+        gam = GamificationService.get_or_create_profile(request.user)
+        GamificationService.update_user_streak(request.user)  # update daily streak on visit
+        rank = GamificationService.get_user_rank(request.user)
+        context['gam_profile'] = gam
+        context['user_rank'] = rank
+    except Exception:
+        context['gam_profile'] = None
+        context['user_rank'] = '—'
+
     return render(request, 'study_planner/dashboard.html', context)
 
 

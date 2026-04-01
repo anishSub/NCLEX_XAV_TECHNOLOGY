@@ -1,0 +1,397 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}NCLEX XAV Technology{% endblock %}</title>
+    <meta name="description" content="{% block meta_description %}NCLEX XAV Technology helps nursing students prepare for the NCLEX-RN with adaptive exams, practice questions, study planning, and gamified learning.{% endblock %}">
+    <link rel="stylesheet" href="{% static 'css/nclex-design.css' %}">
+    <style>
+    .site-shell {
+        min-height: 100vh;
+        background:
+            radial-gradient(circle at top left, rgba(164, 227, 255, 0.42), transparent 28%),
+            radial-gradient(circle at top right, rgba(215, 226, 255, 0.6), transparent 30%),
+            linear-gradient(180deg, #f9fcff 0%, #eef7ff 100%);
+    }
+    .site-header {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        padding: 1rem 1rem 0;
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+    }
+    .site-header-inner {
+        max-width: 1560px;
+        margin: 0 auto;
+        padding: 0.95rem 1.2rem;
+        border: 1px solid rgba(0, 74, 153, 0.08);
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.82);
+        box-shadow: 0 18px 50px rgba(0, 52, 111, 0.08);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+    }
+    .site-brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.85rem;
+        min-width: 0;
+    }
+    .site-brand-mark {
+        width: 2.85rem;
+        height: 2.85rem;
+        border-radius: 1rem;
+        background: linear-gradient(135deg, var(--primary), var(--primary-container));
+        color: #fff;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 14px 26px rgba(0, 52, 111, 0.18);
+    }
+    .site-brand-mark .material-symbols-outlined {
+        font-size: 1.35rem;
+        font-variation-settings: 'FILL' 1;
+    }
+    .site-brand-copy {
+        display: flex;
+        flex-direction: column;
+        line-height: 1.1;
+    }
+    .site-brand-title {
+        color: var(--primary);
+        font-size: 1rem;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+    }
+    .site-brand-subtitle {
+        color: var(--secondary);
+        font-size: 0.72rem;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+    }
+    .site-nav {
+        display: none;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.3rem;
+        border-radius: 999px;
+        background: rgba(226, 239, 255, 0.7);
+    }
+    .site-nav a {
+        padding: 0.72rem 1rem;
+        border-radius: 999px;
+        font-size: 0.88rem;
+        font-weight: 700;
+        color: #5b6b7c;
+        transition: 0.25s ease;
+    }
+    .site-nav a:hover,
+    .site-nav a.is-active {
+        color: var(--primary);
+        background: rgba(255, 255, 255, 0.95);
+        box-shadow: 0 10px 20px rgba(0, 74, 153, 0.08);
+    }
+    .site-actions {
+        display: none;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    .site-ghost-link {
+        color: var(--primary);
+        font-size: 0.88rem;
+        font-weight: 700;
+        padding: 0.7rem 1rem;
+        border-radius: 999px;
+        transition: 0.2s ease;
+    }
+    .site-ghost-link:hover {
+        background: rgba(0, 74, 153, 0.08);
+    }
+    .site-cta-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.45rem;
+        padding: 0.82rem 1.2rem;
+        border-radius: 999px;
+        background: linear-gradient(135deg, var(--primary), var(--primary-container));
+        color: #fff;
+        font-size: 0.88rem;
+        font-weight: 700;
+        box-shadow: 0 14px 26px rgba(0, 52, 111, 0.18);
+        transition: 0.25s ease;
+    }
+    .site-cta-link:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 18px 32px rgba(0, 52, 111, 0.24);
+    }
+    .site-mobile-menu {
+        position: relative;
+        display: block;
+    }
+    .site-mobile-menu summary {
+        list-style: none;
+        width: 2.85rem;
+        height: 2.85rem;
+        border-radius: 0.9rem;
+        background: rgba(226, 239, 255, 0.92);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--primary);
+        cursor: pointer;
+        box-shadow: 0 10px 18px rgba(0, 74, 153, 0.08);
+    }
+    .site-mobile-menu summary::-webkit-details-marker {
+        display: none;
+    }
+    .site-mobile-panel {
+        position: absolute;
+        right: 0;
+        top: calc(100% + 0.75rem);
+        width: min(280px, calc(100vw - 2rem));
+        padding: 1rem;
+        border-radius: 1.25rem;
+        background: rgba(255, 255, 255, 0.97);
+        border: 1px solid rgba(0, 74, 153, 0.08);
+        box-shadow: 0 24px 50px rgba(0, 52, 111, 0.12);
+        display: grid;
+        gap: 0.55rem;
+    }
+    .site-mobile-panel a {
+        padding: 0.85rem 0.95rem;
+        border-radius: 0.85rem;
+        font-size: 0.94rem;
+        font-weight: 700;
+        color: var(--primary);
+        background: var(--surface-container-low);
+    }
+    .site-main {
+        display: block;
+    }
+    .site-footer {
+        margin-top: 4rem;
+        padding: 0 1rem 1rem;
+    }
+    .site-footer-inner {
+        max-width: 1560px;
+        margin: 0 auto;
+        padding: 2.25rem;
+        border-radius: 2rem;
+        background:
+            linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(236, 244, 255, 0.96)),
+            linear-gradient(135deg, rgba(0, 74, 153, 0.02), rgba(31, 102, 126, 0.08));
+        border: 1px solid rgba(0, 74, 153, 0.08);
+        box-shadow: 0 20px 60px rgba(0, 52, 111, 0.08);
+    }
+    .site-footer-top {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 2rem;
+        margin-bottom: 1.5rem;
+    }
+    .site-footer-brand {
+        max-width: 24rem;
+    }
+    .site-footer-brand .site-brand {
+        margin-bottom: 1rem;
+    }
+    .site-footer-description {
+        color: #557189;
+        font-size: 0.96rem;
+        line-height: 1.75;
+    }
+    .site-footer-socials {
+        display: flex;
+        gap: 0.6rem;
+        margin-top: 1.2rem;
+    }
+    .site-footer-socials span {
+        width: 2.35rem;
+        height: 2.35rem;
+        border-radius: 999px;
+        background: rgba(0, 74, 153, 0.08);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--primary);
+    }
+    .site-footer-links {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1.5rem;
+    }
+    .site-footer-column h4 {
+        color: var(--primary);
+        font-size: 0.95rem;
+        font-weight: 800;
+        margin-bottom: 0.9rem;
+    }
+    .site-footer-column a,
+    .site-footer-column span {
+        display: block;
+        margin-bottom: 0.7rem;
+        color: #5d7389;
+        font-size: 0.92rem;
+        line-height: 1.5;
+    }
+    .site-footer-column a:hover {
+        color: var(--primary);
+    }
+    .site-footer-bottom {
+        border-top: 1px solid rgba(0, 74, 153, 0.1);
+        padding-top: 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.6rem;
+        color: #6b8298;
+        font-size: 0.82rem;
+    }
+    @media (min-width: 900px) {
+        .site-nav,
+        .site-actions {
+            display: flex;
+        }
+        .site-mobile-menu {
+            display: none;
+        }
+        .site-footer-top {
+            grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+            align-items: start;
+        }
+        .site-footer-links {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+        .site-footer-bottom {
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+        }
+    }
+    {% block extra_head %}{% endblock %}
+    </style>
+</head>
+<body class="{% block body_class %}{% endblock %}">
+<div class="site-shell">
+    <header class="site-header">
+        <div class="site-header-inner">
+            <a href="{% url 'home' %}" class="site-brand">
+                <span class="site-brand-mark">
+                    <span class="material-symbols-outlined">health_and_safety</span>
+                </span>
+                <span class="site-brand-copy">
+                    <span class="site-brand-title">NCLEX XAV</span>
+                    <span class="site-brand-subtitle">Clinical Excellence Platform</span>
+                </span>
+            </a>
+
+            <nav class="site-nav">
+                <a href="{% url 'home' %}" class="{% if request.resolver_match.url_name == 'home' %}is-active{% endif %}">Home</a>
+                <a href="{% url 'practice_categories' %}" class="{% if request.resolver_match.url_name == 'practice_categories' %}is-active{% endif %}">Practice</a>
+                <a href="{% url 'study_planner' %}" class="{% if request.resolver_match.url_name == 'study_planner' %}is-active{% endif %}">Study Plan</a>
+                <a href="{% url 'pricing' %}" class="{% if request.resolver_match.url_name == 'pricing' %}is-active{% endif %}">Pricing</a>
+                <a href="{% url 'game_page' %}" class="{% if request.resolver_match.url_name == 'game_page' %}is-active{% endif %}">Game</a>
+            </nav>
+
+            <div class="site-actions">
+                {% if user.is_authenticated %}
+                    <a href="{% url 'study_planner' %}" class="site-ghost-link">Dashboard</a>
+                    <a href="{% url 'logout' %}" class="site-cta-link">
+                        <span class="material-symbols-outlined" style="font-size:18px;">logout</span>
+                        Logout
+                    </a>
+                {% else %}
+                    <a href="{% url 'login' %}" class="site-ghost-link">Login</a>
+                    <a href="{% url 'register' %}" class="site-cta-link">
+                        <span class="material-symbols-outlined" style="font-size:18px;">arrow_forward</span>
+                        Get Started
+                    </a>
+                {% endif %}
+            </div>
+
+            <details class="site-mobile-menu">
+                <summary>
+                    <span class="material-symbols-outlined">menu</span>
+                </summary>
+                <div class="site-mobile-panel">
+                    <a href="{% url 'home' %}">Home</a>
+                    <a href="{% url 'practice_categories' %}">Practice</a>
+                    <a href="{% url 'study_planner' %}">Study Plan</a>
+                    <a href="{% url 'pricing' %}">Pricing</a>
+                    <a href="{% url 'game_page' %}">Game</a>
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'logout' %}">Logout</a>
+                    {% else %}
+                        <a href="{% url 'login' %}">Login</a>
+                        <a href="{% url 'register' %}">Get Started</a>
+                    {% endif %}
+                </div>
+            </details>
+        </div>
+    </header>
+
+    <main class="site-main">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="site-footer">
+        <div class="site-footer-inner">
+            <div class="site-footer-top">
+                <div class="site-footer-brand">
+                    <div class="site-brand">
+                        <span class="site-brand-mark">
+                            <span class="material-symbols-outlined">health_and_safety</span>
+                        </span>
+                        <span class="site-brand-copy">
+                            <span class="site-brand-title">NCLEX XAV</span>
+                            <span class="site-brand-subtitle">Clinical Excellence Platform</span>
+                        </span>
+                    </div>
+                    <p class="site-footer-description">
+                        Adaptive NCLEX preparation with CAT-style testing, next-generation question types, study planning, clinical scenarios, and gamified motivation for future nurses.
+                    </p>
+                    <div class="site-footer-socials">
+                        <span><span class="material-symbols-outlined" style="font-size:18px;">public</span></span>
+                        <span><span class="material-symbols-outlined" style="font-size:18px;">school</span></span>
+                        <span><span class="material-symbols-outlined" style="font-size:18px;">monitoring</span></span>
+                    </div>
+                </div>
+
+                <div class="site-footer-links">
+                    <div class="site-footer-column">
+                        <h4>Platform</h4>
+                        <a href="{% url 'start_exam' %}">Adaptive Exam</a>
+                        <a href="{% url 'practice_categories' %}">Question Practice</a>
+                        <a href="{% url 'scenario_practice' %}">Clinical Scenarios</a>
+                    </div>
+                    <div class="site-footer-column">
+                        <h4>Student Tools</h4>
+                        <a href="{% url 'study_planner' %}">Study Planner</a>
+                        <a href="{% url 'pricing' %}">Pricing Plans</a>
+                        <a href="{% url 'game_page' %}">Adventure Game</a>
+                    </div>
+                    <div class="site-footer-column">
+                        <h4>Account</h4>
+                        <a href="{% url 'login' %}">Login</a>
+                        <a href="{% url 'register' %}">Create Account</a>
+                        <a href="/admin/">Admin Panel</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="site-footer-bottom">
+                <span>© 2025 NCLEX XAV Technology. Built for nursing excellence.</span>
+                <span>Adaptive exams · Study plans · NGN practice · Clinical scenarios</span>
+            </div>
+        </div>
+    </footer>
+</div>
+{% block extra_scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}NCLEX Adventure Game – NCLEX XAV Technology{% endblock %}
+
+{% block extra_head %}
+    .game-page { padding: 6rem 2rem 8rem; background: transparent; min-height: 100vh; }
+    .game-container { max-width: 1000px; margin: 0 auto; }
+
+    .game-card {
+        background: var(--surface-container-lowest);
+        border-radius: 2rem; padding: 4rem;
+        box-shadow: 0 40px 80px -15px rgba(10,29,43,.12);
+        border: 1px solid var(--surface-container-high);
+        position: relative; overflow: hidden;
+    }
+    .game-card::before {
+        content: ''; position: absolute; top: 0; right: 0;
+        width: 300px; height: 300px; border-radius: 50%;
+        background: radial-gradient(circle, rgba(59,130,246,.05), transparent 70%);
+        transform: translate(30%, -30%);
+    }
+
+    .game-header { text-align: center; margin-bottom: 4rem; position: relative; z-index: 1; }
+    .game-icon {
+        width: 100px; height: 100px; background: linear-gradient(135deg, var(--primary), var(--primary-container));
+        border-radius: 1.5rem; display: flex; align-items: center; justify-content: center;
+        margin: 0 auto 1.5rem; box-shadow: 0 10px 30px rgba(0,74,153,.2);
+    }
+    .game-icon .material-symbols-outlined { font-size: 3.5rem; color: #fff; font-variation-settings: 'FILL' 1; }
+    .game-header h1 { font-size: 2.5rem; font-weight: 900; color: var(--primary); letter-spacing: -.03em; margin-bottom: .5rem; }
+    .game-header .subtitle { font-size: 1.1rem; color: var(--secondary); font-weight: 500; }
+
+    .game-section { margin-bottom: 3.5rem; position: relative; z-index: 1; }
+    .game-section h2 { font-size: 1.5rem; font-weight: 800; color: var(--primary); margin-bottom: 1.25rem; display: flex; align-items: center; gap: .75rem; }
+    .game-section h2 .material-symbols-outlined { color: var(--primary-container); }
+    .game-section p { font-size: 1.05rem; color: var(--secondary); line-height: 1.7; margin-bottom: 1rem; }
+
+    .features-grid {
+        display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1.5rem; margin-bottom: 3.5rem;
+    }
+    .feature-item {
+        background: var(--surface-container-low); padding: 1.5rem;
+        border-radius: 1.25rem; text-align: center; border: 1px solid var(--surface-container);
+        transition: all .3s;
+    }
+    .feature-item:hover { transform: translateY(-4px); border-color: var(--primary-container); }
+    .feature-item .material-symbols-outlined { font-size: 2.5rem; color: var(--primary); margin-bottom: 1rem; }
+    .feature-item h3 { font-size: 1.1rem; font-weight: 800; color: var(--on-surface); margin-bottom: .5rem; }
+    .feature-item p { font-size: .85rem; color: var(--secondary); line-height: 1.5; margin: 0; }
+
+    .play-section {
+        background: linear-gradient(135deg, #0f172a, #1e293b);
+        border-radius: 1.5rem; padding: 3.5rem 2rem; color: #fff; text-align: center;
+        box-shadow: 0 20px 40px rgba(0,0,0,.2);
+    }
+    .play-section h2 { font-size: 2rem; font-weight: 900; margin-bottom: 1rem; letter-spacing: -.02em; }
+    .play-section p { opacity: .8; margin-bottom: 2.5rem; }
+    
+    .play-btn {
+        display: inline-flex; align-items: center; gap: .75rem;
+        padding: 1.25rem 3.5rem; background: #fff; color: #0f172a;
+        font-weight: 800; font-size: 1.1rem; border-radius: var(--radius-full);
+        text-decoration: none; transition: all .3s;
+        box-shadow: 0 0 30px rgba(255,255,255,.2);
+    }
+    .play-btn:hover { transform: scale(1.05); box-shadow: 0 0 50px rgba(255,255,255,.4); }
+
+    .req-box {
+        background: #fff5f5; border-left: 4px solid #ef4444;
+        padding: 1.5rem; border-radius: .75rem; margin-top: 3rem;
+    }
+    .req-box h3 { color: #991b1b; font-size: 1rem; font-weight: 800; margin-bottom: .75rem; display: flex; align-items: center; gap: .5rem; }
+    .req-list { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
+    .req-list li { color: #b91c1c; font-size: .85rem; display: flex; align-items: center; gap: .5rem; }
+    .req-list li::before { content: '✓'; font-weight: 900; }
+
+    @media (max-width: 768px) {
+        .game-card { padding: 3rem 2rem; }
+        .req-list { grid-template-columns: 1fr; }
+    }
+{% endblock %}
+
+{% block content %}
+<div class="game-page main-with-sidenav">
+    <div class="game-container">
+        
+        <div class="game-card">
+            <!-- Header -->
+            <div class="game-header">
+                <div class="game-icon">
+                    <span class="material-symbols-outlined">videogame_asset</span>
+                </div>
+                <h1>NCLEX Adventure Game</h1>
+                <p class="subtitle">Play in Your Browser – No Downloads Needed!</p>
+            </div>
+
+            <!-- About -->
+            <div class="game-section">
+                <h2>
+                    <span class="material-symbols-outlined">info</span>
+                    About the Game
+                </h2>
+                <p>Experience a unique RPG-style adventure where you battle enemies by answering NCLEX questions correctly! This desktop game combines gaming excitement with serious exam preparation.</p>
+                <p>Play as a Knight fighting through different medical content areas. Each correct answer deals damage to your enemy, while wrong answers cause you to take damage. Earn currency, buy potions, and master all 10 clinical categories!</p>
+            </div>
+
+            <!-- Features -->
+            <div class="features-grid">
+                <div class="feature-item">
+                    <span class="material-symbols-outlined">psychology</span>
+                    <h3>10 Content Areas</h3>
+                    <p>Cardiovascular, EKG, GI, Mental Health, Respiratory, Neurology, Endocrine, and more.</p>
+                </div>
+                <div class="feature-item">
+                    <span class="material-symbols-outlined">swords</span>
+                    <h3>RPG Battle System</h3>
+                    <p>Fight enemies with your knowledge! Correct answers attack, wrong answers hurt you.</p>
+                </div>
+                <div class="feature-item">
+                    <span class="material-symbols-outlined">menu_book</span>
+                    <h3>Study Guide</h3>
+                    <p>Built-in PDF viewer with comprehensive NCLEX content review integrated into the game.</p>
+                </div>
+                <div class="feature-item">
+                    <span class="material-symbols-outlined">payments</span>
+                    <h3>Item Shop</h3>
+                    <p>Earn currency from victories and buy health potions to help you survive tough raids.</p>
+                </div>
+            </div>
+
+            <!-- Play CTA -->
+            {% if user.is_authenticated %}
+                <div class="play-section">
+                    <h2>Ready to Start Your Adventure?</h2>
+                    <p>Launch the RPG directly in your browser. All progress syncs with your study dashboard.</p>
+                    <a href="{% url 'play_game' %}" class="play-btn">
+                        <span class="material-symbols-outlined" style="font-size:24px;">rocket_launch</span>
+                        Play Game Now
+                    </a>
+                </div>
+            {% else %}
+                <div class="play-section">
+                    <h2>Login Required</h2>
+                    <p>Please sign in or create an account to start your clinical adventure.</p>
+                    <a href="{% url 'login' %}" class="play-btn">
+                        <span class="material-symbols-outlined" style="font-size:24px;">login</span>
+                        Sign In to Play
+                    </a>
+                </div>
+            {% endif %}
+
+            <!-- Requirements -->
+            <div class="req-box">
+                <h3><span class="material-symbols-outlined" style="font-size:18px;">report_problem</span> Requirements</h3>
+                <ul class="req-list">
+                    <li>Modern web browser (Chrome, Firefox, Safari)</li>
+                    <li>Desktop or Laptop (Recommended)</li>
+                    <li>Stable Internet connection</li>
+                    <li>Active NCLEX XAV Account</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

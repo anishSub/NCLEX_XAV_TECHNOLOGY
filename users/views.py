@@ -2,8 +2,9 @@ from django.views.generic import CreateView
 from django.urls import reverse_lazy
 from django.contrib import messages
 from django.contrib.auth.views import LoginView, LogoutView
-from django.contrib.auth import login
-from django.shortcuts import redirect
+from django.contrib.auth import login, update_session_auth_hash
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect
 from .forms import StudentSignUpForm
 from .models import Users, StudentProfile
 
@@ -74,6 +75,62 @@ class CustomLogoutView(LogoutView):
         if request.user.is_authenticated:
             messages.success(request, 'You have been logged out successfully.')
         return super().dispatch(request, *args, **kwargs)
-    
-    
-    
+
+
+# --- PROFILE VIEW ---
+@login_required
+def profile_view(request):
+    """User profile page – view and update personal info."""
+    user = request.user
+    profile, _ = StudentProfile.objects.get_or_create(user=user)
+
+    # Try to pull gamification stats
+    try:
+        from gamification.services import GamificationService
+        gam_profile = GamificationService.get_or_create_profile(user)
+        user_rank = GamificationService.get_user_rank(user)
+        badges = GamificationService.get_user_badges(user)
+    except Exception:
+        gam_profile = None
+        user_rank = '—'
+        badges = []
+
+    if request.method == 'POST':
+        # Update basic info
+        user.first_name = request.POST.get('first_name', user.first_name)
+        user.last_name = request.POST.get('last_name', user.last_name)
+        profile.phone_number = request.POST.get('phone_number', profile.phone_number)
+        profile.bio = request.POST.get('bio', profile.bio)
+
+        # Profile image upload
+        if 'profile_image' in request.FILES:
+            profile.profile_image = request.FILES['profile_image']
+
+        user.save()
+        profile.save()
+
+        # Optional password change
+        current_pw = request.POST.get('current_password')
+        new_pw = request.POST.get('new_password')
+        confirm_pw = request.POST.get('confirm_password')
+        if current_pw and new_pw:
+            if not user.check_password(current_pw):
+                messages.error(request, 'Current password is incorrect.')
+            elif new_pw != confirm_pw:
+                messages.error(request, 'New passwords do not match.')
+            else:
+                user.set_password(new_pw)
+                user.save()
+                update_session_auth_hash(request, user)
+                messages.success(request, 'Password updated successfully!')
+
+        messages.success(request, 'Profile updated successfully!')
+        return redirect('profile')
+
+    context = {
+        'profile': profile,
+        'gam_profile': gam_profile,
+        'user_rank': user_rank,
+        'badges_count': len(badges),
+    }
+    return render(request, 'users/profile.html', context)

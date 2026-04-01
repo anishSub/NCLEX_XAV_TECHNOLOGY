@@ -1,217 +1,348 @@
+{% load static %}
 {% load exam_extras %}
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.0.1"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exam Results – NCLEX XAV Technology</title>
+    <meta name="description" content="Your NCLEX adaptive exam performance report with detailed analytics.">
+    <link rel="stylesheet" href="{% static 'css/nclex-design.css' %}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.0.1"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+    .results-page { padding-top: 64px; min-height: 100vh; background: var(--background); }
 
+    .results-container { max-width: 900px; margin: 0 auto; }
 
-<div class="results-container">
-
-  <div class="report-header">
-        <div class="report-title">
-            <h1>NCLEX Adaptive Exam Report</h1>
-            <p>Official Performance Summary</p>
-        </div>
-        <div class="report-meta">
-            <p><strong>Candidate:</strong> {{ request.user.get_full_name }}</p>
-            <p><strong>Date:</strong> {{ session.start_time|date:"F d, Y" }}</p>
-            <p><strong>Duration:</strong> <span id="report-duration">Calculating...</span></p> <p><strong>Exam ID:</strong> #NCX-{{ session.id }}</p>
-            <p><strong>Exam ID:</strong> #NCX-{{ session.id }}</p>
-        </div>
-    </div>
-
-    <div class="download-section" style="margin-bottom: 20px; text-align: right;">
-      <button id="download-btn" class="btn-download">
-          <span>📥</span> Download Results PDF
-      </button>
-    </div>
-
-    {% if session.status == 'PASS' %}
-    <div class="result-card pass">
-        <div class="status-icon">✔</div>
-        <div class="status-text">
-            <h2>EXAM PASSED</h2>
-            <p>Congratulations! You have successfully met the required ability threshold.</p>
-        </div>
-    </div>
-    {% elif session.status == 'FAIL' %}
-    <div class="result-card fail">
-        <div class="status-icon">✘</div>
-        <div class="status-text">
-            <h2>EXAM FAILED</h2>
-            <p>You did not reach the passing threshold this time. Review the performance chart below to identify areas for improvement.</p>
-        </div>
-    </div>
-    {% else %}
-    <div class="result-card">
-        <h2>Status: {{ session.status }}</h2>
-    </div>
-    {% endif %}
-
-    <div class="chart-section">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-            <h3 style="margin: 0;">Ability Estimate (Theta) Progress</h3>
-            <div class="score-badge">
-                Final Ability Level: <strong>{{ session.current_theta|format_theta }}</strong>
-            </div>
-        </div>
-        <div style="height: 350px; position: relative;">
-            <canvas id="performanceChart"></canvas>
-        </div>
-    </div>
-
-    <div class="breakdown-section">
-        <h3>Content Area Performance</h3>
-        <table class="breakdown-table">
-            <thead>
-                <tr>
-                    <th>Client Need Category</th>
-                    <th>Correct</th>
-                    <th>Score</th>
-                    <th>Visual</th>
-                </tr>
-            </thead>
-            <tbody id="category-table-body">
-                </tbody>
-        </table>
-    </div>
-    
-    <!-- NEW: Ability Trend Over Time -->
-    <div class="analytics-section" id="trend-section" style="margin-top: 40px; display: none;">
-        <h3>📈 Your Progress Over Time</h3>
-        <p id="trend-summary" style="color: #666; margin-bottom: 15px;"></p>
-        <div style="height: 300px; position: relative;">
-            <canvas id="trendChart"></canvas>
-        </div>
-    </div>
-    
-    <!-- NEW: Insights & Recommendations -->
-    <div class="insights-section" id="insights-section" style="margin-top: 40px; display: none;">
-        <h3>💡 Personalized Insights</h3>
-        <div id="insights-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px; margin-top: 20px;">
-            <!-- Insights will be dynamically added here -->
-        </div>
-    </div>
-    
-    <!-- NEW: Time Analytics -->
-    <div class="time-analytics-section" id="time-section" style="margin-top: 40px; display: none;">
-        <h3>⏱️ Time Management</h3>
-        <div class="time-stats" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-top: 20px;">
-            <div class="stat-card" style="background: white; border: 1px solid #e3e6f0; border-radius: 12px; padding: 20px; text-align: center;">
-                <div class="stat-value" id="avg-time" style="font-size: 2rem; font-weight: bold; color: #004a99;">--</div>
-                <div class="stat-label" style="color: #666; margin-top: 8px;">Avg per Question</div>
-            </div>
-            <div class="stat-card" style="background: white; border: 1px solid #e3e6f0; border-radius: 12px; padding: 20px; text-align: center;">
-                <div class="stat-value" id="total-duration" style="font-size: 2rem; font-weight: bold; color: #28a745;">--</div>
-                <div class="stat-label" style="color: #666; margin-top: 8px;">Total Duration</div>
-            </div>
-            <div class="stat-card" style="background: white; border: 1px solid #e3e6f0; border-radius: 12px; padding: 20px; text-align: center;">
-                <div class="stat-value" id="percentile" style="font-size: 2rem; font-weight: bold; color: #6f42c1;">--</div>
-                <div class="stat-label" style="color: #666; margin-top: 8px;">Your Percentile</div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<style>
-    /* Add the CSS I provided earlier here */
-    .results-container { max-width: 800px; margin: auto; padding: 20px; font-family: sans-serif; }
-    
-    .result-card {
-        display: flex; align-items: center; padding: 20px; border-radius: 12px;
-        border-left: 8px solid #ccc; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 30px;
+    /* Report Header */
+    .report-header {
+        display: flex; flex-wrap: wrap; justify-content: space-between;
+        align-items: flex-end; gap: 1rem;
+        border-bottom: 3px solid var(--primary);
+        padding-bottom: 1rem; margin-bottom: 2rem;
     }
-
-    .result-card.pass { background-color: #e6fffa; border-color: #38a169; color: #276749; }
-    .result-card.fail { background-color: #fff5f5; border-color: #e53e3e; color: #9b2c2c; }
-
-    .status-icon {
-        width: 50px; height: 50px; border-radius: 50%; display: flex;
-        justify-content: center; align-items: center; font-size: 24px;
-        font-weight: bold; margin-right: 20px; flex-shrink: 0;
+    .report-title h1 {
+        font-size: 1.5rem; font-weight: 900; color: var(--primary);
+        letter-spacing: -.03em; margin-bottom: .25rem;
     }
-    .pass .status-icon { background-color: #38a169; color: white; }
-    .fail .status-icon { background-color: #e53e3e; color: white; }
+    .report-title p { color: var(--secondary); font-size: .85rem; }
+    .report-meta p {
+        margin: .15rem 0; font-size: .8rem; color: #64748b;
+    }
+    .report-meta strong { color: var(--on-surface); }
 
-    .status-text h2 { margin: 0; font-size: 1.5rem; }
-    .status-text p { margin: 5px 0 0; font-size: 0.95rem; }
-    
-    .chart-section { background: #f9f9f9; padding: 20px; border-radius: 12px; }
-
+    .download-row { text-align: right; margin-bottom: 1.5rem; }
     .btn-download {
-    background-color: #004a99;
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 6px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background 0.3s ease;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    float: right;
-}
+        display: inline-flex; align-items: center; gap: .5rem;
+        padding: .75rem 1.5rem;
+        background: linear-gradient(135deg, var(--primary), var(--primary-container));
+        color: #fff; font-weight: 700; font-size: .85rem;
+        border-radius: var(--radius-full); cursor: pointer;
+        transition: all .3s; box-shadow: 0 4px 12px rgba(0,52,111,.2);
+    }
+    .btn-download:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,52,111,.3); }
 
-.btn-download:hover {
-    background-color: #003366;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-}
+    /* Result Card */
+    .result-card {
+        display: flex; align-items: center; gap: 1.5rem;
+        padding: 1.75rem; border-radius: 1rem;
+        border-left: 6px solid var(--outline-variant);
+        margin-bottom: 2rem;
+        box-shadow: 0 1px 3px var(--shadow-color);
+    }
+    .result-card.pass {
+        background: rgba(126,251,164,.08);
+        border-left-color: var(--tertiary);
+    }
+    .result-card.fail {
+        background: rgba(186,26,26,.05);
+        border-left-color: var(--error);
+    }
+    .status-icon {
+        width: 56px; height: 56px; border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.5rem; font-weight: 900; flex-shrink: 0;
+    }
+    .pass .status-icon { background: var(--tertiary); color: #fff; }
+    .fail .status-icon { background: var(--error); color: #fff; }
+    .status-text h2 {
+        font-size: 1.25rem; font-weight: 800; margin-bottom: .25rem;
+        letter-spacing: -.02em;
+    }
+    .pass .status-text h2 { color: var(--tertiary); }
+    .fail .status-text h2 { color: var(--error); }
+    .status-text p { font-size: .9rem; color: #64748b; }
 
-/* Clearfix for the floated button */
-.download-section::after {
-    content: "";
-    clear: both;
-    display: table;
-}
+    /* Chart Section */
+    .chart-section {
+        background: var(--surface-container-lowest); padding: 2rem;
+        border-radius: 1rem; margin-bottom: 2rem;
+        box-shadow: 0 1px 3px var(--shadow-color);
+    }
+    .chart-hdr {
+        display: flex; flex-wrap: wrap; justify-content: space-between;
+        align-items: center; margin-bottom: 1rem; gap: .75rem;
+    }
+    .chart-hdr h3 {
+        font-size: 1.1rem; font-weight: 800; color: var(--primary);
+        display: flex; align-items: center; gap: .5rem;
+    }
+    .score-badge {
+        display: inline-flex; align-items: center; gap: .35rem;
+        background: var(--primary); color: #fff;
+        padding: .4rem 1rem; border-radius: 999px;
+        font-size: .8rem; font-weight: 600;
+    }
+    .score-badge strong { font-size: .9rem; }
 
+    /* Breakdown Table */
+    .breakdown-section {
+        background: var(--surface-container-lowest);
+        border-radius: 1rem; padding: 2rem;
+        box-shadow: 0 1px 3px var(--shadow-color);
+        margin-bottom: 2rem; overflow-x: auto;
+    }
+    .breakdown-section h3 {
+        font-size: 1.1rem; font-weight: 800; color: var(--primary);
+        margin-bottom: 1rem; display: flex; align-items: center; gap: .5rem;
+    }
+    .breakdown-table { width: 100%; border-collapse: collapse; }
+    .breakdown-table thead tr { background: var(--surface-container-high); }
+    .breakdown-table th {
+        padding: .85rem 1rem; font-size: 10px; font-weight: 900;
+        letter-spacing: .1em; text-transform: uppercase;
+        color: var(--primary); text-align: left;
+    }
+    .breakdown-table td {
+        padding: .85rem 1rem; font-size: .875rem;
+        color: var(--on-surface); border-bottom: 1px solid var(--surface-container);
+    }
+    .breakdown-table tbody tr:hover { background: rgba(59,130,246,.03); }
+    .progress-bg {
+        width: 100px; height: 8px; background: var(--surface-container);
+        border-radius: 999px; position: relative; overflow: hidden;
+    }
+    .progress-fill {
+        height: 100%; border-radius: 999px; background: var(--primary-container);
+    }
 
-/* Report Header Styles */
-.report-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    border-bottom: 3px solid #004a99;
-    padding-bottom: 10px;
-    margin-bottom: 25px;
-}
-.report-title h1 { color: #004a99; margin: 0; font-size: 22px; }
-.report-meta p { margin: 2px 0; font-size: 13px; color: #555; }
+    /* Analytics Sections */
+    .analytics-section {
+        background: var(--surface-container-lowest); padding: 2rem;
+        border-radius: 1rem; margin-bottom: 2rem;
+        box-shadow: 0 1px 3px var(--shadow-color);
+    }
+    .analytics-section h3 {
+        font-size: 1.1rem; font-weight: 800; color: var(--primary);
+        margin-bottom: .5rem;
+    }
+    .analytics-section p { color: var(--secondary); font-size: .9rem; }
 
-/* Breakdown Table Styles */
-.breakdown-section { margin-top: 40px; }
-.breakdown-table { width: 100%; border-collapse: collapse; margin-top: 15px; background: white; }
-.breakdown-table th { background: #f4f7f9; text-align: left; padding: 12px; border-bottom: 2px solid #dee2e6; }
-.breakdown-table td { padding: 12px; border-bottom: 1px solid #eee; font-size: 14px; }
+    .time-stats {
+        display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 1rem; margin-top: 1rem;
+    }
+    .time-stat-card {
+        background: var(--surface-container-low); border-radius: 1rem;
+        padding: 1.5rem; text-align: center;
+    }
+    .time-stat-card .val { font-size: 2rem; font-weight: 900; color: var(--primary); }
+    .time-stat-card .lbl {
+        font-size: .75rem; font-weight: 700; text-transform: uppercase;
+        letter-spacing: .08em; color: #94a3b8; margin-top: .35rem;
+    }
 
-/* Progress Bar in Table */
-.progress-bg { background: #eee; border-radius: 10px; width: 100px; height: 8px; position: relative; }
-.progress-fill { background: #004a99; height: 100%; border-radius: 10px; }
+    .insights-grid {
+        display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1rem; margin-top: 1rem;
+    }
+    .insight-card {
+        background: var(--surface-container-low);
+        border-left: 4px solid var(--primary-container);
+        border-radius: .5rem; padding: 1rem 1.25rem;
+        font-size: .9rem; color: var(--on-surface); line-height: 1.6;
+    }
 
-.score-badge {
-    background-color: #004a99;
-    color: white;
-    padding: 6px 16px;
-    border-radius: 50px;
-    font-size: 0.9rem;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
+    .nav-actions-bottom {
+        display: flex; gap: 1rem; justify-content: center;
+        margin: 2rem 0; flex-wrap: wrap;
+    }
 
-.score-badge strong {
-    font-size: 1.1rem;
-    margin-left: 5px;
-}
-</style>
+    @media (max-width: 768px) {
+        .report-header { flex-direction: column; align-items: flex-start; }
+        .chart-hdr { flex-direction: column; align-items: flex-start; }
+    }
+    </style>
+</head>
+<body>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- ====== TOP NAVIGATION ====== -->
+<nav class="nclex-topnav">
+    <div class="nav-inner">
+        <a href="{% url 'home' %}" class="nav-brand">NCLEX XAV</a>
+        <div class="nav-links">
+            <a href="{% url 'study_planner' %}">Dashboard</a>
+            <a href="{% url 'practice_categories' %}">Practice</a>
+            <a href="{% url 'start_exam' %}">Exams</a>
+        </div>
+        <div class="nav-actions">
+            <a href="{% url 'home' %}" class="nav-icon-btn"><span class="material-symbols-outlined">home</span></a>
+        </div>
+    </div>
+</nav>
+
+<!-- ====== MAIN CONTENT ====== -->
+<main class="results-page" style="padding: 5.5rem 2rem 4rem;">
+    <div class="results-container">
+
+        <!-- Report Header -->
+        <div class="report-header">
+            <div class="report-title">
+                <h1>NCLEX Adaptive Exam Report</h1>
+                <p>Official Performance Summary</p>
+            </div>
+            <div class="report-meta">
+                <p><strong>Candidate:</strong> {{ request.user.get_full_name }}</p>
+                <p><strong>Date:</strong> {{ session.start_time|date:"F d, Y" }}</p>
+                <p><strong>Duration:</strong> <span id="report-duration">Calculating...</span></p>
+                <p><strong>Exam ID:</strong> #NCX-{{ session.id }}</p>
+            </div>
+        </div>
+
+        <!-- Download Button -->
+        <div class="download-row">
+            <button id="download-btn" class="btn-download">
+                <span class="material-symbols-outlined" style="font-size:18px;">download</span>
+                Download PDF
+            </button>
+        </div>
+
+        <!-- Pass/Fail Card -->
+        {% if session.status == 'PASS' %}
+        <div class="result-card pass">
+            <div class="status-icon">✔</div>
+            <div class="status-text">
+                <h2>EXAM PASSED</h2>
+                <p>Congratulations! You have successfully met the required ability threshold.</p>
+            </div>
+        </div>
+        {% elif session.status == 'FAIL' %}
+        <div class="result-card fail">
+            <div class="status-icon">✘</div>
+            <div class="status-text">
+                <h2>EXAM FAILED</h2>
+                <p>You did not reach the passing threshold this time. Review the performance chart below to identify areas for improvement.</p>
+            </div>
+        </div>
+        {% else %}
+        <div class="result-card">
+            <div class="status-text"><h2>Status: {{ session.status }}</h2></div>
+        </div>
+        {% endif %}
+
+        <!-- Chart Section -->
+        <div class="chart-section">
+            <div class="chart-hdr">
+                <h3>
+                    <span class="material-symbols-outlined" style="font-size:20px;">monitoring</span>
+                    Ability Estimate (Theta) Progress
+                </h3>
+                <div class="score-badge">
+                    Final Ability: <strong>{{ session.current_theta|format_theta }}</strong>
+                </div>
+            </div>
+            <div style="height: 350px; position: relative;">
+                <canvas id="performanceChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Content Area Breakdown -->
+        <div class="breakdown-section">
+            <h3>
+                <span class="material-symbols-outlined" style="font-size:20px;">table_chart</span>
+                Content Area Performance
+            </h3>
+            <table class="breakdown-table">
+                <thead>
+                    <tr>
+                        <th>Client Need Category</th>
+                        <th>Correct</th>
+                        <th>Score</th>
+                        <th>Visual</th>
+                    </tr>
+                </thead>
+                <tbody id="category-table-body"></tbody>
+            </table>
+        </div>
+
+        <!-- Ability Trend -->
+        <div class="analytics-section" id="trend-section" style="display:none;">
+            <h3>📈 Your Progress Over Time</h3>
+            <p id="trend-summary"></p>
+            <div style="height: 300px; position: relative; margin-top: 1rem;">
+                <canvas id="trendChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Insights -->
+        <div class="analytics-section" id="insights-section" style="display:none;">
+            <h3>💡 Personalized Insights</h3>
+            <div class="insights-grid" id="insights-container"></div>
+        </div>
+
+        <!-- Time Analytics -->
+        <div class="analytics-section" id="time-section" style="display:none;">
+            <h3>⏱️ Time Management</h3>
+            <div class="time-stats">
+                <div class="time-stat-card">
+                    <div class="val" id="avg-time">--</div>
+                    <div class="lbl">Avg per Question</div>
+                </div>
+                <div class="time-stat-card">
+                    <div class="val" id="total-duration">--</div>
+                    <div class="lbl">Total Duration</div>
+                </div>
+                <div class="time-stat-card">
+                    <div class="val" id="percentile" style="color:var(--secondary);">--</div>
+                    <div class="lbl">Your Percentile</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="nav-actions-bottom">
+            <a href="{% url 'start_exam' %}" class="btn-primary-pill">
+                <span class="material-symbols-outlined" style="font-size:18px;">replay</span>
+                Take Another Exam
+            </a>
+            <a href="{% url 'practice_categories' %}" class="btn-outline-pill">
+                <span class="material-symbols-outlined" style="font-size:18px;">menu_book</span>
+                Practice More
+            </a>
+            <a href="{% url 'study_planner' %}" class="btn-ghost">
+                <span class="material-symbols-outlined" style="font-size:18px;">dashboard</span>
+                Dashboard
+            </a>
+        </div>
+    </div>
+</main>
+
+<!-- ====== FOOTER ====== -->
+<footer class="nclex-footer-light">
+    <div class="footer-inner">
+        <div><span style="font-weight:700;color:var(--primary);">NCLEX XAV</span>
+        <p style="font-size:.75rem;color:#94a3b8;">© 2025 NCLEX XAV Technology.</p></div>
+    </div>
+</footer>
 
 <script>
 fetch(`/exam/api/performance-data/{{ session.id }}/`)
     .then(res => res.json())
     .then(data => {
-        // --- 1. RENDER THE CHART ---
         const ctx = document.getElementById('performanceChart').getContext('2d');
         const passingThreshold = data.pass_threshold !== undefined ? data.pass_threshold : 0.0;
-
         document.getElementById('report-duration').innerText = data.duration;
 
         new Chart(ctx, {
@@ -251,7 +382,7 @@ fetch(`/exam/api/performance-data/{{ session.id }}/`)
                 responsive: true,
                 maintainAspectRatio: false,
                 scales: {
-                    y: { 
+                    y: {
                         beginAtZero: false,
                         title: { display: true, text: 'Logit (Difficulty/Ability)' },
                         suggestedMax: Math.max(...data.theta_values, passingThreshold) + 0.5,
@@ -259,27 +390,19 @@ fetch(`/exam/api/performance-data/{{ session.id }}/`)
                     }
                 },
                 plugins: {
-                    legend: {
-                        labels: {
-                            filter: (item) => item.text !== 'Lower Bound'
-                        }
-                    },
+                    legend: { labels: { filter: (item) => item.text !== 'Lower Bound' } },
                     annotation: {
                         annotations: {
                             thresholdLine: {
                                 type: 'line',
-                                yMin: passingThreshold,
-                                yMax: passingThreshold,
+                                yMin: passingThreshold, yMax: passingThreshold,
                                 borderColor: 'rgb(255, 99, 132)',
-                                borderWidth: 3,
-                                borderDash: [6, 6],
+                                borderWidth: 3, borderDash: [6, 6],
                                 label: {
-                                    display: true,
-                                    content: 'Passing Standard',
+                                    display: true, content: 'Passing Standard',
                                     position: 'end',
                                     backgroundColor: 'rgb(255, 99, 132)',
-                                    color: 'white',
-                                    font: { size: 12, weight: 'bold' }
+                                    color: 'white', font: { size: 12, weight: 'bold' }
                                 }
                             }
                         }
@@ -288,41 +411,34 @@ fetch(`/exam/api/performance-data/{{ session.id }}/`)
             }
         });
 
-        // --- 2. POPULATE THE TABLE ---
+        // Populate category table
         const tableBody = document.getElementById('category-table-body');
         if (data.category_breakdown) {
-            // Clear existing content just in case
-            tableBody.innerHTML = ""; 
+            tableBody.innerHTML = '';
             data.category_breakdown.forEach(cat => {
-                const row = `
+                tableBody.innerHTML += `
                     <tr>
                         <td><strong>${cat.name}</strong></td>
                         <td>${cat.correct} / ${cat.total}</td>
                         <td>${cat.percentage}%</td>
-                        <td>
-                            <div class="progress-bg">
-                                <div class="progress-fill" style="width: ${cat.percentage}%"></div>
-                            </div>
-                        </td>
+                        <td><div class="progress-bg"><div class="progress-fill" style="width:${cat.percentage}%"></div></div></td>
                     </tr>
                 `;
-                tableBody.innerHTML += row;
             });
         }
     })
     .catch(error => console.error('Error loading performance data:', error));
 
-// --- 3. NEW ANALYTICS RENDERING ---
+// Analytics
 fetch(`/exam/api/performance-data/{{ session.id }}/`)
     .then(res => res.json())
     .then(data => {
         if (data.analytics) {
             const analytics = data.analytics;
-            
-            // --- ABILITY TREND CHART ---
+
+            // Ability Trend
             if (analytics.ability_trend && analytics.ability_trend.theta_values.length > 1) {
                 document.getElementById('trend-section').style.display = 'block';
-                
                 const trendCtx = document.getElementById('trendChart').getContext('2d');
                 new Chart(trendCtx, {
                     type: 'line',
@@ -333,83 +449,62 @@ fetch(`/exam/api/performance-data/{{ session.id }}/`)
                             data: analytics.ability_trend.theta_values,
                             borderColor: '#004a99',
                             backgroundColor: 'rgba(0, 74, 153, 0.1)',
-                            fill: true,
-                            tension: 0.4,
-                            pointRadius: 5,
-                            pointHoverRadius: 7
+                            fill: true, tension: 0.4, pointRadius: 5, pointHoverRadius: 7
                         }]
                     },
                     options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: {
-                            y: {
-                                title: { display: true, text: 'Ability (Logit)' }
-                            }
-                        }
+                        responsive: true, maintainAspectRatio: false,
+                        scales: { y: { title: { display: true, text: 'Ability (Logit)' } } }
                     }
                 });
-                
-                // Trend summary
+
                 const firstTheta = analytics.ability_trend.theta_values[0];
                 const lastTheta = analytics.ability_trend.theta_values[analytics.ability_trend.theta_values.length - 1];
                 const improvement = (lastTheta - firstTheta).toFixed(2);
-                const trendText = improvement > 0 
-                    ? `🎉 You've improved by +${improvement} logits over your last ${analytics.ability_trend.theta_values.length} exams!`
-                    : improvement < 0
-                    ? `📚 Practice more! You've dropped by ${improvement} logits. Keep studying!`
+                document.getElementById('trend-summary').textContent =
+                    improvement > 0 ? `🎉 You've improved by +${improvement} logits over your last ${analytics.ability_trend.theta_values.length} exams!`
+                    : improvement < 0 ? `📚 Practice more! You've dropped by ${improvement} logits.`
                     : `➡️ Your ability level has remained stable.`;
-                document.getElementById('trend-summary').textContent = trendText;
             }
-            
-            // --- INSIGHTS & RECOMMENDATIONS ---
+
+            // Insights
             if (analytics.recommendations && analytics.recommendations.length > 0) {
                 document.getElementById('insights-section').style.display = 'block';
-                
                 const container = document.getElementById('insights-container');
                 analytics.recommendations.forEach(rec => {
                     const card = document.createElement('div');
-                    card.style.cssText = 'background: white; border-left: 4px solid #004a99; border-radius: 8px; padding: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);';
-                    card.innerHTML = `<p style="margin: 0; font-size: 0.95rem;">${rec}</p>`;
+                    card.className = 'insight-card';
+                    card.innerHTML = `<p style="margin:0;">${rec}</p>`;
                     container.appendChild(card);
                 });
             }
-            
-            // --- TIME ANALYTICS ---
+
+            // Time Analytics
             if (analytics.time_analytics) {
                 document.getElementById('time-section').style.display = 'block';
-                
-                const timeData = analytics.time_analytics;
-                document.getElementById('avg-time').textContent = `${timeData.avg_time_per_question}s`;
-                
-                const minutes = Math.floor(timeData.total_duration / 60);
-                document.getElementById('total-duration').textContent = `${minutes}m`;
-                
+                document.getElementById('avg-time').textContent = `${analytics.time_analytics.avg_time_per_question}s`;
+                document.getElementById('total-duration').textContent = `${Math.floor(analytics.time_analytics.total_duration / 60)}m`;
                 document.getElementById('percentile').textContent = `${analytics.comparison.percentile}%`;
             }
         }
     })
     .catch(error => console.error('Error loading analytics:', error));
 
-// --- 4. PDF DOWNLOAD LOGIC ---
-document.getElementById('download-btn').addEventListener('click', function () {
+// PDF Download
+document.getElementById('download-btn').addEventListener('click', function() {
     const element = document.querySelector('.results-container');
     const btn = this;
-
     btn.style.display = 'none';
-
     const opt = {
-        margin:       0.5,
-        filename:     'NCLEX_Performance_Report.pdf',
-        image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2, useCORS: true, logging: false, letterRendering: true },
-        jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+        margin: 0.5, filename: 'NCLEX_Performance_Report.pdf',
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, logging: false, letterRendering: true },
+        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
     };
-
     setTimeout(() => {
-        html2pdf().set(opt).from(element).save().then(() => {
-            btn.style.display = 'block';
-        });
-    }, 500); 
+        html2pdf().set(opt).from(element).save().then(() => { btn.style.display = 'inline-flex'; });
+    }, 500);
 });
 </script>
+</body>
+</html>

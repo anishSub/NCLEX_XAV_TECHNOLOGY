@@ -4,187 +4,221 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NCLEX Adaptive Exam</title>
-    
-    <!-- External Libraries -->
+    <title>NCLEX Adaptive Exam – NCLEX XAV Technology</title>
+    <meta name="description" content="NCLEX CAT adaptive exam powered by Rasch IRT model.">
+
+    <!-- External Libraries (unchanged) -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    
-    <!-- Dark Mode Theme CSS -->
+
+    <!-- Dark Mode Theme CSS (unchanged) -->
     <link rel="stylesheet" href="{% static 'exam_sessions/css/theme.css' %}">
-    
-    <!-- Your Custom CSS -->
+
+    <!-- Your Custom Exam Engine CSS (unchanged) -->
     <link rel="stylesheet" href="{% static 'exam_sessions/css/exam_style.css' %}">
-    
-    <!-- Scenario Enhancements CSS -->
+
+    <!-- Scenario Enhancements CSS (unchanged) -->
     <link rel="stylesheet" href="{% static 'exam_sessions/css/scenario_enhancements.css' %}">
-    
-    <!--Dark Mode Toggle JavaScript -->
+
+    <!-- Design System -->
+    <link rel="stylesheet" href="{% static 'css/nclex-design.css' %}">
+
+    <!-- Dark Mode Toggle JS (unchanged) -->
     <script src="{% static 'js/theme-toggle.js' %}"></script>
-    
+
     <style>
-        /* Quick inline styles for exam header */
-        body {
-            margin: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f6f9;
-        }
-        
-        .exam-header {
-            background: linear-gradient(135deg, #004a99 0%, #0066cc 100%);
-            color: white;
-            padding: 15px 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        
-        .exam-title h1 {
-            margin: 0;
-            font-size: 1.5rem;
-            font-weight: 600;
-        }
-        
-        .exam-info {
-            display: flex;
-            gap: 30px;
-            align-items: center;
-        }
-        
-        .info-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        #timer {
-            font-size: 1.3rem;
-            font-weight: bold;
-            letter-spacing: 1px;
-        }
-        
-        #question-counter {
-            font-size: 1.1rem;
-            background: rgba(255,255,255,0.2);
-            padding: 5px 15px;
-            border-radius: 20px;
-        }
-        
-        .exam-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        
-        #exam-layout {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-            overflow: hidden;
-        }
-        
-        #question-panel {
-            padding: 30px;
-        }
-        
-        .submit-btn {
-            width: 100%;
-            max-width: 300px;
-            margin: 30px auto 0;
-            display: block;
-            padding: 15px;
-            background: linear-gradient(135deg, #004a99 0%, #0066cc 100%);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 10px rgba(0, 74, 153, 0.3);
-            min-height: 54px; /* Prevent button height change during loading */
-        }
-        
-        .submit-btn:disabled {
-            opacity: 0.8;
-            cursor: not-allowed;
-        }
-        
-        .submit-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(0, 74, 153, 0.4);
-        }
-        
-        .submit-btn:active {
-            transform: translateY(0);
-        }
-        
-        .hidden {
-            display: none;
-        }
-        
-        /* Loading spinner animation */
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
+    /* ── Reset & base ── */
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+        margin: 0;
+        font-family: 'Inter', 'Segoe UI', sans-serif;
+        background: var(--background);
+        min-height: 100vh;
+    }
+
+    /* ── Exam Header ── */
+    .exam-header {
+        position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+        background: linear-gradient(135deg, #004a99 0%, #0066cc 100%);
+        padding: 0 2rem; height: 60px;
+        display: flex; align-items: center; justify-content: space-between;
+        box-shadow: 0 4px 20px rgba(0,52,111,.3);
+    }
+    .exam-brand {
+        display: flex; align-items: center; gap: .75rem;
+    }
+    .exam-brand-text {
+        font-size: 1.1rem; font-weight: 900; color: #fff; letter-spacing: -.02em;
+    }
+    .exam-brand-sub { font-size: .7rem; color: rgba(255,255,255,.7); font-weight: 500; }
+
+    .exam-meta { display: flex; gap: 1rem; align-items: center; }
+    .exam-chip {
+        display: flex; align-items: center; gap: .5rem;
+        background: rgba(255,255,255,.15); color: #fff;
+        border-radius: 999px; padding: .35rem .9rem;
+        font-size: .875rem; font-weight: 600; backdrop-filter: blur(4px);
+    }
+    .exam-chip .material-symbols-outlined { font-size: 16px; }
+    #timer {
+        font-size: 1.05rem; font-weight: 800;
+        font-variant-numeric: tabular-nums; letter-spacing: .04em;
+    }
+
+    /* Progress bar below header */
+    .exam-progress-bar {
+        position: fixed; top: 60px; left: 0; right: 0; z-index: 99;
+        height: 4px; background: rgba(255,255,255,.15);
+    }
+    .exam-progress-fill {
+        height: 100%; width: 0%;
+        background: linear-gradient(90deg, #7efba4, #00e5ff);
+        transition: width .5s ease;
+    }
+
+    /* Dark mode toggle btn */
+    .theme-toggle-icon {
+        background: rgba(255,255,255,.12);
+        border: none; border-radius: 50%;
+        width: 36px; height: 36px;
+        display: flex; align-items: center; justify-content: center;
+        cursor: pointer; color: #fff; transition: all .2s;
+    }
+    .theme-toggle-icon:hover { background: rgba(255,255,255,.25); }
+
+    /* ── Exam Container ── */
+    .exam-outer {
+        padding-top: 76px; /* header(60) + progress(4) + gap(12) */
+        min-height: 100vh; padding-bottom: 2rem;
+    }
+    .exam-container {
+        max-width: 1300px; margin: 0 auto; padding: 1.5rem 1.25rem;
+    }
+
+    /* ── Exam Layout (card) ── */
+    #exam-layout {
+        background: var(--surface-container-lowest);
+        border-radius: 1.25rem;
+        box-shadow: 0 4px 20px var(--shadow-color);
+        overflow: hidden;
+        min-height: 70vh;
+    }
+
+    /* Scenario panel styling */
+    #scenario-panel {
+        background: var(--surface-container);
+        border-right: 2px solid var(--surface-container-high);
+    }
+
+    /* Question panel */
+    #question-panel { padding: 2rem 2.5rem; }
+
+    /* Loading state */
+    #question-display-area {
+        min-height: 300px; display: flex; align-items: center; justify-content: center;
+    }
+    .question-loading-msg {
+        text-align: center; color: var(--secondary); padding: 3rem;
+    }
+    .question-loading-msg .material-symbols-outlined {
+        font-size: 3rem; color: var(--primary-container); margin-bottom: 1rem; display: block;
+        animation: spin-slow 2s linear infinite;
+    }
+    @keyframes spin-slow { to { transform: rotate(360deg); } }
+
+    /* ── Submit Button ── */
+    .submit-btn {
+        width: 100%; max-width: 320px;
+        margin: 2rem auto 0;
+        display: flex; align-items: center; justify-content: center; gap: .5rem;
+        padding: 1rem 2rem;
+        background: linear-gradient(135deg, #004a99 0%, #0066cc 100%);
+        color: white; border: none; border-radius: var(--radius-full);
+        font-size: 1rem; font-weight: 700;
+        cursor: pointer; transition: all .3s ease;
+        box-shadow: 0 6px 20px rgba(0,74,153,.3);
+        min-height: 54px;
+    }
+    .submit-btn:disabled { opacity: .7; cursor: not-allowed; transform: none !important; }
+    .submit-btn:not(:disabled):hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 28px rgba(0,74,153,.4);
+    }
+    .submit-btn:active { transform: translateY(0); }
+
+    .hidden { display: none !important; }
+
+    /* Loading spinner used by exam_style.css */
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
-    <!-- Exam Header with Timer and Progress -->
-    <div class="exam-header">
-        <div class="exam-title">
-            <h1>🩺 NCLEX Adaptive Exam</h1>
+
+    <!-- ── Exam Header ── -->
+    <header class="exam-header">
+        <div class="exam-brand">
+            <span class="material-symbols-outlined" style="color:#7efba4;font-size:22px;font-variation-settings:'FILL' 1;">stethoscope</span>
+            <div>
+                <div class="exam-brand-text">NCLEX Adaptive Exam</div>
+                <div class="exam-brand-sub">Computer Adaptive Testing</div>
+            </div>
         </div>
-        <div class="exam-info">
-            <div class="info-item">
-                <span>⏱️ Time:</span>
+
+        <div class="exam-meta">
+            <div class="exam-chip">
+                <span class="material-symbols-outlined">timer</span>
                 <span id="timer">00:00:00</span>
             </div>
-            <div class="info-item">
-                <span>📝 Question:</span>
-                <span><span id="current-q">1</span> of 75</span>
+            <div class="exam-chip">
+                <span class="material-symbols-outlined">quiz</span>
+                Q&nbsp;<span id="current-q">1</span>&nbsp;of 75
             </div>
-            <!-- Dark Mode Toggle -->
-            <div class="info-item">
-                <button id="theme-toggle-btn" class="theme-toggle-icon" title="Toggle Dark Mode">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-                    </svg>
-                </button>
-            </div>
+            <button id="theme-toggle-btn" class="theme-toggle-icon" title="Toggle Dark Mode">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                </svg>
+            </button>
         </div>
+    </header>
+
+    <!-- ── Progress Bar ── -->
+    <div class="exam-progress-bar">
+        <div class="exam-progress-fill" id="exam-progress-fill"></div>
     </div>
 
-    <!-- Main Exam Container -->
-    <div class="exam-container">
-        <div id="exam-layout" class="standard-layout">
-            <!-- Left Panel: Clinical Scenario (Only shows for case studies) -->
-            <div id="scenario-panel" class="hidden">
-                <div id="scenario-tabs" class="tab-header"></div>
-                <div id="scenario-content" class="tab-content"></div>
-            </div>
+    <!-- ── Main Exam Area ── -->
+    <div class="exam-outer">
+        <div class="exam-container">
+            <div id="exam-layout" class="standard-layout">
 
-            <!-- Right Panel: Question Display -->
-            <div id="question-panel">
-                <div id="question-display-area">
-                    <!-- Questions dynamically injected here by exam_engine.js -->
-                    <div style="text-align: center; padding: 50px; color: #999;">
-                        <p>Loading your first question...</p>
-                    </div>
+                <!-- Left Panel: Clinical Scenario (only for case studies) -->
+                <div id="scenario-panel" class="hidden">
+                    <div id="scenario-tabs" class="tab-header"></div>
+                    <div id="scenario-content" class="tab-content"></div>
                 </div>
-                
-                <button class="submit-btn" onclick="handleUserSubmit()">
-                    Submit Answer & Continue
-                </button>
+
+                <!-- Right Panel: Question Display -->
+                <div id="question-panel">
+                    <div id="question-display-area">
+                        <div class="question-loading-msg">
+                            <span class="material-symbols-outlined">psychiatry</span>
+                            <p>Loading your first question...</p>
+                        </div>
+                    </div>
+
+                    <button class="submit-btn" onclick="handleUserSubmit()">
+                        <span class="material-symbols-outlined" style="font-size:18px;">check_circle</span>
+                        Submit Answer &amp; Continue
+                    </button>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Your Custom Exam Engine JavaScript -->
+    <!-- ── Exam Engine JS (unchanged) ── -->
     <script src="{% static 'exam_sessions/js/exam_engine.js' %}"></script>
-    
-    <!-- Initialization Script -->
+
+    <!-- ── Initialization (unchanged logic, added progress bar update) ── -->
     <script>
         // CSRF Token Helper (needed for POST requests)
         function getCookie(name) {
@@ -201,55 +235,52 @@
             }
             return cookieValue;
         }
-        
-        
+
+        // Update progress bar as questions advance
+        function updateProgressBar(current, total) {
+            const pct = total > 0 ? Math.round((current / total) * 100) : 0;
+            const fill = document.getElementById('exam-progress-fill');
+            if (fill) fill.style.width = pct + '%';
+        }
+
         // Initialize exam when page loads
         document.addEventListener('DOMContentLoaded', function() {
             // Set global variables for the exam session
             window.activeSessionId = {{ session.id }};
-            
+
             // Start the 5-hour timer
             startTimer();
-            
+
             // Load first question from API
             fetch(`/exam/api/session/{{ session.id }}/first-question/`)
                 .then(res => res.json())
                 .then(data => {
                     if (data.error) {
-                        // No questions in database
                         Swal.fire({
                             icon: 'error',
                             title: 'No Questions Available',
                             text: data.message || 'Please contact administrator.',
                             confirmButtonText: 'Go Back'
-                        }).then(() => {
-                            window.location.href = '/';
-                        });
+                        }).then(() => { window.location.href = '/'; });
                     } else if (data.question) {
-                        // Store global question metadata
                         window.activeQuestionId = data.question.id;
                         window.activeQuestionType = data.question.type;
-                        
-                        // Render the first question (counter will auto-increment)
                         renderQuestion(data.question);
+                        updateProgressBar(1, 75);
                     }
                 })
                 .catch(err => {
                     console.error('===== EXAM LOAD ERROR =====');
                     console.error('Error details:', err);
-                    console.error('Error message:', err.message);
-                    console.error('Error stack:', err.stack);
                     console.error('Session ID:', '{{ session.id }}');
                     console.error('API URL:', `/exam/api/session/{{ session.id }}/first-question/`);
-                    
+
                     Swal.fire({
                         icon: 'error',
                         title: 'Connection Error',
                         text: `Could not load exam: ${err.message}. Please check browser console for details.`,
                         confirmButtonText: 'Refresh'
-                    }).then(() => {
-                        location.reload();
-                    });
+                    }).then(() => { location.reload(); });
                 });
         });
     </script>

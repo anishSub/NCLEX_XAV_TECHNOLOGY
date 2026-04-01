@@ -1,0 +1,243 @@
+/* ========== NCLEX ADMIN CUSTOM STYLES ========== */
+/* Make CARDS wide, not just the page */
+
+/* ========== CRITICAL: CARD/MODULE WIDTH ========== */
+/* Force all cards, modules, and fieldsets to be WIDE */
+.card,
+.card-body,
+.module,
+fieldset.module {
+  max-width: 100% !important;
+  width: 100% !important;
+}
+
+/* Add Card Style to Main Form (Title & Exhibits) to match Questions */
+fieldset.module {
+  background: #ffffff !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  width: 100% !important;
+}
+
+/* Jazzmin uses Bootstrap cards */
+.card-outline {
+  max-width: 100% !important;
+  width: 100% !important;
+}
+
+/* Django admin change form */
+.change-form,
+.form-horizontal {
+  max-width: 100% !important;
+  width: 100% !important;
+}
+
+/* Form rows inside cards */
+.card .form-row,
+.module .form-row,
+fieldset .form-row {
+  max-width: 100% !important;
+  width: 100% !important;
+}
+
+/* ========== FIELDSETS FULL WIDTH ========== */
+fieldset,
+fieldset.module,
+.form-horizontal fieldset {
+  max-width: 100% !important;
+  width: 100% !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+/* ========== FORM ROWS FULL WIDTH ========== */
+.form-row,
+.row {
+  max-width: 100% !important;
+  width: 100% !important;
+  clear: both !important;
+  margin-bottom: 10px !important;
+}
+
+/* ========== JSON EDITORS - REMOVED (Legacy) ========== */
+/* The django-json-widget was removed due to conflicts. 
+   We now use standard textareas with Javascript enhancement. */
+
+
+
+
+
+
+
+/* ========== INLINE FORMSETS (NO OVERLAPPING) ========== */
+.inline-group {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+  border: none !important;
+}
+
+/* Header for the group ("Questions") */
+.inline-group>h2 {
+  margin: 0 0 20px 0 !important;
+  padding: 10px 0 !important;
+  font-weight: 600 !important;
+  color: #444 !important;
+  border-bottom: 2px solid #17a2b8 !important;
+}
+
+/* ========== INLINE FORMSETS - ONE CARD PER QUESTION ========== */
+
+/* The main container for a single question */
+.inline-related {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: #ffffff !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  position: relative !important;
+  overflow: visible !important;
+}
+
+/* ULTRA AGGRESSIVE: Remove ALL borders/styles from ANY nested container */
+.inline-related .module,
+.inline-related .card,
+.inline-related .card-body,
+.inline-related .card-outline,
+.inline-related .card-header,
+.inline-related .form-row,
+.inline-related>div,
+.inline-related .wrapper,
+.inline-related .tabular {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+}
+
+/* Restore minimal margin for form-row and PREVENT negative margins */
+.inline-related .form-row {
+  margin-bottom: 15px !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  padding-left: 5px !important;
+  /* Safety padding */
+  width: 100% !important;
+}
+
+/* Force rows inside to respect container */
+.inline-related .row {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  width: 100% !important;
+}
+
+/* Remove all styling from inner fieldsets - they just hold fields now */
+.inline-related fieldset {
+  width: 100% !important;
+  max-width: 100% !important;
+  padding: 0 !important;
+  margin: 0 0 20px 0 !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Add spacing between fieldset blocks (Type, Content, Difficulty) */
+.inline-related fieldset+fieldset {
+  margin-top: 10px !important;
+  padding-top: 20px !important;
+  border-top: 1px dashed #eee !important;
+  /* Subtle separator */
+}
+
+/* OVERRIDE DJANGO'S ALIGNED LAYOUT - VERTICAL STACKING */
+.inline-related fieldset.aligned .form-row {
+  display: block !important;
+  width: 100% !important;
+  margin-bottom: 20px !important;
+  padding: 0 !important;
+  overflow: visible !important;
+  /* Allow content to flow */
+}
+
+/* LABELS: Simple, above field, no negative margins */
+.inline-related fieldset.aligned .form-row>label,
+.inline-related fieldset label {
+  float: none !important;
+  display: block !important;
+  width: 100% !important;
+  margin: 0 0 8px 0 !important;
+  /* Space below label */
+  padding: 0 !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  color: #444 !important;
+  text-align: left !important;
+}
+
+/* FIELDS: Full width reset */
+.inline-related fieldset.aligned .form-row>div,
+.inline-related fieldset.aligned .form-row>p {
+  float: none !important;
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+/* Question Header (h3) styling override */
+.inline-related>h3 {
+  margin: -25px -25px 20px -25px !important;
+  /* Pull to edges of card */
+  padding: 15px 25px !important;
+  background: #f8f9fa !important;
+  border-bottom: 1px solid #eee !important;
+  color: #333 !important;
+  font-size: 16px !important;
+}
+
+/* FORCE VISIBILITY for all textareas */
+textarea,
+.form-row textarea,
+.inline-related textarea {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  height: auto !important;
+  min-height: 150px !important;
+}
+
+/* EMERGENCY FIX: Ensure hidden fields in Questions admin are forced visible */
+.field-options,
+.field-correct_option_ids,
+.field-exhibit_updates {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+.field-options textarea,
+.field-correct_option_ids textarea,
+.field-exhibit_updates textarea {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  height: auto !important;
+  min-height: 200px !important;
+  width: 100% !important;
+  border: 1px solid #ccc !important;
+  background-color: #fff !important;
+  color: #000 !important;
+}

@@ -4,182 +4,270 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Checkout - NCLEX Prep</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <title>Checkout – NCLEX XAV Technology</title>
+    <meta name="description" content="Complete your NCLEX XAV subscription purchase securely.">
+    <link rel="stylesheet" href="{% static 'css/nclex-design.css' %}">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); min-height: 100vh; padding: 2rem 1rem; }
-        .container { max-width: 600px; margin: 0 auto; }
-        
-        .checkout-card { background: white; border-radius: 20px; padding: 2.5rem; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3); }
-        
-        .header { text-align: center; margin-bottom: 2rem; }
-        .header h1 { font-size: 2rem; color: #2c3e50; margin-bottom: 0.5rem; }
-        .header p { color: #7f8c8d; }
-        
-        .plan-summary { background: #f8f9fa; border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; }
-        .plan-name { font-size: 1.5rem; font-weight: 700; color: #1e3c72; margin-bottom: 0.5rem; }
-        .plan-price { font-size: 2.5rem; font-weight: 800; color: #27ae60; margin-bottom: 1rem; }
-        .plan-details { color: #5a6c7d; font-size: 0.95rem; line-height: 1.6; }
-        .plan-details li { margin-bottom: 0.5rem; }
-        
-        .payment-methods { margin-bottom: 2rem; }
-        .payment-methods h3 { font-size: 1.2rem; color: #2c3e50; margin-bottom: 1rem; }
-        
-        .payment-option { background: white; border: 2px solid #e0e0e0; border-radius: 12px; padding: 1.5rem; margin-bottom: 1rem; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; gap: 1rem; }
-        .payment-option:hover { border-color: #1e3c72; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(30, 60, 114, 0.1); }
-        .payment-option.selected { border-color: #1e3c72; background: #f0f8ff; }
-        
-        .payment-logo { width: 80px; height: 40px; object-fit: contain; }
-        .payment-info { flex: 1; }
-        .payment-name { font-weight: 700; color: #2c3e50; margin-bottom: 0.3rem; }
-        .payment-desc { font-size: 0.85rem; color: #7f8c8d; }
-        
-        .btn-pay { width: 100%; padding: 1.2rem; background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white; border: none; border-radius: 50px; font-size: 1.1rem; font-weight: 700; cursor: pointer; transition: all 0.3s; text-transform: uppercase; letter-spacing: 1px; }
-        .btn-pay:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(30, 60, 114, 0.4); }
-        .btn-pay:disabled { opacity: 0.5; cursor: not-allowed; }
-        
-        .security-note { text-align: center; margin-top: 1.5rem; color: #7f8c8d; font-size: 0.9rem; }
-        .security-note i { color: #27ae60; }
-        
-        .btn-back { display: inline-block; margin-bottom: 1rem; color: white; text-decoration: none; padding: 0.8rem 1.5rem; background: rgba(255,255,255,0.2); border-radius: 50px; transition: all 0.3s; }
-        .btn-back:hover { background: rgba(255,255,255,0.3); }
-        
-        /* Responsive */
-        @media (max-width: 768px) {
-            .checkout-card { padding: 1.5rem; }
-            .header h1 { font-size: 1.6rem; }
-            .plan-price { font-size: 2rem; }
-        }
+    .checkout-page {
+        min-height: 100vh; background: #D6F3F4;
+        display: flex; flex-direction: column;
+        position: relative; overflow: hidden;
+    }
+    .checkout-page .bg-dots {
+        position: absolute; inset: 0;
+        background-image: radial-gradient(#004a99 0.5px, transparent 0.5px);
+        background-size: 24px 24px; opacity: .04; pointer-events: none;
+    }
+    .checkout-inner {
+        max-width: 640px; margin: 0 auto; padding: 6rem 2rem 4rem;
+        position: relative; z-index: 1; flex: 1;
+    }
+
+    .back-link {
+        display: inline-flex; align-items: center; gap: .4rem;
+        color: var(--primary); font-weight: 600; font-size: .9rem;
+        margin-bottom: 1.5rem;
+    }
+    .back-link:hover { text-decoration: underline; }
+
+    .checkout-card {
+        background: var(--surface-container-lowest);
+        border-radius: 1.5rem; padding: 2.5rem;
+        box-shadow: 0 32px 64px -12px rgba(10,29,43,.1);
+    }
+    .co-header { text-align: center; margin-bottom: 2rem; }
+    .co-header .icon-w {
+        width: 64px; height: 64px; background: var(--surface-container);
+        border-radius: 1rem; display: flex; align-items: center; justify-content: center;
+        margin: 0 auto 1rem;
+    }
+    .co-header .icon-w .material-symbols-outlined {
+        font-size: 2rem; color: var(--primary); font-variation-settings: 'FILL' 1;
+    }
+    .co-header h1 { font-size: 1.5rem; font-weight: 800; color: var(--primary); letter-spacing: -.03em; margin-bottom: .35rem; }
+    .co-header p { color: var(--secondary); font-size: .9rem; }
+
+    /* Order Summary */
+    .order-summary {
+        background: var(--surface-container-low); border-radius: 1rem;
+        padding: 1.5rem; margin-bottom: 2rem;
+    }
+    .os-plan {
+        font-size: 1.25rem; font-weight: 800; color: var(--primary);
+        margin-bottom: .5rem;
+    }
+    .os-price {
+        font-size: 2.25rem; font-weight: 900; color: var(--tertiary);
+        margin-bottom: 1rem;
+    }
+    .os-features { list-style: none; }
+    .os-features li {
+        display: flex; align-items: center; gap: .6rem;
+        font-size: .875rem; color: #64748b; padding: .35rem 0;
+    }
+    .os-features li .material-symbols-outlined {
+        font-size: 1rem; color: var(--tertiary); font-variation-settings: 'FILL' 1;
+    }
+
+    /* Payment Methods */
+    .pay-methods { margin-bottom: 2rem; }
+    .pay-methods h3 {
+        font-size: .7rem; font-weight: 700; text-transform: uppercase;
+        letter-spacing: .08em; color: #64748b; margin-bottom: 1rem;
+    }
+    .pay-option {
+        display: flex; align-items: center; gap: 1rem;
+        background: var(--surface-container-lowest);
+        border: 2px solid var(--surface-container-high);
+        border-radius: .75rem; padding: 1.25rem;
+        margin-bottom: .75rem; cursor: pointer;
+        transition: all .3s;
+    }
+    .pay-option:hover {
+        border-color: var(--primary); transform: translateY(-2px);
+        box-shadow: 0 4px 12px var(--shadow-color);
+    }
+    .pay-option.selected {
+        border-color: var(--primary); background: #dbeafe;
+    }
+    .pay-logo {
+        width: 72px; height: 36px; border-radius: .5rem;
+        display: flex; align-items: center; justify-content: center;
+        font-weight: 800; font-size: 1rem; color: #fff;
+    }
+    .logo-esewa { background: #60bb46; }
+    .logo-khalti { background: #5c2d91; }
+    .logo-manual { background: var(--primary); font-size: .7rem; }
+    .pay-info { flex: 1; }
+    .pay-name { font-weight: 700; color: var(--on-surface); font-size: .9rem; }
+    .pay-desc { font-size: .78rem; color: #94a3b8; }
+    .pay-radio {
+        width: 20px; height: 20px; border: 2px solid var(--outline-variant);
+        border-radius: 50%; flex-shrink: 0; position: relative;
+    }
+    .pay-option.selected .pay-radio {
+        border-color: var(--primary);
+    }
+    .pay-option.selected .pay-radio::after {
+        content: ''; position: absolute; inset: 3px;
+        background: var(--primary); border-radius: 50%;
+    }
+
+    .pay-btn {
+        width: 100%; padding: 1.1rem;
+        background: linear-gradient(135deg, var(--primary), var(--primary-container));
+        color: #fff; font-weight: 700; font-size: 1rem;
+        border: none; border-radius: var(--radius-full); cursor: pointer;
+        transition: all .3s; box-shadow: 0 8px 25px rgba(0,52,111,.2);
+        display: flex; align-items: center; justify-content: center; gap: .5rem;
+        text-transform: uppercase; letter-spacing: .05em;
+    }
+    .pay-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(0,52,111,.3); }
+    .pay-btn:active { transform: scale(.97); }
+
+    .security-note {
+        text-align: center; margin-top: 1.5rem;
+        display: flex; align-items: center; justify-content: center; gap: .5rem;
+        font-size: .8rem; color: #94a3b8;
+    }
+    .security-note .material-symbols-outlined { font-size: 16px; color: var(--tertiary); font-variation-settings: 'FILL' 1; }
+
+    @media (max-width: 480px) {
+        .checkout-card { padding: 1.5rem; }
+        .os-price { font-size: 1.75rem; }
+    }
     </style>
 </head>
 <body>
-    <div class="container">
-        <a href="{% url 'pricing' %}" class="btn-back">← Back to Pricing</a>
-        
+
+<!-- ====== TOP NAV ====== -->
+<nav class="nclex-topnav">
+    <div class="nav-inner" style="max-width:80rem;">
+        <a href="{% url 'home' %}" class="nav-brand">NCLEX XAV</a>
+        <div class="nav-links">
+            <a href="{% url 'pricing' %}">Pricing</a>
+        </div>
+        <div class="nav-actions">
+            <a href="{% url 'home' %}" class="nav-icon-btn"><span class="material-symbols-outlined">home</span></a>
+        </div>
+    </div>
+</nav>
+
+<div class="checkout-page">
+    <div class="bg-dots"></div>
+    <div class="checkout-inner">
+        <a href="{% url 'pricing' %}" class="back-link">
+            <span class="material-symbols-outlined" style="font-size:18px;">arrow_back</span>
+            Back to Pricing
+        </a>
+
         <div class="checkout-card">
-            <div class="header">
+            <div class="co-header">
+                <div class="icon-w"><span class="material-symbols-outlined">shopping_cart</span></div>
                 <h1>Complete Your Purchase</h1>
-                <p>Choose your payment method</p>
+                <p>Choose your preferred payment method</p>
             </div>
-            
-            <div class="plan-summary">
-                <div class="plan-name">
-                    {% if duration == 'MONTHLY' %}आगमन (Aagaman) - Monthly{% endif %}
-                    {% if duration == 'QUARTERLY' %}प्रगति (Pragati) - 3 Months{% endif %}
-                    {% if duration == 'YEARLY' %}विजय (Vijaya) - 1 Year{% endif %}
+
+            <!-- Order Summary -->
+            <div class="order-summary">
+                <div class="os-plan">
+                    {% if duration == 'MONTHLY' %}आगमन (Aagaman) – Monthly{% endif %}
+                    {% if duration == 'QUARTERLY' %}प्रगति (Pragati) – 3 Months{% endif %}
+                    {% if duration == 'YEARLY' %}विजय (Vijaya) – 1 Year{% endif %}
+                    {% if duration == 'LIFETIME' %}सिद्धि (Siddhi) – Lifetime{% endif %}
                 </div>
-                <div class="plan-price">Rs. {{ amount }}</div>
-                <ul class="plan-details">
-                    <li>✅ Full Adaptive CAT Exam Access</li>
-                    <li>✅ Advanced Performance Analytics</li>
-                    <li>✅ AI-Powered Recommendations</li>
-                    <li>✅ Pass Probability Tracking</li>
-                    <li>✅ Download Study Reports (PDF)</li>
+                <div class="os-price">Rs. {{ amount }}</div>
+                <ul class="os-features">
+                    <li><span class="material-symbols-outlined">check_circle</span> Full Adaptive CAT Exam Access</li>
+                    <li><span class="material-symbols-outlined">check_circle</span> Advanced Performance Analytics</li>
+                    <li><span class="material-symbols-outlined">check_circle</span> AI-Powered Recommendations</li>
+                    <li><span class="material-symbols-outlined">check_circle</span> Download Study Reports (PDF)</li>
                 </ul>
             </div>
-            
-            <div class="payment-methods">
+
+            <!-- Payment Methods -->
+            <div class="pay-methods">
                 <h3>Select Payment Method</h3>
-                
-                <!-- eSewa -->
-                <div class="payment-option selected" data-method="esewa" onclick="selectPayment('esewa')">
-                    <div class="payment-logo" style="background: #60bb46; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 1.2rem;">eSewa</div>
-                    <div class="payment-info">
-                        <div class="payment-name">eSewa</div>
-                        <div class="payment-desc">Most popular in Nepal</div>
+
+                <div class="pay-option selected" data-method="esewa" onclick="selectPayment('esewa')">
+                    <div class="pay-logo logo-esewa">eSewa</div>
+                    <div class="pay-info">
+                        <div class="pay-name">eSewa</div>
+                        <div class="pay-desc">Most popular in Nepal</div>
                     </div>
+                    <div class="pay-radio"></div>
                 </div>
-                
-                <!-- Khalti -->
-                <div class="payment-option" data-method="khalti" onclick="selectPayment('khalti')">
-                    <div class="payment-logo" style="background: #5c2d91; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 1.2rem;">Khalti</div>
-                    <div class="payment-info">
-                        <div class="payment-name">Khalti</div>
-                        <div class="payment-desc">Digital wallet payment</div>
+
+                <div class="pay-option" data-method="khalti" onclick="selectPayment('khalti')">
+                    <div class="pay-logo logo-khalti">Khalti</div>
+                    <div class="pay-info">
+                        <div class="pay-name">Khalti</div>
+                        <div class="pay-desc">Digital wallet payment</div>
                     </div>
+                    <div class="pay-radio"></div>
                 </div>
-                
-                <!-- Manual (for testing) -->
-                <div class="payment-option" data-method="manual" onclick="selectPayment('manual')">
-                    <div class="payment-logo" style="background: #004a99; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 0.9rem;">MANUAL</div>
-                    <div class="payment-info">
-                        <div class="payment-name">Manual Activation (Testing)</div>
-                        <div class="payment-desc">For development/testing only</div>
+
+                <div class="pay-option" data-method="manual" onclick="selectPayment('manual')">
+                    <div class="pay-logo logo-manual">TEST</div>
+                    <div class="pay-info">
+                        <div class="pay-name">Manual Activation (Testing)</div>
+                        <div class="pay-desc">For development/testing only</div>
                     </div>
+                    <div class="pay-radio"></div>
                 </div>
             </div>
-            
-            <button class="btn-pay" onclick="proceedPayment()">
+
+            <button class="pay-btn" onclick="proceedPayment()">
+                <span class="material-symbols-outlined" style="font-size:20px;">lock</span>
                 Proceed to Payment
             </button>
-            
+
             <div class="security-note">
-                🔒 Secure payment · 7-day money-back guarantee
+                <span class="material-symbols-outlined">verified_user</span>
+                Secure payment · 7-day money-back guarantee
             </div>
         </div>
     </div>
-    
-    <script>
-    let selectedMethod = 'esewa';
-    const duration = '{{ duration }}';
-    const amount = '{{ amount }}';
-    
-    function selectPayment(method) {
-        selectedMethod = method;
-        document.querySelectorAll('.payment-option').forEach(opt => {
-            opt.classList.remove('selected');
+</div>
+
+<script>
+let selectedMethod = 'esewa';
+const duration = '{{ duration }}';
+const amount = '{{ amount }}';
+
+function selectPayment(method) {
+    selectedMethod = method;
+    document.querySelectorAll('.pay-option').forEach(o => o.classList.remove('selected'));
+    document.querySelector(`[data-method="${method}"]`).classList.add('selected');
+}
+
+function getCookie(name) {
+    let v = null;
+    if (document.cookie) {
+        document.cookie.split(';').forEach(c => {
+            c = c.trim();
+            if (c.startsWith(name + '=')) v = decodeURIComponent(c.substring(name.length + 1));
         });
-        document.querySelector(`[data-method="${method}"]`).classList.add('selected');
     }
-    
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
-        }
-        return cookieValue;
+    return v;
+}
+
+async function proceedPayment() {
+    if (selectedMethod === 'manual') {
+        try {
+            const r = await fetch('/subscriptions/api/activate/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+                body: JSON.stringify({ duration, amount })
+            });
+            const data = await r.json();
+            if (data.success) { alert('✅ ' + data.message); window.location.href = '/subscriptions/dashboard/'; }
+            else alert('❌ ' + (data.error || 'Activation failed'));
+        } catch (err) { console.error(err); alert('Error activating subscription'); }
+    } else {
+        alert(`${selectedMethod.toUpperCase()} integration coming soon!\n\nFor now, use "Manual Activation (Testing)" to activate your subscription.`);
     }
-    
-    async function proceedPayment() {
-        if (selectedMethod === 'manual') {
-            // For testing - manually activate subscription
-            try {
-                const response = await fetch('/subscriptions/api/activate/', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': getCookie('csrftoken')
-                    },
-                    body: JSON.stringify({
-                        duration: duration,
-                        amount: amount
-                    })
-                });
-                
-                const data = await response.json();
-                if (data.success) {
-                    alert('✅ ' + data.message);
-                    window.location.href = '/subscriptions/dashboard/';
-                } else {
-                    alert('❌ ' + (data.error || 'Activation failed'));
-                }
-            } catch (error) {
-                console.error(error);
-                alert('Error activating subscription');
-            }
-        } else {
-            // TODO: Integrate real payment gateways
-            alert(`${selectedMethod.toUpperCase()} integration coming soon!\n\nFor now, use "Manual Activation (Testing)" to activate your subscription.`);
-        }
-    }
-    </script>
+}
+</script>
 </body>
 </html>
