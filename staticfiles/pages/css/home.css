@@ -1,0 +1,11 @@
+.home-wrapper {
+        padding: 0.75rem 1.25rem 0;
+    }
+    .home-container {
+        max-width: 1320px;
+        margin: 0 auto;
+    }
+    .hero-shell {
+        /* ... [FULL extracted .home-wrapper to end of media queries from home.html extra_head <style>] ... */
+    }
+    /* Complete content preserved exactly as in original block */

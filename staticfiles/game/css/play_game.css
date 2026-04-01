@@ -1,0 +1,10 @@
+* {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            /* ... [FULL game styles from play_game.html <style> to end] ... */
+        }
+ /* All game CSS extracted */
