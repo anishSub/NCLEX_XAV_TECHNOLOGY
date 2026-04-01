@@ -6,6 +6,8 @@ from django.utils import timezone
 from datetime import datetime, timedelta
 from .models import StudyPlan, StudyTask, StudySession
 from categories.models import Categories
+from exam_sessions.models import ExamSessions
+from questions.models import Questions
 import json
 
 
@@ -31,6 +33,48 @@ def planner_dashboard(request):
     total_tasks = study_plan.tasks.count()
     completed_tasks = study_plan.tasks.filter(status='COMPLETED').count()
     completion_rate = round((completed_tasks / total_tasks) * 100) if total_tasks > 0 else 0
+
+    practice_sessions = ExamSessions.objects.filter(user=request.user, session_type='PRACTICE').order_by('-created_at')
+    adaptive_sessions = ExamSessions.objects.filter(user=request.user, session_type='ADAPTIVE').order_by('-created_at')
+
+    practice_history = []
+    for session in practice_sessions:
+        practice_history.extend(session.question_history or [])
+
+    total_practiced_questions = len(practice_history)
+    correct_practice_questions = sum(1 for entry in practice_history if entry.get('is_correct'))
+    practice_accuracy = round((correct_practice_questions / total_practiced_questions) * 100) if total_practiced_questions else 0
+
+    adaptive_attempts = adaptive_sessions.count()
+    completed_adaptive_attempts = adaptive_sessions.filter(status__in=['PASS', 'FAIL', 'COMPLETED']).count()
+    standalone_question_bank = Questions.objects.filter(parent_scenario__isnull=True).count()
+    case_study_bank = Questions.objects.filter(parent_scenario__isnull=False).values('parent_scenario').distinct().count()
+
+    latest_practice_session = practice_sessions.first()
+    latest_exam_session = adaptive_sessions.first()
+
+    task_status_breakdown = [
+        todays_tasks_todo.count(),
+        todays_tasks_in_progress.count(),
+        todays_tasks_completed.count(),
+    ]
+
+    activity_dates = [today - timedelta(days=offset) for offset in range(6, -1, -1)]
+    activity_labels = [day.strftime('%a') for day in activity_dates]
+    activity_completed = [
+        study_plan.tasks.filter(status='COMPLETED', completed_at__date=day).count()
+        for day in activity_dates
+    ]
+    activity_scheduled = [
+        study_plan.tasks.filter(scheduled_date=day).count()
+        for day in activity_dates
+    ]
+
+    exam_mix = [
+        practice_sessions.count(),
+        adaptive_attempts,
+        case_study_bank,
+    ]
     
     context = {
         'study_plan': study_plan,
@@ -41,6 +85,20 @@ def planner_dashboard(request):
         'days_until_exam': days_until_exam,
         'completion_rate': completion_rate,
         'today': today,
+        'total_practiced_questions': total_practiced_questions,
+        'practice_accuracy': practice_accuracy,
+        'practice_sessions_count': practice_sessions.count(),
+        'adaptive_attempts': adaptive_attempts,
+        'completed_adaptive_attempts': completed_adaptive_attempts,
+        'standalone_question_bank': standalone_question_bank,
+        'case_study_bank': case_study_bank,
+        'latest_practice_session': latest_practice_session,
+        'latest_exam_session': latest_exam_session,
+        'task_status_breakdown': task_status_breakdown,
+        'activity_labels': activity_labels,
+        'activity_completed': activity_completed,
+        'activity_scheduled': activity_scheduled,
+        'exam_mix': exam_mix,
     }
 
     # Inject gamification profile so streak / points show correctly
@@ -318,4 +376,3 @@ def create_recommendation_task(request):
         print(f"Error creating recommendation task: {str(e)}")
         print(traceback.format_exc())
         return JsonResponse({'success': False, 'error': str(e)}, status=400)
-

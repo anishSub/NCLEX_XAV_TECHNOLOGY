@@ -1,6 +1,22 @@
 /* --- GLOBAL QUESTION COUNTER --- */
 window.currentQuestionNumber = window.currentQuestionNumber || 0;
 
+function buildQuestionShell(data, answerContent, metaContent = '') {
+    return `
+        <article class="exam-question-shell">
+            <header class="exam-question-header">
+                ${metaContent ? `<div class="exam-question-meta">${metaContent}</div>` : ''}
+                <div class="q-header">
+                    <p class="q-text">${data.text}</p>
+                </div>
+            </header>
+            <section class="exam-answer-section">
+                ${answerContent}
+            </section>
+        </article>
+    `;
+}
+
 /* --- PART 1: THE SWITCH --- */
 function renderQuestion(questionData) {
     try {
@@ -128,18 +144,18 @@ function createDragDropHTML(data) {
         sentenceHTML = sentenceHTML.replace(`[${wellKey}]`, dropZone);
     });
 
-    return `
-        <div class="q-header">
-            <p class="q-text">${data.text}</p>
-        </div>
-        <div class="rationale-sentence">
-            ${sentenceHTML}
-        </div>
-        <div class="answer-choices-header">Answer Choices</div>
-        <div class="source-well-single">
-            ${draggablesHTML}
-        </div>
-    `;
+    return buildQuestionShell(
+        data,
+        `
+            <div class="rationale-sentence">
+                ${sentenceHTML}
+            </div>
+            <div class="answer-choices-header">Answer Choices</div>
+            <div class="source-well-single">
+                ${draggablesHTML}
+            </div>
+        `
+    );
 }
 
 //createMCQHTML function. Without this, standard multiple-choice questions won't render at all.
@@ -154,10 +170,11 @@ function createMCQHTML(data) {
         </div>
     `).join('');
 
-    return `
-        <div class="q-header"><p class="q-text">${data.text}</p></div>
-        <div class="mcq-options-container">${optionsHTML}</div>
-    `;
+    return buildQuestionShell(
+        data,
+        `<div class="mcq-options-container">${optionsHTML}</div>`,
+        `<span class="badge">Single Best Answer</span>`
+    );
 }
 
 
@@ -174,16 +191,11 @@ function createSATAHTML(data) {
         </div>
     `).join('');
 
-    return `
-        <div class="q-header">
-            <span class="badge sata-badge">Select All That Apply</span>
-            <hr style="border: 0; border-top: 1px solid #e1e4e8; margin: 12px 0;">
-            <p class="q-text">${data.text}</p>
-        </div>
-        <div class="sata-options-container">
-            ${optionsHTML}
-        </div>
-    `;
+    return buildQuestionShell(
+        data,
+        `<div class="sata-options-container">${optionsHTML}</div>`,
+        `<span class="badge sata-badge">Select All That Apply</span>`
+    );
 }
 
 /* --- PART 3: THE INTERACTION (NCLEX FORMAT) --- */
@@ -248,19 +260,18 @@ function createMatrixMultipleHTML(data) {
         return `<tr><td class="row-label">${rowText}</td>${cells}</tr>`;
     }).join('');
 
-    return `
-        <div class="q-header">
-            <span class="badge">Matrix Multiple Response</span>
-            <hr style="border: 0; border-top: 1px solid #e1e4e8; margin: 12px 0;">
-            <p class="q-text">${data.text}</p>
-        </div>
-        <div class="matrix-scroll-container">
-            <table class="matrix-table">
-                ${headerHTML}
-                <tbody>${rowsHTML}</tbody>
-            </table>
-        </div>
-    `;
+    return buildQuestionShell(
+        data,
+        `
+            <div class="matrix-scroll-container">
+                <table class="matrix-table">
+                    ${headerHTML}
+                    <tbody>${rowsHTML}</tbody>
+                </table>
+            </div>
+        `,
+        `<span class="badge">Matrix Multiple Response</span>`
+    );
 }
 
 
@@ -291,16 +302,15 @@ function createDropdownRationaleHTML(data) {
         html = html.replace(`[${key}]`, selectTag);
     });
 
-    return `
-        <div class="q-header">
-            <span class="badge">Cloze Dropdown Rationale</span>
-            <hr style="border: 0; border-top: 1px solid #e1e4e8; margin: 12px 0;">
-            <p class="q-text">${data.text}</p>
-        </div>
-        <div class="cloze-container">
-            ${html}
-        </div>
-    `;
+    return buildQuestionShell(
+        data,
+        `
+            <div class="cloze-container">
+                ${html}
+            </div>
+        `,
+        `<span class="badge">Cloze Dropdown Rationale</span>`
+    );
 }
 
 
@@ -319,20 +329,19 @@ function createHotSpotHTML(data) {
         console.log('🔧 Auto-fixed Hot Spot Image URL:', imageUrl);
     }
 
-    return `
-        <div class="q-header">
-            <span class="badge">Hot Spot</span>
-            <hr style="border: 0; border-top: 1px solid #e1e4e8; margin: 12px 0;">
-            <p class="q-text">${data.text}</p>
-        </div>
-        <div class="hotspot-frame">
-            <div class="hotspot-instruction">🖱️ Point and click on the specific area in the diagram below to select your answer.</div>
-            <div class="hotspot-wrapper">
-                <img src="${imageUrl}" id="hotspot-img" alt="Clinical Diagram">
-                <div id="click-marker" style="display: none;"></div>
+    return buildQuestionShell(
+        data,
+        `
+            <div class="hotspot-frame">
+                <div class="hotspot-instruction">🖱️ Point and click on the specific area in the diagram below to select your answer.</div>
+                <div class="hotspot-wrapper">
+                    <img src="${imageUrl}" id="hotspot-img" alt="Clinical Diagram">
+                    <div id="click-marker" style="display: none;"></div>
+                </div>
             </div>
-        </div>
-    `;
+        `,
+        `<span class="badge">Hot Spot</span>`
+    );
 }
 
 
@@ -368,16 +377,16 @@ function initHotSpotLogic() {
 
 /* --- PART 2: THE BUILDERS & INITIALIZERS --- */
 function createHighlightTextHTML(data) {
-    return `
-        <div class="q-header">
-            <span class="badge">Highlight Text</span>
-            <hr style="border: 0; border-top: 1px solid #e1e4e8; margin: 12px 0;">
-            <p>${data.text}</p>
-        </div>
-        <div class="chart-container">
-            <div class="chart-header">Orders: 1215</div>
-            <div class="chart-content">${data.options.formatted_text}</div>
-        </div>`;
+    return buildQuestionShell(
+        data,
+        `
+            <div class="chart-container">
+                <div class="chart-header">Orders: 1215</div>
+                <div class="chart-content">${data.options.formatted_text}</div>
+            </div>
+        `,
+        `<span class="badge">Highlight Text</span>`
+    );
 }
 
 function initHighlightTextLogic() {

@@ -6,6 +6,7 @@
 {% block body_class %}home-page{% endblock %}
 
 {% block extra_head %}
+<style>
     .home-wrapper {
         padding: 0.75rem 1.25rem 0;
     }
@@ -691,10 +692,14 @@
             url("{% static 'nurse2.jpg' %}") center top / cover no-repeat;
     }
     .insight-cover.gradient-blue {
-        background: linear-gradient(135deg, rgba(0, 52, 111, 0.94), rgba(31, 102, 126, 0.84));
+        background:
+            linear-gradient(180deg, rgba(0, 52, 111, 0.16), rgba(0, 52, 111, 0.8)),
+            url("{% static 'nurse4.jpg' %}") center center / cover no-repeat;
     }
     .insight-cover.gradient-mint {
-        background: linear-gradient(135deg, rgba(31, 102, 126, 0.92), rgba(164, 227, 255, 0.82));
+        background:
+            linear-gradient(180deg, rgba(31, 102, 126, 0.16), rgba(0, 52, 111, 0.78)),
+            url("{% static 'nurse6.jpg' %}") center center / cover no-repeat;
     }
     .insight-body {
         padding: 1.25rem;
@@ -954,6 +959,7 @@
             padding-right: 0.75rem;
         }
     }
+</style>
 {% endblock %}
 
 {% block content %}

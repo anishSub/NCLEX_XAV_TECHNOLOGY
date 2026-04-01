@@ -4,8 +4,10 @@
 {% block title %}NCLEX Adventure Game – NCLEX XAV Technology{% endblock %}
 
 {% block extra_head %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
     .game-page { padding: 6rem 2rem 8rem; background: transparent; min-height: 100vh; }
-    .game-container { max-width: 1000px; margin: 0 auto; }
+    .game-container { max-width: 1200px; margin: 0 auto; }
 
     .game-card {
         background: var(--surface-container-lowest);
@@ -41,14 +43,25 @@
         gap: 1.5rem; margin-bottom: 3.5rem;
     }
     .feature-item {
-        background: var(--surface-container-low); padding: 1.5rem;
-        border-radius: 1.25rem; text-align: center; border: 1px solid var(--surface-container);
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(226, 239, 255, 0.9) 100%);
+        padding: 1.5rem;
+        border-radius: 1.25rem; text-align: center;
+        border: 2px solid rgba(0, 74, 153, 0.12);
         transition: all .3s;
+        box-shadow: 0 4px 15px rgba(0, 74, 153, 0.08);
     }
-    .feature-item:hover { transform: translateY(-4px); border-color: var(--primary-container); }
-    .feature-item .material-symbols-outlined { font-size: 2.5rem; color: var(--primary); margin-bottom: 1rem; }
-    .feature-item h3 { font-size: 1.1rem; font-weight: 800; color: var(--on-surface); margin-bottom: .5rem; }
-    .feature-item p { font-size: .85rem; color: var(--secondary); line-height: 1.5; margin: 0; }
+    .feature-item:hover {
+        transform: translateY(-4px);
+        border-color: #0066cc;
+        box-shadow: 0 8px 25px rgba(0, 74, 153, 0.15);
+    }
+    .feature-item i {
+        font-size: 2.5rem;
+        color: #004a99;
+        margin-bottom: 1rem;
+    }
+    .feature-item h3 { font-size: 1.1rem; font-weight: 800; color: #004a99; margin-bottom: .5rem; }
+    .feature-item p { font-size: .85rem; color: #6b8298; line-height: 1.5; margin: 0; }
 
     .play-section {
         background: linear-gradient(135deg, #0f172a, #1e293b);
@@ -80,6 +93,7 @@
         .game-card { padding: 3rem 2rem; }
         .req-list { grid-template-columns: 1fr; }
     }
+</style>
 {% endblock %}
 
 {% block content %}
@@ -109,24 +123,44 @@
             <!-- Features -->
             <div class="features-grid">
                 <div class="feature-item">
-                    <span class="material-symbols-outlined">psychology</span>
-                    <h3>10 Content Areas</h3>
-                    <p>Cardiovascular, EKG, GI, Mental Health, Respiratory, Neurology, Endocrine, and more.</p>
+                    <i class="fas fa-user-md"></i>
+                    <h3>Management of Care</h3>
+                    <p>12 questions</p>
                 </div>
                 <div class="feature-item">
-                    <span class="material-symbols-outlined">swords</span>
-                    <h3>RPG Battle System</h3>
-                    <p>Fight enemies with your knowledge! Correct answers attack, wrong answers hurt you.</p>
+                    <i class="fas fa-shield-alt"></i>
+                    <h3>Safety and Infection Control</h3>
+                    <p>10 questions</p>
                 </div>
                 <div class="feature-item">
-                    <span class="material-symbols-outlined">menu_book</span>
-                    <h3>Study Guide</h3>
-                    <p>Built-in PDF viewer with comprehensive NCLEX content review integrated into the game.</p>
+                    <i class="fas fa-heartbeat"></i>
+                    <h3>Health Promotion and Maintenance</h3>
+                    <p>10 questions</p>
                 </div>
                 <div class="feature-item">
-                    <span class="material-symbols-outlined">payments</span>
-                    <h3>Item Shop</h3>
-                    <p>Earn currency from victories and buy health potions to help you survive tough raids.</p>
+                    <i class="fas fa-brain"></i>
+                    <h3>Psychosocial Integrity</h3>
+                    <p>10 questions</p>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-procedures"></i>
+                    <h3>Basic Care and Comfort</h3>
+                    <p>10 questions</p>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-pills"></i>
+                    <h3>Pharmacological and Parenteral Therapies</h3>
+                    <p>10 questions</p>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <h3>Reduction of Risk Potential</h3>
+                    <p>10 questions</p>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-stethoscope"></i>
+                    <h3>Physiological Adaptation</h3>
+                    <p>10 questions</p>
                 </div>
             </div>
 
@@ -165,4 +199,3 @@
     </div>
 </div>
 {% endblock %}
-

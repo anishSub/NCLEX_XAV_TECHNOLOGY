@@ -412,9 +412,13 @@ def scenario_practice_view(request):
     from scenarios.models import Scenarios
     
     scenarios = Scenarios.objects.all().order_by('-created_at')
+    total_questions = sum(scenario.questions.count() for scenario in scenarios)
     
     return render(request, 'exam_sessions/scenario_practice.html', {
-        'scenarios': scenarios
+        'scenarios': scenarios,
+        'scenario_count': scenarios.count(),
+        'total_scenario_questions': total_questions,
+        'latest_scenario': scenarios.first(),
     })
 
 

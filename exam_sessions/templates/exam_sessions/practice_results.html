@@ -1,144 +1,196 @@
+{% extends "base.html" %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Practice Results</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #f0f8ff 0%, #e6f3ff 100%); min-height: 100vh; padding: 2rem; }
-        .container { max-width: 900px; margin: 0 auto; background: white; border-radius: 20px; padding: 3rem; box-shadow: 0 10px 40px rgba(0, 74, 153, 0.15); }
-        h1 { color: #004a99; margin-bottom: 1rem; }
-        .score-card { text-align: center; background: linear-gradient(135deg, #004a99 0%, #0066cc 100%); color: white; padding: 2rem; border-radius: 15px; margin: 2rem 0; }
-        .score-big { font-size: 4rem; font-weight: 700; }
-        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin: 2rem 0; }
-        .stat-box { background: #f8fbff; padding: 1.5rem; border-radius: 12px; text-align: center; }
-        .stat-number { font-size: 2rem; font-weight: 700; color: #004a99; }
-        .stat-label { color: #5a6c7d; margin-top: 0.5rem; }
-        .category-breakdown { margin: 2rem 0; }
-        .category-item { display: flex; justify-content: space-between; padding: 1rem; margin: 0.5rem 0; background: #f8fbff; border-radius: 8px; }
-        .btn-home { display: inline-block; padding: 1rem 2rem; background: #004a99; color: white; text-decoration: none; border-radius: 50px; margin-top: 2rem; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>🎯 Practice Results</h1>
-        
-        <div class="score-card">
-            <div class="score-big">{{ score_percentage }}%</div>
-            <p>Overall Score</p>
-        </div>
-        
-        <div class="stats-grid">
-            <div class="stat-box">
-                <div class="stat-number">{{ total_questions }}</div>
-                <div class="stat-label">Total Questions</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-number" style="color: #38a169;">{{ correct_count }}</div>
-                <div class="stat-label">Correct</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-number" style="color: #e53e3e;">{{ incorrect_count }}</div>
-                <div class="stat-label">Incorrect</div>
-            </div>
-        </div>
-        
-        <div class="category-breakdown">
-            <h2 style="color: #004a99; margin-bottom: 1rem;">Performance by Category</h2>
-            {% for cat in category_breakdown %}
-            <div class="category-item">
-                <span><strong>{{ cat.name }}</strong></span>
-                <span>{{ cat.correct }}/{{ cat.total }} ({{ cat.percentage }}%)</span>
-            </div>
-            {% empty %}
-            <p style="color: grey; font-style: italic;">No category data available.</p>
-            {% endfor %}
-        </div>
 
-        <div class="category-breakdown">
-            <h2 style="color: #004a99; margin-bottom: 1rem;">Performance by Question Type</h2>
-            {% for type in type_breakdown %}
-            <div class="category-item">
-                <span><strong>{{ type.name }}</strong></span>
-                <span>{{ type.correct }}/{{ type.total }} ({{ type.percentage }}%)</span>
-            </div>
-            {% empty %}
-            <p style="color: grey; font-style: italic;">No question type data available.</p>
-            {% endfor %}
-        </div>
-        
-        <div style="margin-top: 3rem;">
-            <h2 style="color: #004a99; margin-bottom: 1.5rem; text-align: center;">Detailed Review</h2>
-            {% for q in detailed_review %}
-            <div style="background: #fff; border: 1px solid #e0e0e0; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
-                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
-                    <span style="background: #004a99; color: white; padding: 4px 10px; border-radius: 6px; font-size: 0.9rem;">Q{{ q.num }} - {{ q.type }}</span>
-                    {% if q.is_correct %}
-                    <span style="color: #38a169; font-weight: bold;">✅ Correct</span>
-                    {% else %}
-                    <span style="color: #e53e3e; font-weight: bold;">❌ Incorrect</span>
-                    {% endif %}
+{% block title %}Practice Results – NCLEX XAV Technology{% endblock %}
+{% block meta_description %}Review your practice results, performance by category, and detailed rationales.{% endblock %}
+
+{% block extra_head %}
+<style>
+    .practice-results-hero,
+    .practice-results-card,
+    .practice-review-card,
+    .practice-results-stat {
+        background: rgba(255, 255, 255, 0.9);
+        border: 1px solid rgba(0, 74, 153, 0.08);
+        box-shadow: 0 18px 44px rgba(0, 52, 111, 0.07);
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+    }
+    .practice-results-hero { border-radius: 2rem; padding: 2rem; background: radial-gradient(circle at top right, rgba(255, 255, 255, 0.16), transparent 32%), linear-gradient(135deg, var(--primary), var(--primary-container)); color: #fff; }
+    .practice-results-hero h1 { font-size: clamp(2.1rem, 4vw, 3.3rem); line-height: 0.98; letter-spacing: -0.06em; margin-bottom: 0.9rem; font-weight: 900; max-width: 11ch; }
+    .practice-results-hero p { max-width: 42rem; color: rgba(255, 255, 255, 0.86); line-height: 1.8; }
+    .practice-results-score { margin-top: 1.25rem; display: inline-flex; flex-direction: column; gap: 0.2rem; padding: 1rem 1.2rem; border-radius: 1.2rem; background: rgba(255, 255, 255, 0.14); }
+    .practice-results-score .label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 800; opacity: 0.82; }
+    .practice-results-score .value { font-size: 2rem; font-weight: 900; letter-spacing: -0.04em; }
+    .practice-results-stats { display: grid; grid-template-columns: repeat(1, minmax(0, 1fr)); gap: 1rem; margin-top: 1.25rem; }
+    .practice-results-stat { border-radius: 1.35rem; padding: 1.2rem; }
+    .practice-results-stat .label { display: block; color: #6c849b; font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.45rem; }
+    .practice-results-stat .value { display: block; color: var(--primary); font-size: 1.9rem; font-weight: 900; letter-spacing: -0.05em; }
+    .practice-results-stat .sub { display: block; margin-top: 0.35rem; color: #60778b; font-size: 0.88rem; line-height: 1.6; }
+    .practice-results-grid { display: grid; gap: 1.25rem; margin-top: 1.25rem; }
+    .practice-results-card { border-radius: 1.6rem; padding: 1.5rem; }
+    .practice-results-card h2 { color: var(--primary); font-size: 1.15rem; font-weight: 900; letter-spacing: -0.03em; margin-bottom: 1rem; }
+    .breakdown-list { display: grid; gap: 0.75rem; }
+    .breakdown-item { display: flex; justify-content: space-between; gap: 1rem; padding: 1rem; border-radius: 1rem; background: rgba(236, 244, 255, 0.72); color: #5a7289; }
+    .breakdown-item strong { color: var(--primary); }
+    .practice-review-list { display: grid; gap: 1rem; }
+    .practice-review-card { border-radius: 1.5rem; padding: 1.4rem; }
+    .practice-review-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; margin-bottom: 1rem; }
+    .practice-review-tag { display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.45rem 0.75rem; border-radius: 999px; background: rgba(0, 74, 153, 0.1); color: var(--primary); font-size: 0.8rem; font-weight: 800; }
+    .practice-review-status { font-weight: 800; font-size: 0.92rem; }
+    .practice-review-status.correct { color: #138a57; }
+    .practice-review-status.incorrect { color: #d04646; }
+    .practice-review-question { color: #24384e; font-size: 1.05rem; font-weight: 800; line-height: 1.7; margin-bottom: 1rem; }
+    .practice-review-answer-grid { display: grid; grid-template-columns: 1fr; gap: 0.9rem; margin-bottom: 1rem; }
+    .practice-review-answer { padding: 1rem; border-radius: 1rem; background: rgba(236, 244, 255, 0.66); border-left: 4px solid rgba(0, 74, 153, 0.2); }
+    .practice-review-answer.correct { background: rgba(16, 185, 129, 0.08); border-left-color: #10b981; }
+    .practice-review-answer.incorrect { background: rgba(239, 68, 68, 0.08); border-left-color: #ef4444; }
+    .practice-review-answer strong { display: block; color: var(--primary); margin-bottom: 0.45rem; }
+    .practice-review-answer span { color: #5a7289; line-height: 1.7; }
+    .practice-review-rationale { padding: 1rem 1.1rem; border-radius: 1rem; background: rgba(255, 248, 220, 0.7); border-left: 4px solid #d69e2e; color: #5a7289; line-height: 1.7; }
+    .practice-review-rationale strong { display: block; color: #9a6d00; margin-bottom: 0.35rem; }
+    .practice-review-hotspot { position: relative; max-width: 100%; width: fit-content; margin-bottom: 1rem; border: 1px solid rgba(0, 74, 153, 0.12); border-radius: 1rem; overflow: hidden; }
+    .practice-review-hotspot img { max-height: 400px; max-width: 100%; display: block; }
+    .practice-results-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1.5rem; }
+    .practice-results-actions a { display: inline-flex; align-items: center; justify-content: center; gap: 0.45rem; padding: 0.95rem 1.25rem; border-radius: 999px; font-weight: 800; }
+    .practice-results-actions .primary { background: linear-gradient(135deg, var(--primary), var(--primary-container)); color: #fff; }
+    .practice-results-actions .secondary { background: rgba(226, 239, 255, 0.78); color: var(--primary); }
+    .practice-results-empty { color: #6b8298; font-style: italic; }
+    @media (min-width: 760px) {
+        .practice-results-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        .practice-review-answer-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="app-section-shell">
+    <div class="app-section-layout">
+        {% include "includes/practice_sidebar.html" with practice_nav="practice" %}
+        <div class="app-section-main">
+
+            <section class="practice-results-hero">
+                <h1>Review how your practice session went.</h1>
+                <p>This results page now follows the same shared app layout and gives students a clearer snapshot of score, category performance, and the rationale behind each answer.</p>
+                <div class="practice-results-score">
+                    <span class="label">Overall Score</span>
+                    <span class="value">{{ score_percentage }}%</span>
                 </div>
-                
-                <h3 style="font-size: 1.1rem; margin-bottom: 1rem; color: #2d3748;">{{ q.text|safe }}</h3>
-                
-                <!-- VISUAL HOT SPOT FEEDBACK -->
-                {% if q.type == 'Hot Spot' and q.image_url %}
-                <div style="position: relative; max-width: 100%; width: fit-content; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; overflow: hidden;">
-                    <img src="{{ q.image_url }}" style="max-height: 400px; max-width: 100%; display: block;">
-                    
-                    <!-- User Click (Red X) -->
-                    {% if q.raw_user_answer.x %}
-                    <div style="position: absolute; left: {{ q.raw_user_answer.x }}%; top: {{ q.raw_user_answer.y }}%; width: 20px; height: 20px; background: rgba(229, 62, 62, 0.8); border: 2px solid white; border-radius: 50%; transform: translate(-50%, -50%); box-shadow: 0 2px 5px rgba(0,0,0,0.3);" title="Your Answer">
-                        <span style="display: block; width: 100%; height: 100%; text-align: center; line-height: 16px; color: white; font-weight: bold; font-size: 12px;">✖</span>
+            </section>
+
+            <section class="practice-results-stats">
+                <article class="practice-results-stat">
+                    <span class="label">Questions</span>
+                    <span class="value">{{ total_questions }}</span>
+                    <span class="sub">Total questions completed in this session.</span>
+                </article>
+                <article class="practice-results-stat">
+                    <span class="label">Correct</span>
+                    <span class="value">{{ correct_count }}</span>
+                    <span class="sub">Questions answered correctly.</span>
+                </article>
+                <article class="practice-results-stat">
+                    <span class="label">Incorrect</span>
+                    <span class="value">{{ incorrect_count }}</span>
+                    <span class="sub">Questions that still need review.</span>
+                </article>
+            </section>
+
+            <div class="practice-results-grid">
+                <section class="practice-results-card">
+                    <h2>Performance by Category</h2>
+                    <div class="breakdown-list">
+                        {% for cat in category_breakdown %}
+                            <div class="breakdown-item">
+                                <span><strong>{{ cat.name }}</strong></span>
+                                <span>{{ cat.correct }}/{{ cat.total }} ({{ cat.percentage }}%)</span>
+                            </div>
+                        {% empty %}
+                            <p class="practice-results-empty">No category data available.</p>
+                        {% endfor %}
                     </div>
-                    {% endif %}
+                </section>
 
-                    <!-- Correct Zone (Green Circle) -->
-                    {% with target=q.raw_correct_answer.0|default:q.raw_correct_answer %}
-                    {% if target.center_x %}
-                    <div style="position: absolute; left: {{ target.center_x }}%; top: {{ target.center_y }}%; width: {{ target.radius|add:target.radius }}%; height: {{ target.radius|add:target.radius }}%; background: rgba(56, 161, 105, 0.3); border: 2px solid #38a169; border-radius: 50%; transform: translate(-50%, -50%); pointer-events: none;" title="Correct Zone"></div>
-                    {% endif %}
-                    {% endwith %}
-                </div>
-                {% endif %}
+                <section class="practice-results-card">
+                    <h2>Performance by Question Type</h2>
+                    <div class="breakdown-list">
+                        {% for type in type_breakdown %}
+                            <div class="breakdown-item">
+                                <span><strong>{{ type.name }}</strong></span>
+                                <span>{{ type.correct }}/{{ type.total }} ({{ type.percentage }}%)</span>
+                            </div>
+                        {% empty %}
+                            <p class="practice-results-empty">No question type data available.</p>
+                        {% endfor %}
+                    </div>
+                </section>
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
-                    <div style="background: #f8fbff; padding: 10px; border-radius: 8px; border-left: 4px solid {% if q.is_correct %}#38a169{% else %}#e53e3e{% endif %};">
-                        <strong>Your Answer:</strong><br>
-                        <span style="color: #555;">
-                            {% for line in q.user_answer %}
-                                {{ line }}<br>
-                            {% endfor %}
-                        </span>
+                <section class="practice-results-card">
+                    <h2>Detailed Review</h2>
+                    <div class="practice-review-list">
+                        {% for q in detailed_review %}
+                            <article class="practice-review-card">
+                                <div class="practice-review-head">
+                                    <span class="practice-review-tag">Q{{ q.num }} · {{ q.type }}</span>
+                                    <span class="practice-review-status {% if q.is_correct %}correct{% else %}incorrect{% endif %}">
+                                        {% if q.is_correct %}Correct{% else %}Incorrect{% endif %}
+                                    </span>
+                                </div>
+
+                                <div class="practice-review-question">{{ q.text|safe }}</div>
+
+                                {% if q.type == 'Hot Spot' and q.image_url %}
+                                    <div class="practice-review-hotspot">
+                                        <img src="{{ q.image_url }}" alt="Hot spot review image">
+                                        {% if q.raw_user_answer.x %}
+                                            <div style="position:absolute; left:{{ q.raw_user_answer.x }}%; top:{{ q.raw_user_answer.y }}%; width:20px; height:20px; background:rgba(229, 62, 62, 0.8); border:2px solid white; border-radius:50%; transform:translate(-50%, -50%); box-shadow:0 2px 5px rgba(0,0,0,0.3);" title="Your Answer">
+                                                <span style="display:block; width:100%; height:100%; text-align:center; line-height:16px; color:white; font-weight:bold; font-size:12px;">✖</span>
+                                            </div>
+                                        {% endif %}
+                                        {% with target=q.raw_correct_answer.0|default:q.raw_correct_answer %}
+                                            {% if target.center_x %}
+                                                <div style="position:absolute; left:{{ target.center_x }}%; top:{{ target.center_y }}%; width:{{ target.radius|add:target.radius }}%; height:{{ target.radius|add:target.radius }}%; background:rgba(56, 161, 105, 0.3); border:2px solid #38a169; border-radius:50%; transform:translate(-50%, -50%); pointer-events:none;" title="Correct Zone"></div>
+                                            {% endif %}
+                                        {% endwith %}
+                                    </div>
+                                {% endif %}
+
+                                <div class="practice-review-answer-grid">
+                                    <div class="practice-review-answer {% if q.is_correct %}correct{% else %}incorrect{% endif %}">
+                                        <strong>Your Answer</strong>
+                                        <span>
+                                            {% for line in q.user_answer %}
+                                                {{ line }}<br>
+                                            {% endfor %}
+                                        </span>
+                                    </div>
+                                    <div class="practice-review-answer correct">
+                                        <strong>Correct Answer</strong>
+                                        <span>
+                                            {% for line in q.correct_answer %}
+                                                {{ line }}<br>
+                                            {% endfor %}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                {% if q.rationale %}
+                                    <div class="practice-review-rationale">
+                                        <strong>Rationale</strong>
+                                        <div>{{ q.rationale|safe }}</div>
+                                    </div>
+                                {% endif %}
+                            </article>
+                        {% endfor %}
                     </div>
-                    <div style="background: #f0fff4; padding: 10px; border-radius: 8px; border-left: 4px solid #38a169;">
-                        <strong>Correct Answer:</strong><br>
-                        <span style="color: #555;">
-                            {% for line in q.correct_answer %}
-                                {{ line }}<br>
-                            {% endfor %}
-                        </span>
+
+                    <div class="practice-results-actions">
+                        <a href="{% url 'practice_categories' %}" class="primary"><span class="material-symbols-outlined" style="font-size:18px;">replay</span>Practice Again</a>
+                        <a href="{% url 'study_planner' %}" class="secondary"><span class="material-symbols-outlined" style="font-size:18px;">space_dashboard</span>Open Dashboard</a>
                     </div>
-                </div>
-                
-                {% if q.rationale %}
-                <div style="background: #fffbea; padding: 15px; border-radius: 8px; border-left: 4px solid #d69e2e;">
-                    <strong>💡 Rationale:</strong>
-                    <div style="margin-top: 5px; color: #4a5568;">{{ q.rationale|safe }}</div>
-                </div>
-                {% endif %}
+                </section>
             </div>
-            {% endfor %}
-        </div>
-
-        <div style="text-align: center;">
-            <a href="{% url 'practice_categories' %}" class="btn-home">Practice Again</a>
-            <a href="{% url 'home' %}" class="btn-home" style="background: #6c757d; margin-left: 1rem;">Home</a>
         </div>
     </div>
-</body>
-</html>
+</section>
+{% endblock %}

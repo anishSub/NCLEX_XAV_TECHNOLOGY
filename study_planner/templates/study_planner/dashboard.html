@@ -1,471 +1,772 @@
+{% extends "base.html" %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard – NCLEX XAV Technology</title>
-    <meta name="description" content="Your personalized NCLEX study dashboard with task management, recommendations, and progress tracking.">
-    <link rel="stylesheet" href="{% static 'css/nclex-design.css' %}">
-    <style>
-    /* ===== DASHBOARD PAGE STYLES ===== */
-    .dash-page { padding-top: 64px; min-height: 100vh; background: var(--background); }
 
-    /* Welcome Banner */
-    .dash-welcome {
-        background: linear-gradient(135deg, var(--primary), var(--primary-container));
-        color: #fff; padding: 2.5rem; border-radius: 1rem;
-        margin-bottom: 2rem; position: relative; overflow: hidden;
-    }
-    .dash-welcome::after {
-        content: ''; position: absolute; right: -40px; top: -40px;
-        width: 200px; height: 200px; border-radius: 50%;
-        background: rgba(255,255,255,.06);
-    }
-    .dash-welcome h1 { font-size: 1.75rem; font-weight: 800; margin-bottom: .5rem; }
-    .dash-welcome p { opacity: .85; font-size: .95rem; }
+{% block title %}Study Dashboard – NCLEX XAV Technology{% endblock %}
+{% block meta_description %}Your personalized NCLEX dashboard for study planning, practice progress, and exam readiness.{% endblock %}
 
-    /* Stats Grid */
-    .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 2rem; }
-    .stat-box {
-        background: var(--surface-container-lowest); padding: 1.5rem;
-        border-radius: 1rem; box-shadow: 0 1px 3px var(--shadow-color);
-        display: flex; flex-direction: column; gap: .5rem;
+{% block extra_head %}
+<style>
+    .planner-shell {
+        padding: 1.25rem 1rem 3rem;
     }
-    .stat-box .label {
-        font-size: 10px; font-weight: 700; text-transform: uppercase;
-        letter-spacing: .1em; color: #94a3b8;
+    .planner-layout {
+        max-width: 1320px;
+        margin: 0 auto;
     }
-    .stat-box .value { font-size: 2rem; font-weight: 900; color: var(--primary); }
-    .stat-box .sub { font-size: .8rem; color: var(--secondary); }
-    .stat-streak {
+    .planner-panel,
+    .planner-stat-card,
+    .planner-metric-card {
+        background: rgba(255, 255, 255, 0.88);
+        border: 1px solid rgba(0, 74, 153, 0.08);
+        box-shadow: 0 18px 44px rgba(0, 52, 111, 0.07);
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+    }
+    .planner-hero {
+        border-radius: 2rem;
+        padding: 2rem;
+        background:
+            radial-gradient(circle at top right, rgba(255, 255, 255, 0.18), transparent 34%),
+            linear-gradient(135deg, var(--primary), var(--primary-container));
+        color: #fff;
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 1.25rem;
+    }
+    .planner-hero::after {
+        content: "";
+        position: absolute;
+        right: -3rem;
+        bottom: -3rem;
+        width: 13rem;
+        height: 13rem;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.08);
+    }
+    .planner-hero-grid {
+        display: grid;
+        gap: 1rem;
+        position: relative;
+        z-index: 1;
+    }
+    .planner-hero-copy h1 {
+        font-size: clamp(2rem, 3vw, 3rem);
+        line-height: 1.02;
+        letter-spacing: -0.05em;
+        margin-bottom: 0.75rem;
+        font-weight: 900;
+    }
+    .planner-hero-copy p {
+        max-width: 42rem;
+        color: rgba(255, 255, 255, 0.84);
+        line-height: 1.75;
+    }
+    .planner-hero-badges {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+    }
+    .planner-hero-badge {
+        padding: 0.85rem 1rem;
+        border-radius: 1rem;
+        background: rgba(255, 255, 255, 0.13);
+        border: 1px solid rgba(255, 255, 255, 0.16);
+    }
+    .planner-hero-badge .label {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        opacity: 0.8;
+        font-weight: 700;
+    }
+    .planner-hero-badge .value {
+        display: block;
+        font-size: 1.1rem;
+        font-weight: 800;
+        margin-top: 0.2rem;
+    }
+    .planner-stats-grid,
+    .planner-metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(1, minmax(0, 1fr));
+        gap: 1rem;
+        margin-bottom: 1.25rem;
+    }
+    .planner-stat-card,
+    .planner-metric-card {
+        border-radius: 1.5rem;
+        padding: 1.35rem;
+    }
+    .planner-stat-card .label,
+    .planner-metric-card .label {
+        display: block;
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: #6c849b;
+        font-weight: 800;
+        margin-bottom: 0.55rem;
+    }
+    .planner-stat-card .value,
+    .planner-metric-card .value {
+        display: block;
+        font-size: 2rem;
+        color: var(--primary);
+        letter-spacing: -0.05em;
+        font-weight: 900;
+    }
+    .planner-stat-card .sub,
+    .planner-metric-card .sub {
+        display: block;
+        margin-top: 0.45rem;
+        color: #5f768c;
+        font-size: 0.88rem;
+        line-height: 1.5;
+    }
+    .planner-stat-card.is-streak {
         background: linear-gradient(135deg, #ff6b6b, #ff8e53);
-        color: #fff; text-align: center; border-radius: 1rem;
-        padding: 1.5rem; display: flex; flex-direction: column;
-        align-items: center; justify-content: center;
+        color: #fff;
     }
-    .stat-streak .material-symbols-outlined { font-size: 2rem; margin-bottom: .25rem; font-variation-settings: 'FILL' 1; }
-    .stat-streak .value { font-size: 2rem; font-weight: 900; }
-    .stat-streak .label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; opacity: .9; }
-
-    /* Quick Actions */
+    .planner-stat-card.is-streak .label,
+    .planner-stat-card.is-streak .value,
+    .planner-stat-card.is-streak .sub {
+        color: #fff;
+    }
+    .planner-section-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+    .planner-section-head h2 {
+        color: var(--primary);
+        font-size: 1.2rem;
+        font-weight: 900;
+        letter-spacing: -0.03em;
+    }
+    .planner-section-head p {
+        color: #62788d;
+        font-size: 0.9rem;
+    }
     .quick-actions {
-        display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        margin-bottom: 1.25rem;
     }
     .qa-btn {
-        display: flex; align-items: center; gap: .5rem;
-        padding: .75rem 1.5rem; border-radius: var(--radius-full);
-        font-weight: 600; font-size: .85rem; transition: all .2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.9rem 1.25rem;
+        border-radius: 999px;
+        font-weight: 800;
+        font-size: 0.9rem;
     }
-    .qa-btn-primary { background: var(--primary); color: #fff; box-shadow: 0 4px 12px rgba(0,52,111,.2); }
-    .qa-btn-primary:hover { opacity: .9; }
-    .qa-btn-outline { border: 1.5px solid var(--primary); color: var(--primary); }
-    .qa-btn-outline:hover { background: rgba(0,52,111,.04); }
-    .qa-btn-surface { background: var(--surface-container); color: var(--secondary); }
-
-    /* Recommendations */
+    .qa-btn-primary {
+        background: linear-gradient(135deg, var(--primary), var(--primary-container));
+        color: #fff;
+        box-shadow: 0 14px 26px rgba(0, 52, 111, 0.16);
+    }
+    .qa-btn-outline {
+        background: rgba(255, 255, 255, 0.88);
+        color: var(--primary);
+        border: 1px solid rgba(0, 74, 153, 0.14);
+    }
+    .qa-btn-surface {
+        background: rgba(226, 239, 255, 0.74);
+        color: var(--secondary);
+    }
+    .planner-panel {
+        border-radius: 1.6rem;
+        padding: 1.45rem;
+        margin-bottom: 1.25rem;
+    }
+    .planner-chart-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        margin-bottom: 1.25rem;
+    }
+    .planner-chart-card {
+        border-radius: 1.6rem;
+        padding: 1.35rem;
+        background: rgba(255, 255, 255, 0.9);
+        border: 1px solid rgba(0, 74, 153, 0.08);
+        box-shadow: 0 18px 44px rgba(0, 52, 111, 0.07);
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+    }
+    .planner-chart-card h3 {
+        color: var(--primary);
+        font-size: 1.05rem;
+        font-weight: 900;
+        letter-spacing: -0.03em;
+        margin-bottom: 0.35rem;
+    }
+    .planner-chart-card p {
+        color: #60778b;
+        font-size: 0.88rem;
+        line-height: 1.65;
+        margin-bottom: 1rem;
+    }
+    .planner-chart-wrap {
+        position: relative;
+        min-height: 280px;
+    }
+    .planner-chart-card.compact .planner-chart-wrap {
+        min-height: 240px;
+    }
+    .planner-highlight-strip {
+        display: grid;
+        grid-template-columns: repeat(1, minmax(0, 1fr));
+        gap: 0.85rem;
+        margin-bottom: 1.25rem;
+    }
+    .planner-highlight-card {
+        padding: 1.1rem 1.15rem;
+        border-radius: 1.25rem;
+        background: rgba(236, 244, 255, 0.78);
+        border: 1px solid rgba(0, 74, 153, 0.08);
+    }
+    .planner-highlight-card .eyebrow {
+        display: block;
+        color: #6c849b;
+        font-size: 0.72rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        margin-bottom: 0.3rem;
+    }
+    .planner-highlight-card strong {
+        display: block;
+        color: var(--primary);
+        font-size: 1rem;
+        font-weight: 900;
+        margin-bottom: 0.15rem;
+    }
+    .planner-highlight-card span {
+        color: #60778b;
+        font-size: 0.86rem;
+    }
     .rec-section {
-        background: var(--surface-container-lowest); border-radius: 1rem;
-        padding: 2rem; margin-bottom: 2rem;
-        box-shadow: 0 1px 3px var(--shadow-color);
         display: none;
     }
-    .rec-section.visible { display: block; }
-    .rec-hdr { display: flex; align-items: center; gap: .75rem; margin-bottom: 1.5rem; }
-    .rec-hdr .material-symbols-outlined { color: var(--error); font-size: 1.5rem; font-variation-settings: 'FILL' 1; }
-    .rec-hdr h2 { font-size: 1.25rem; font-weight: 800; color: var(--primary); }
-    .rec-hdr span.sub { font-size: .85rem; color: var(--secondary); margin-left: auto; }
-    .rec-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; }
+    .rec-section.visible {
+        display: block;
+    }
+    .rec-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1rem;
+    }
     .rec-card {
-        background: var(--surface-container-low); border-radius: 1rem;
-        padding: 1.5rem; border-left: 4px solid; transition: all .3s;
+        background: rgba(236, 244, 255, 0.72);
+        border-radius: 1.2rem;
+        padding: 1.15rem;
+        border-left: 4px solid;
     }
-    .rec-card:hover { transform: translateY(-4px); box-shadow: 0 8px 20px var(--shadow-color); }
     .rec-card.weak { border-left-color: var(--error); }
-    .rec-card.needs_work { border-left-color: #ff9800; }
+    .rec-card.needs_work { border-left-color: #f59e0b; }
     .rec-card.strong { border-left-color: var(--tertiary); }
-    .rec-card-hdr { display: flex; align-items: center; gap: .75rem; margin-bottom: 1rem; }
-    .rec-card-hdr .icon { font-size: 1.75rem; }
-    .rec-card-hdr .name { font-weight: 700; color: var(--on-surface); }
-    .rec-pct { font-size: 2.5rem; font-weight: 900; text-align: center; margin: .5rem 0; }
-    .rec-card.weak .rec-pct { color: var(--error); }
-    .rec-card.needs_work .rec-pct { color: #ff9800; }
-    .rec-card.strong .rec-pct { color: var(--tertiary); }
-    .rec-detail { text-align: center; color: var(--secondary); font-size: .85rem; margin-bottom: 1.25rem; }
+    .rec-card-hdr {
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+        margin-bottom: 0.75rem;
+    }
+    .rec-card .icon {
+        font-size: 1.35rem;
+    }
+    .rec-card .name {
+        font-weight: 800;
+        color: var(--primary);
+    }
+    .rec-pct {
+        font-size: 2rem;
+        font-weight: 900;
+        letter-spacing: -0.04em;
+    }
+    .rec-detail {
+        color: #5f768c;
+        font-size: 0.86rem;
+        margin: 0.45rem 0 1rem;
+    }
     .rec-practice-btn {
-        width: 100%; padding: .85rem;
+        width: 100%;
+        padding: 0.82rem;
+        border-radius: 999px;
         background: linear-gradient(135deg, var(--primary), var(--primary-container));
-        color: #fff; font-weight: 700; font-size: .85rem;
-        border-radius: var(--radius-full); transition: all .3s;
+        color: #fff;
+        font-weight: 800;
+        font-size: 0.88rem;
     }
-    .rec-practice-btn:hover { box-shadow: 0 6px 15px rgba(0,74,153,.3); }
-
-    /* Kanban */
-    .kanban-hdr {
-        display: flex; justify-content: space-between; align-items: center;
-        margin-bottom: 1.5rem;
+    .kanban-board {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1rem;
     }
-    .kanban-hdr h2 { font-size: 1.25rem; font-weight: 800; color: var(--primary); }
-    .kanban-board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; margin-bottom: 2rem; }
     .kb-col {
-        background: var(--surface-container-lowest); border-radius: 1rem;
-        padding: 1.5rem; box-shadow: 0 1px 3px var(--shadow-color);
+        border-radius: 1.25rem;
+        padding: 1.15rem;
+        background: rgba(236, 244, 255, 0.72);
     }
     .kb-col-hdr {
-        display: flex; justify-content: space-between; align-items: center;
-        margin-bottom: 1rem; padding-bottom: .75rem;
-        border-bottom: 2px solid var(--surface-container);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 0.75rem;
+        margin-bottom: 0.75rem;
+        border-bottom: 1px solid rgba(0, 74, 153, 0.08);
     }
-    .kb-col-hdr .title { font-weight: 700; font-size: .95rem; display: flex; align-items: center; gap: .5rem; }
+    .kb-col-hdr .title {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: 800;
+    }
     .kb-col-hdr .count {
-        padding: .2rem .65rem; border-radius: var(--radius-full);
-        font-size: .8rem; font-weight: 700;
+        padding: 0.2rem 0.65rem;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.9);
+        font-size: 0.78rem;
+        font-weight: 800;
     }
-    .todo-col .kb-col-hdr .title { color: #3b82f6; }
-    .todo-col .kb-col-hdr .count { background: #dbeafe; color: #3b82f6; }
-    .ip-col .kb-col-hdr .title { color: #f59e0b; }
-    .ip-col .kb-col-hdr .count { background: #fef3c7; color: #f59e0b; }
-    .done-col .kb-col-hdr .title { color: #22c55e; }
-    .done-col .kb-col-hdr .count { background: #dcfce7; color: #22c55e; }
-
+    .todo-col .title { color: #2563eb; }
+    .ip-col .title { color: #f59e0b; }
+    .done-col .title { color: #16a34a; }
     .task-card {
-        background: var(--surface-container-low); padding: 1rem;
-        border-radius: .75rem; border-left: 3px solid; margin-bottom: .75rem;
-        transition: all .3s; cursor: default;
+        background: rgba(255, 255, 255, 0.85);
+        border-radius: 1rem;
+        padding: 1rem;
+        border-left: 4px solid;
+        margin-bottom: 0.7rem;
     }
-    .task-card:hover { transform: translateX(4px); box-shadow: 0 4px 10px var(--shadow-color); }
-    .todo-col .task-card { border-left-color: #3b82f6; }
+    .todo-col .task-card { border-left-color: #2563eb; }
     .ip-col .task-card { border-left-color: #f59e0b; }
-    .done-col .task-card { border-left-color: #22c55e; opacity: .7; }
-    .task-card .t-title { font-weight: 600; color: var(--on-surface); margin-bottom: .3rem; }
-    .task-card .t-meta { font-size: .8rem; color: var(--secondary); }
-    .task-card .t-actions { display: flex; gap: .4rem; margin-top: .6rem; }
+    .done-col .task-card { border-left-color: #16a34a; }
+    .t-title {
+        font-weight: 800;
+        color: var(--primary);
+        margin-bottom: 0.25rem;
+    }
+    .t-meta {
+        color: #60758a;
+        font-size: 0.84rem;
+    }
+    .t-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.45rem;
+        margin-top: 0.8rem;
+    }
     .t-btn {
-        padding: .35rem .65rem; font-size: .78rem; font-weight: 600;
-        border-radius: .4rem; transition: all .2s;
+        padding: 0.45rem 0.75rem;
+        border-radius: 0.7rem;
+        font-size: 0.8rem;
+        font-weight: 800;
     }
-    .t-btn-start { background: #fef3c7; color: #f59e0b; }
-    .t-btn-done { background: #dcfce7; color: #22c55e; }
-    .t-btn-reset { background: #dbeafe; color: #3b82f6; }
-    .t-btn:hover { filter: brightness(.95); }
-    .hidden-task { display: none; }
+    .t-btn-start { background: #fef3c7; color: #b45309; }
+    .t-btn-done { background: #dcfce7; color: #15803d; }
+    .t-btn-reset { background: #dbeafe; color: #1d4ed8; }
+    .hidden-task {
+        display: none;
+    }
     .btn-show-more {
-        width: 100%; padding: .65rem; background: var(--surface-container);
-        border: 2px dashed var(--outline-variant); border-radius: .5rem;
-        color: var(--secondary); font-weight: 600; font-size: .85rem;
-        cursor: pointer; margin-top: .5rem; transition: all .2s;
+        width: 100%;
+        padding: 0.8rem;
+        border-radius: 0.9rem;
+        border: 1px dashed rgba(0, 74, 153, 0.16);
+        color: var(--primary);
+        font-weight: 800;
+        background: rgba(255, 255, 255, 0.72);
     }
-    .btn-show-more:hover { background: var(--surface-container-high); }
-    .empty-msg { color: #94a3b8; text-align: center; padding: 2rem; font-size: .9rem; }
-
-    /* Upcoming */
-    .upcoming-panel {
-        background: var(--surface-container-lowest); border-radius: 1rem;
-        padding: 2rem; box-shadow: 0 1px 3px var(--shadow-color); margin-bottom: 2rem;
+    .empty-msg {
+        padding: 1rem 0.2rem;
+        text-align: center;
+        color: #7890a6;
+        font-size: 0.9rem;
     }
-    .upcoming-panel h2 { font-size: 1.25rem; font-weight: 800; color: var(--primary); margin-bottom: 1rem; }
+    .upcoming-list {
+        display: grid;
+        gap: 0.7rem;
+    }
     .upcoming-item {
-        display: flex; align-items: center; gap: 1rem;
-        padding: .75rem 1rem; background: var(--surface-container-low);
-        border-radius: .75rem; margin-bottom: .5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.9rem;
+        padding: 0.95rem 1rem;
+        background: rgba(236, 244, 255, 0.7);
+        border-radius: 1rem;
     }
-    .upcoming-item .material-symbols-outlined { color: var(--secondary); font-size: 1.25rem; }
-    .upcoming-item strong { color: var(--on-surface); font-size: .9rem; }
-    .upcoming-item span { color: var(--secondary); font-size: .8rem; margin-left: auto; }
-
-    /* Modal */
+    .upcoming-item strong {
+        color: var(--primary);
+        font-size: 0.92rem;
+    }
+    .upcoming-item span {
+        margin-left: auto;
+        color: #62788d;
+        font-size: 0.82rem;
+    }
     .modal-overlay {
-        display: none; position: fixed; inset: 0;
-        background: rgba(0,0,0,.4); backdrop-filter: blur(4px);
-        z-index: 100; align-items: center; justify-content: center;
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(10, 29, 43, 0.35);
+        backdrop-filter: blur(5px);
+        z-index: 120;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
     }
-    .modal-overlay.open { display: flex; }
+    .modal-overlay.open {
+        display: flex;
+    }
     .modal-box {
-        background: var(--surface-container-lowest);
-        border-radius: 1.5rem; padding: 2.5rem;
-        width: 90%; max-width: 440px;
-        box-shadow: 0 32px 64px rgba(0,0,0,.15);
+        width: min(100%, 460px);
+        border-radius: 1.6rem;
+        padding: 2rem;
+        background: #fff;
+        border: 1px solid rgba(0, 74, 153, 0.08);
+        box-shadow: 0 26px 60px rgba(0, 52, 111, 0.15);
     }
-    .modal-box h2 { font-size: 1.25rem; font-weight: 800; color: var(--primary); margin-bottom: 1.5rem; }
-    .modal-box .form-group { margin-bottom: 1rem; }
+    .modal-box h2 {
+        font-size: 1.3rem;
+        color: var(--primary);
+        font-weight: 900;
+        margin-bottom: 1rem;
+    }
+    .modal-box .form-group {
+        margin-bottom: 1rem;
+    }
     .modal-box label {
-        display: block; font-size: .7rem; font-weight: 700;
-        text-transform: uppercase; letter-spacing: .08em; color: #64748b;
-        margin-bottom: .4rem; padding-left: .25rem;
+        display: block;
+        margin-bottom: 0.4rem;
+        font-size: 0.72rem;
+        color: #657d93;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-weight: 800;
     }
     .modal-box input,
-    .modal-box select,
-    .modal-box textarea {
-        width: 100%; padding: .8rem 1rem; border: 1px solid var(--outline-variant);
-        border-radius: .5rem; font-size: .9rem; color: var(--on-surface);
-        background: var(--surface-container-low); transition: all .2s;
+    .modal-box select {
+        width: 100%;
+        padding: 0.85rem 1rem;
+        border-radius: 0.8rem;
+        border: 1px solid rgba(0, 74, 153, 0.12);
+        background: rgba(236, 244, 255, 0.65);
     }
-    .modal-box input:focus,
-    .modal-box select:focus { outline: none; border-color: var(--primary-container); box-shadow: 0 0 0 3px rgba(0,74,153,.1); }
+    .modal-submit,
+    .modal-cancel {
+        width: 100%;
+        padding: 0.9rem;
+        border-radius: 999px;
+        font-weight: 800;
+        margin-top: 0.55rem;
+    }
     .modal-submit {
-        width: 100%; padding: .9rem;
         background: linear-gradient(135deg, var(--primary), var(--primary-container));
-        color: #fff; font-weight: 700; border-radius: var(--radius-full);
-        font-size: .9rem; margin-top: .5rem;
+        color: #fff;
     }
     .modal-cancel {
-        width: 100%; padding: .9rem; margin-top: .5rem;
-        background: var(--surface-container); color: var(--secondary);
-        font-weight: 600; border-radius: var(--radius-full); font-size: .9rem;
+        background: rgba(226, 239, 255, 0.8);
+        color: var(--primary);
     }
-
-    /* ===== Responsive ===== */
-    @media (max-width: 1024px) { .stats-row { grid-template-columns: repeat(2, 1fr); } }
-    @media (max-width: 768px) {
-        .kanban-board { grid-template-columns: 1fr; }
-        .stats-row { grid-template-columns: repeat(2, 1fr); }
-        .quick-actions { flex-wrap: wrap; }
-        .rec-grid { grid-template-columns: 1fr; }
+    @media (min-width: 860px) {
+        .planner-hero-grid,
+        .planner-stats-grid,
+        .planner-metrics-grid,
+        .planner-highlight-strip {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
     }
-    @media (max-width: 480px) { .stats-row { grid-template-columns: 1fr; } }
-    </style>
-</head>
-<body>
+    @media (min-width: 980px) {
+        .planner-stats-grid,
+        .planner-metrics-grid {
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+        }
+        .planner-chart-grid {
+            grid-template-columns: 1.3fr 0.9fr;
+        }
+        .planner-highlight-strip {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+        .kanban-board {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+    }
+</style>
+{% endblock %}
 
-<!-- ====== TOP NAVIGATION ====== -->
-<nav class="nclex-topnav">
-    <div class="nav-inner">
-        <a href="{% url 'home' %}" class="nav-brand">NCLEX XAV</a>
-        <div class="nav-links">
-            <a href="{% url 'study_planner' %}" class="active">Dashboard</a>
-            <a href="{% url 'practice_categories' %}">Practice</a>
-            <a href="{% url 'start_exam' %}">Exams</a>
-            <a href="{% url 'gamification:leaderboard' %}">Leaderboard</a>
-        </div>
-        <div class="nav-actions">
-            <a href="{% url 'setup_study_plan' %}" class="nav-icon-btn" title="Settings">
-                <span class="material-symbols-outlined">settings</span>
-            </a>
-            <a href="{% url 'home' %}" class="nav-icon-btn">
-                <span class="material-symbols-outlined">home</span>
-            </a>
-        </div>
-    </div>
-</nav>
-
-<!-- ====== SIDE NAVIGATION (Desktop) ====== -->
-<aside class="nclex-sidenav">
-    <div class="sidenav-header">
-        <h4>Clinical Suite</h4>
-        <p>NCLEX Prep</p>
-    </div>
-    <div class="sidenav-links">
-        <a href="{% url 'study_planner' %}" class="sidenav-link active">
-            <span class="material-symbols-outlined">dashboard</span> Dashboard
-        </a>
-        <a href="{% url 'practice_categories' %}" class="sidenav-link">
-            <span class="material-symbols-outlined">menu_book</span> Practice
-        </a>
-        <a href="{% url 'start_exam' %}" class="sidenav-link">
-            <span class="material-symbols-outlined">assignment</span> Exams
-        </a>
-        <a href="{% url 'gamification:leaderboard' %}" class="sidenav-link">
-            <span class="material-symbols-outlined">leaderboard</span> Leaderboard
-        </a>
-        <a href="{% url 'gamification:badges' %}" class="sidenav-link">
-            <span class="material-symbols-outlined">military_tech</span> Badges
-        </a>
-    </div>
-    <div class="sidenav-footer">
-        <a href="{% url 'start_exam' %}" class="btn-container-pill" style="width:100%;text-align:center;">
-            <span class="material-symbols-outlined" style="font-size:16px;">play_circle</span> Start Exam
-        </a>
-    </div>
-</aside>
-
-<!-- ====== MAIN CONTENT ====== -->
-<main class="dash-page main-with-sidenav" style="padding: 5.5rem 2rem 6rem;">
-    <div style="max-width:1200px; margin:0 auto;">
-
-        <!-- Welcome Banner -->
-        <div class="dash-welcome">
-            <h1>Welcome back, {{ request.user.first_name|default:request.user.email }}! 👋</h1>
-            <p>Your exam is <strong>{{ days_until_exam }} days</strong> away on {{ study_plan.exam_date|date:"F d, Y" }}.
-            {% if gam_profile %} Level {{ gam_profile.level }} · {{ gam_profile.total_points }} pts · Rank #{{ user_rank }}{% endif %}</p>
-        </div>
-
-        <!-- Stats Row -->
-        <div class="stats-row">
-            <div class="stat-box">
-                <span class="label">Days Until Exam</span>
-                <span class="value">{{ days_until_exam }}</span>
-                <span class="sub">{{ study_plan.exam_date|date:"M d, Y" }}</span>
-            </div>
-            <div class="stat-streak">
-                <span class="material-symbols-outlined">local_fire_department</span>
-                <span class="value">{% if gam_profile %}{{ gam_profile.current_streak }}{% else %}{{ study_plan.study_streak }}{% endif %}</span>
-                <span class="label">Day Streak</span>
-            </div>
-            <div class="stat-box">
-                <span class="label">Completion Rate</span>
-                <span class="value">{{ completion_rate }}%</span>
-                <span class="sub">Tasks completed</span>
-            </div>
-            <div class="stat-box">
-                <span class="label">Daily Goal</span>
-                <span class="value">{{ study_plan.daily_study_hours }}h</span>
-                <span class="sub">Study hours</span>
-            </div>
-        </div>
-
-        <!-- Quick Actions -->
-        <div class="quick-actions">
-            <a href="{% url 'start_exam' %}" class="qa-btn qa-btn-primary">
-                <span class="material-symbols-outlined" style="font-size:18px;">play_circle</span>
-                Start Exam
-            </a>
-            <a href="{% url 'practice_categories' %}" class="qa-btn qa-btn-outline">
-                <span class="material-symbols-outlined" style="font-size:18px;">menu_book</span>
-                Practice
-            </a>
-            <button class="qa-btn qa-btn-surface" onclick="openAddTaskModal()">
-                <span class="material-symbols-outlined" style="font-size:18px;">add_circle</span>
-                Add Task
-            </button>
-        </div>
-
-        <!-- Recommendations Section -->
-        <div class="rec-section" id="recommendationsSection">
-            <div class="rec-hdr">
-                <span class="material-symbols-outlined">auto_awesome</span>
-                <h2>Recommended Practice</h2>
-                <span class="sub">Based on your exam performance</span>
-            </div>
-            <div class="rec-grid" id="recommendationsGrid"></div>
-        </div>
-
-        <!-- Kanban Board -->
-        <div class="kanban-hdr">
-            <h2>Today's Tasks</h2>
-        </div>
-        <div class="kanban-board">
-            <!-- TO DO Column -->
-            <div class="kb-col todo-col">
-                <div class="kb-col-hdr">
-                    <span class="title">
-                        <span class="material-symbols-outlined" style="font-size:18px;">radio_button_unchecked</span>
-                        To Do
-                    </span>
-                    <span class="count">{{ todays_tasks_todo.count }}</span>
-                </div>
-                {% for task in todays_tasks_todo %}
-                <div class="task-card {% if forloop.counter > 5 %}hidden-task{% endif %}" data-column="todo">
-                    <div class="t-title">{{ task.title }}</div>
-                    <div class="t-meta">{{ task.estimated_minutes }} min · {{ task.get_priority_display }}</div>
-                    <div class="t-actions">
-                        <button class="t-btn t-btn-start" onclick="updateStatus({{ task.id }}, 'IN_PROGRESS')">▶ Start</button>
-                        <button class="t-btn t-btn-done" onclick="updateStatus({{ task.id }}, 'COMPLETED')">✓ Done</button>
+{% block content %}
+<section class="planner-shell">
+    <div class="planner-layout">
+        <div>
+            <section class="planner-hero">
+                <div class="planner-hero-grid">
+                    <div class="planner-hero-copy">
+                        <h1>Welcome back, {{ request.user.first_name|default:request.user.email }}.</h1>
+                        <p>Your exam is {{ days_until_exam }} days away on {{ study_plan.exam_date|date:"F d, Y" }}. This dashboard now tracks your study plan, question practice, and adaptive exam activity in one place.</p>
+                    </div>
+                    <div class="planner-hero-badges">
+                        <div class="planner-hero-badge">
+                            <span class="label">Level</span>
+                            <span class="value">{% if gam_profile %}{{ gam_profile.level }}{% else %}1{% endif %}</span>
+                        </div>
+                        <div class="planner-hero-badge">
+                            <span class="label">Points</span>
+                            <span class="value">{% if gam_profile %}{{ gam_profile.total_points }}{% else %}0{% endif %}</span>
+                        </div>
+                        <div class="planner-hero-badge">
+                            <span class="label">Rank</span>
+                            <span class="value">#{{ user_rank }}</span>
+                        </div>
                     </div>
                 </div>
-                {% empty %}
-                <p class="empty-msg">No tasks yet</p>
-                {% endfor %}
-                {% if todays_tasks_todo.count > 5 %}
-                <button class="btn-show-more" onclick="toggleShowMore('todo')">+ Show {{ todays_tasks_todo.count|add:"-5" }} More</button>
-                {% endif %}
+            </section>
+
+            <div class="planner-stats-grid">
+                <article class="planner-stat-card">
+                    <span class="label">Days Until Exam</span>
+                    <span class="value">{{ days_until_exam }}</span>
+                    <span class="sub">Target date: {{ study_plan.exam_date|date:"M d, Y" }}</span>
+                </article>
+                <article class="planner-stat-card is-streak">
+                    <span class="label">Current Streak</span>
+                    <span class="value">{% if gam_profile %}{{ gam_profile.current_streak }}{% else %}{{ study_plan.study_streak }}{% endif %}</span>
+                    <span class="sub">Keep your daily study rhythm alive</span>
+                </article>
+                <article class="planner-stat-card">
+                    <span class="label">Task Completion</span>
+                    <span class="value">{{ completion_rate }}%</span>
+                    <span class="sub">{{ todays_tasks_completed.count }} finished today</span>
+                </article>
+                <article class="planner-stat-card">
+                    <span class="label">Daily Goal</span>
+                    <span class="value">{{ study_plan.daily_study_hours }}h</span>
+                    <span class="sub">Planned study time each day</span>
+                </article>
             </div>
 
-            <!-- IN PROGRESS Column -->
-            <div class="kb-col ip-col">
-                <div class="kb-col-hdr">
-                    <span class="title">
-                        <span class="material-symbols-outlined" style="font-size:18px;">pending</span>
-                        In Progress
-                    </span>
-                    <span class="count">{{ todays_tasks_in_progress.count }}</span>
-                </div>
-                {% for task in todays_tasks_in_progress %}
-                <div class="task-card {% if forloop.counter > 5 %}hidden-task{% endif %}" data-column="in-progress">
-                    <div class="t-title">{{ task.title }}</div>
-                    <div class="t-meta">{{ task.estimated_minutes }} min · {{ task.get_priority_display }}</div>
-                    <div class="t-actions">
-                        <button class="t-btn t-btn-reset" onclick="updateStatus({{ task.id }}, 'TODO')">↩ To Do</button>
-                        <button class="t-btn t-btn-done" onclick="updateStatus({{ task.id }}, 'COMPLETED')">✓ Done</button>
+            <div class="planner-metrics-grid">
+                <article class="planner-metric-card">
+                    <span class="label">Questions Practiced</span>
+                    <span class="value">{{ total_practiced_questions }}</span>
+                    <span class="sub">{% if latest_practice_session %}Across {{ practice_sessions_count }} practice session{{ practice_sessions_count|pluralize }}{% else %}No practice activity yet{% endif %}</span>
+                </article>
+                <article class="planner-metric-card">
+                    <span class="label">Practice Accuracy</span>
+                    <span class="value">{{ practice_accuracy }}%</span>
+                    <span class="sub">Correct answers from your completed practice history</span>
+                </article>
+                <article class="planner-metric-card">
+                    <span class="label">Exam Attempts</span>
+                    <span class="value">{{ adaptive_attempts }}</span>
+                    <span class="sub">{{ completed_adaptive_attempts }} completed adaptive exam{{ completed_adaptive_attempts|pluralize }}</span>
+                </article>
+                <article class="planner-metric-card">
+                    <span class="label">Question Bank</span>
+                    <span class="value">{{ standalone_question_bank }}</span>
+                    <span class="sub">{{ case_study_bank }} case stud{{ case_study_bank|pluralize:"y,ies" }} available</span>
+                </article>
+            </div>
+
+            <div class="planner-highlight-strip">
+                <article class="planner-highlight-card">
+                    <span class="eyebrow">Latest Practice</span>
+                    <strong>{% if latest_practice_session %}{{ latest_practice_session.created_at|date:"M d, Y" }}{% else %}No session yet{% endif %}</strong>
+                    <span>{% if latest_practice_session %}Session #{{ latest_practice_session.id }} with {{ latest_practice_session.total_questions|default:0 }} questions{% else %}Start a category session to begin tracking{% endif %}</span>
+                </article>
+                <article class="planner-highlight-card">
+                    <span class="eyebrow">Latest Exam</span>
+                    <strong>{% if latest_exam_session %}{{ latest_exam_session.status }}{% else %}Not started{% endif %}</strong>
+                    <span>{% if latest_exam_session %}Adaptive attempt from {{ latest_exam_session.created_at|date:"M d, Y" }}{% else %}Your first adaptive attempt will appear here{% endif %}</span>
+                </article>
+                <article class="planner-highlight-card">
+                    <span class="eyebrow">Today’s Balance</span>
+                    <strong>{{ todays_tasks_completed.count }} done / {{ todays_tasks_todo.count }} pending</strong>
+                    <span>Use the charts below to monitor completion and practice mix.</span>
+                </article>
+            </div>
+
+            <div class="planner-chart-grid">
+                <section class="planner-chart-card">
+                    <h3>7-Day Study Activity</h3>
+                    <p>A quick bar view of how many tasks you planned versus how many you actually completed this week.</p>
+                    <div class="planner-chart-wrap">
+                        <canvas id="studyActivityChart"></canvas>
+                    </div>
+                </section>
+                <section class="planner-chart-card compact">
+                    <h3>Task Status Split</h3>
+                    <p>This pie chart shows how today’s workload is distributed between to-do, active, and completed work.</p>
+                    <div class="planner-chart-wrap">
+                        <canvas id="taskStatusChart"></canvas>
+                    </div>
+                </section>
+            </div>
+
+            <div class="planner-chart-grid">
+                <section class="planner-chart-card">
+                    <h3>Learning Mode Mix</h3>
+                    <p>Compare how much of your recent activity has gone into practice sessions, adaptive exams, and case-study exposure.</p>
+                    <div class="planner-chart-wrap">
+                        <canvas id="learningMixChart"></canvas>
+                    </div>
+                </section>
+                <section class="planner-chart-card compact">
+                    <h3>Progress Snapshot</h3>
+                    <p>Your dashboard cards are mirrored here to give a quick visual progress read at a glance.</p>
+                    <div class="planner-chart-wrap">
+                        <canvas id="progressSnapshotChart"></canvas>
+                    </div>
+                </section>
+            </div>
+
+            <div class="quick-actions">
+                <a href="{% url 'start_exam' %}" class="qa-btn qa-btn-primary">
+                    <span class="material-symbols-outlined" style="font-size:18px;">play_circle</span>
+                    Start Exam
+                </a>
+                <a href="{% url 'practice_categories' %}" class="qa-btn qa-btn-outline">
+                    <span class="material-symbols-outlined" style="font-size:18px;">menu_book</span>
+                    Practice Questions
+                </a>
+                <a href="{% url 'scenario_practice' %}" class="qa-btn qa-btn-outline">
+                    <span class="material-symbols-outlined" style="font-size:18px;">clinical_notes</span>
+                    Try Scenarios
+                </a>
+                <button class="qa-btn qa-btn-surface" onclick="openAddTaskModal()">
+                    <span class="material-symbols-outlined" style="font-size:18px;">add_circle</span>
+                    Add Task
+                </button>
+            </div>
+
+            <section class="planner-panel rec-section" id="recommendationsSection">
+                <div class="planner-section-head">
+                    <div>
+                        <h2>Recommended Practice</h2>
+                        <p>These suggestions are generated from your recent performance patterns.</p>
                     </div>
                 </div>
-                {% empty %}
-                <p class="empty-msg">No tasks</p>
-                {% endfor %}
-                {% if todays_tasks_in_progress.count > 5 %}
-                <button class="btn-show-more" onclick="toggleShowMore('in-progress')">+ Show {{ todays_tasks_in_progress.count|add:"-5" }} More</button>
-                {% endif %}
-            </div>
+                <div class="rec-grid" id="recommendationsGrid"></div>
+            </section>
 
-            <!-- COMPLETED Column -->
-            <div class="kb-col done-col">
-                <div class="kb-col-hdr">
-                    <span class="title">
-                        <span class="material-symbols-outlined" style="font-size:18px;">check_circle</span>
-                        Completed
-                    </span>
-                    <span class="count">{{ todays_tasks_completed.count }}</span>
-                </div>
-                {% for task in todays_tasks_completed %}
-                <div class="task-card {% if forloop.counter > 5 %}hidden-task{% endif %}" data-column="completed">
-                    <div class="t-title">{{ task.title }}</div>
-                    <div class="t-meta">Completed at {{ task.completed_at|date:"g:i A" }}</div>
-                    <div class="t-actions">
-                        <button class="t-btn t-btn-reset" onclick="updateStatus({{ task.id }}, 'TODO')">↩ Redo</button>
+            <section class="planner-panel">
+                <div class="planner-section-head">
+                    <div>
+                        <h2>Today's Tasks</h2>
+                        <p>Move work from to-do to completed as you study.</p>
                     </div>
                 </div>
-                {% empty %}
-                <p class="empty-msg">Nothing yet – keep going!</p>
-                {% endfor %}
-                {% if todays_tasks_completed.count > 5 %}
-                <button class="btn-show-more" onclick="toggleShowMore('completed')">+ Show {{ todays_tasks_completed.count|add:"-5" }} More</button>
-                {% endif %}
-            </div>
-        </div>
+                <div class="kanban-board">
+                    <div class="kb-col todo-col">
+                        <div class="kb-col-hdr">
+                            <span class="title">
+                                <span class="material-symbols-outlined" style="font-size:18px;">radio_button_unchecked</span>
+                                To Do
+                            </span>
+                            <span class="count">{{ todays_tasks_todo.count }}</span>
+                        </div>
+                        {% for task in todays_tasks_todo %}
+                            <div class="task-card {% if forloop.counter > 5 %}hidden-task{% endif %}" data-column="todo">
+                                <div class="t-title">{{ task.title }}</div>
+                                <div class="t-meta">{{ task.estimated_minutes }} min · {{ task.get_priority_display }}</div>
+                                <div class="t-actions">
+                                    <button class="t-btn t-btn-start" onclick="updateStatus({{ task.id }}, 'IN_PROGRESS')">Start</button>
+                                    <button class="t-btn t-btn-done" onclick="updateStatus({{ task.id }}, 'COMPLETED')">Done</button>
+                                </div>
+                            </div>
+                        {% empty %}
+                            <p class="empty-msg">No tasks planned for today yet.</p>
+                        {% endfor %}
+                        {% if todays_tasks_todo.count > 5 %}
+                            <button class="btn-show-more" onclick="toggleShowMore('todo')">+ Show {{ todays_tasks_todo.count|add:"-5" }} More</button>
+                        {% endif %}
+                    </div>
 
-        <!-- Upcoming Tasks -->
-        <div class="upcoming-panel">
-            <h2>Upcoming Tasks</h2>
-            {% for task in upcoming_tasks %}
-            <div class="upcoming-item">
-                <span class="material-symbols-outlined">event</span>
-                <strong>{{ task.title }}</strong>
-                <span>{{ task.scheduled_date|date:"M d" }} · {{ task.estimated_minutes }} min</span>
-            </div>
-            {% empty %}
-            <p class="empty-msg">No upcoming tasks</p>
-            {% endfor %}
+                    <div class="kb-col ip-col">
+                        <div class="kb-col-hdr">
+                            <span class="title">
+                                <span class="material-symbols-outlined" style="font-size:18px;">pending</span>
+                                In Progress
+                            </span>
+                            <span class="count">{{ todays_tasks_in_progress.count }}</span>
+                        </div>
+                        {% for task in todays_tasks_in_progress %}
+                            <div class="task-card {% if forloop.counter > 5 %}hidden-task{% endif %}" data-column="in-progress">
+                                <div class="t-title">{{ task.title }}</div>
+                                <div class="t-meta">{{ task.estimated_minutes }} min · {{ task.get_priority_display }}</div>
+                                <div class="t-actions">
+                                    <button class="t-btn t-btn-reset" onclick="updateStatus({{ task.id }}, 'TODO')">Reset</button>
+                                    <button class="t-btn t-btn-done" onclick="updateStatus({{ task.id }}, 'COMPLETED')">Done</button>
+                                </div>
+                            </div>
+                        {% empty %}
+                            <p class="empty-msg">Nothing is in progress right now.</p>
+                        {% endfor %}
+                        {% if todays_tasks_in_progress.count > 5 %}
+                            <button class="btn-show-more" onclick="toggleShowMore('in-progress')">+ Show {{ todays_tasks_in_progress.count|add:"-5" }} More</button>
+                        {% endif %}
+                    </div>
+
+                    <div class="kb-col done-col">
+                        <div class="kb-col-hdr">
+                            <span class="title">
+                                <span class="material-symbols-outlined" style="font-size:18px;">check_circle</span>
+                                Completed
+                            </span>
+                            <span class="count">{{ todays_tasks_completed.count }}</span>
+                        </div>
+                        {% for task in todays_tasks_completed %}
+                            <div class="task-card {% if forloop.counter > 5 %}hidden-task{% endif %}" data-column="completed">
+                                <div class="t-title">{{ task.title }}</div>
+                                <div class="t-meta">Completed at {{ task.completed_at|date:"g:i A" }}</div>
+                                <div class="t-actions">
+                                    <button class="t-btn t-btn-reset" onclick="updateStatus({{ task.id }}, 'TODO')">Redo</button>
+                                </div>
+                            </div>
+                        {% empty %}
+                            <p class="empty-msg">Nothing completed yet. You can build momentum here.</p>
+                        {% endfor %}
+                        {% if todays_tasks_completed.count > 5 %}
+                            <button class="btn-show-more" onclick="toggleShowMore('completed')">+ Show {{ todays_tasks_completed.count|add:"-5" }} More</button>
+                        {% endif %}
+                    </div>
+                </div>
+            </section>
+
+            <section class="planner-panel">
+                <div class="planner-section-head">
+                    <div>
+                        <h2>Upcoming Tasks</h2>
+                        <p>What is already scheduled beyond today.</p>
+                    </div>
+                </div>
+                <div class="upcoming-list">
+                    {% for task in upcoming_tasks %}
+                        <div class="upcoming-item">
+                            <span class="material-symbols-outlined">event</span>
+                            <strong>{{ task.title }}</strong>
+                            <span>{{ task.scheduled_date|date:"M d" }} · {{ task.estimated_minutes }} min</span>
+                        </div>
+                    {% empty %}
+                        <p class="empty-msg">No upcoming tasks yet. Add a few to build out your week.</p>
+                    {% endfor %}
+                </div>
+            </section>
         </div>
     </div>
-</main>
+</section>
 
-<!-- ====== BOTTOM NAV (Mobile) ====== -->
-<nav class="nclex-bottomnav">
-    <a href="{% url 'study_planner' %}" class="active">
-        <span class="material-symbols-outlined">dashboard</span>
-        <span class="label">Dashboard</span>
-    </a>
-    <a href="{% url 'practice_categories' %}">
-        <span class="material-symbols-outlined">menu_book</span>
-        <span class="label">Practice</span>
-    </a>
-    <a href="{% url 'start_exam' %}">
-        <span class="material-symbols-outlined">assignment</span>
-        <span class="label">Exam</span>
-    </a>
-    <a href="{% url 'gamification:leaderboard' %}">
-        <span class="material-symbols-outlined">leaderboard</span>
-        <span class="label">Rank</span>
-    </a>
-</nav>
-
-<!-- ====== ADD TASK MODAL ====== -->
 <div id="addTaskModal" class="modal-overlay">
     <div class="modal-box">
         <h2>Add New Task</h2>
         <form id="taskForm">
             <div class="form-group">
                 <label>Title</label>
-                <input type="text" name="title" required placeholder="e.g. Review Pharmacology">
+                <input type="text" name="title" required placeholder="Review pharmacology set">
             </div>
             <div class="form-group">
                 <label>Scheduled Date</label>
@@ -483,38 +784,32 @@
                 <label>Estimated Time (minutes)</label>
                 <input type="number" name="estimated_minutes" value="30">
             </div>
-            <button type="submit" class="modal-submit">Add Task</button>
-            <button type="button" onclick="closeModal()" class="modal-cancel">Cancel</button>
+            <button type="submit" class="modal-submit">Save Task</button>
+            <button type="button" class="modal-cancel" onclick="closeModal()">Cancel</button>
         </form>
     </div>
 </div>
+{% endblock %}
 
-<!-- ====== FOOTER ====== -->
-<footer class="nclex-footer-light main-with-sidenav">
-    <div class="footer-inner">
-        <div>
-            <span style="font-weight:700;color:var(--primary);">NCLEX XAV</span>
-            <p style="font-size:.75rem;color:#94a3b8;">© 2025 NCLEX XAV Technology. Clinical Excellence Platform.</p>
-        </div>
-        <div class="footer-links">
-            <a href="{% url 'home' %}" style="font-size:.75rem;color:#94a3b8;">Home</a>
-            <a href="{% url 'pricing' %}" style="font-size:.75rem;color:#94a3b8;">Pricing</a>
-        </div>
-    </div>
-</footer>
-
+{% block extra_scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-/* ===== Task Modal ===== */
 function openAddTaskModal() { document.getElementById('addTaskModal').classList.add('open'); }
 function closeModal() { document.getElementById('addTaskModal').classList.remove('open'); }
 
 document.getElementById('taskForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     const fd = new FormData(e.target);
-    const data = { title: fd.get('title'), scheduled_date: fd.get('scheduled_date'), priority: fd.get('priority'), estimated_minutes: fd.get('estimated_minutes') };
+    const data = {
+        title: fd.get('title'),
+        scheduled_date: fd.get('scheduled_date'),
+        priority: fd.get('priority'),
+        estimated_minutes: fd.get('estimated_minutes')
+    };
     try {
-        const r = await fetch('/planner/api/tasks/create/', {
-            method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+        const r = await fetch('{% url "create_task" %}', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
             body: JSON.stringify(data)
         });
         if (r.ok) location.reload();
@@ -523,8 +818,9 @@ document.getElementById('taskForm').addEventListener('submit', async function(e)
 
 async function updateStatus(taskId, newStatus) {
     try {
-        const r = await fetch(`/planner/api/tasks/${taskId}/status/`, {
-            method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+        const r = await fetch(`{% url "update_task_status" 0 %}`.replace('/0/', `/${taskId}/`), {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
             body: JSON.stringify({ status: newStatus })
         });
         if (r.ok) location.reload();
@@ -551,12 +847,12 @@ function getCookie(name) {
     return v;
 }
 
-/* ===== Recommendations ===== */
 document.addEventListener('DOMContentLoaded', loadRecommendations);
+document.addEventListener('DOMContentLoaded', renderPlannerCharts);
 
 async function loadRecommendations() {
     try {
-        const r = await fetch('/planner/api/recommendations/');
+        const r = await fetch('{% url "get_recommendations" %}');
         const data = await r.json();
         if (data.recommendations && data.recommendations.length > 0) displayRecommendations(data.recommendations);
     } catch (err) { console.error(err); }
@@ -580,7 +876,7 @@ function displayRecommendations(recs) {
             <div class="rec-pct">${rec.percentage}%</div>
             <div class="rec-detail">${rec.correct_answers} correct / ${rec.total_questions} total</div>
             <button class="rec-practice-btn" onclick="createPracticeTask(${rec.category_id}, '${rec.category_name}', ${rec.recommended_practice})">
-                Practice ${rec.recommended_practice} Questions →
+                Practice ${rec.recommended_practice} Questions
             </button>
         `;
         grid.appendChild(card);
@@ -591,15 +887,133 @@ function displayRecommendations(recs) {
 async function createPracticeTask(catId, catName, numQ) {
     if (!catId) { alert('Cannot create task'); return; }
     try {
-        const r = await fetch('/planner/api/recommendations/create-task/', {
-            method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+        const r = await fetch('{% url "create_recommendation_task" %}', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
             body: JSON.stringify({ category_id: catId, category_name: catName, num_questions: numQ })
         });
         const data = await r.json();
-        if (data.success) { alert(`✅ ${data.message}`); location.reload(); }
-        else alert(`⚠️ ${data.error}`);
+        if (data.success) { alert(data.message); location.reload(); }
+        else alert(data.error || 'Failed to create task');
     } catch (err) { console.error(err); alert('Failed to create task'); }
 }
+
+function renderPlannerCharts() {
+    const defaultGridColor = 'rgba(148, 163, 184, 0.18)';
+    const defaultTickColor = '#64748b';
+
+    const activityCanvas = document.getElementById('studyActivityChart');
+    if (activityCanvas) {
+        new Chart(activityCanvas, {
+            type: 'bar',
+            data: {
+                labels: {{ activity_labels|safe }},
+                datasets: [
+                    {
+                        label: 'Scheduled',
+                        data: {{ activity_scheduled|safe }},
+                        backgroundColor: 'rgba(31, 102, 126, 0.35)',
+                        borderRadius: 10
+                    },
+                    {
+                        label: 'Completed',
+                        data: {{ activity_completed|safe }},
+                        backgroundColor: 'rgba(0, 74, 153, 0.9)',
+                        borderRadius: 10
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: { grid: { display: false }, ticks: { color: defaultTickColor } },
+                    y: { beginAtZero: true, grid: { color: defaultGridColor }, ticks: { color: defaultTickColor, precision: 0 } }
+                },
+                plugins: {
+                    legend: { labels: { color: defaultTickColor } }
+                }
+            }
+        });
+    }
+
+    const taskCanvas = document.getElementById('taskStatusChart');
+    if (taskCanvas) {
+        new Chart(taskCanvas, {
+            type: 'pie',
+            data: {
+                labels: ['To Do', 'In Progress', 'Completed'],
+                datasets: [{
+                    data: {{ task_status_breakdown|safe }},
+                    backgroundColor: ['#93c5fd', '#fbbf24', '#34d399'],
+                    borderColor: '#ffffff',
+                    borderWidth: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom', labels: { color: defaultTickColor } }
+                }
+            }
+        });
+    }
+
+    const mixCanvas = document.getElementById('learningMixChart');
+    if (mixCanvas) {
+        new Chart(mixCanvas, {
+            type: 'doughnut',
+            data: {
+                labels: ['Practice Sessions', 'Adaptive Exams', 'Case Studies'],
+                datasets: [{
+                    data: {{ exam_mix|safe }},
+                    backgroundColor: ['#004a99', '#1f667e', '#7efba4'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '62%',
+                plugins: {
+                    legend: { position: 'bottom', labels: { color: defaultTickColor } }
+                }
+            }
+        });
+    }
+
+    const snapshotCanvas = document.getElementById('progressSnapshotChart');
+    if (snapshotCanvas) {
+        new Chart(snapshotCanvas, {
+            type: 'bar',
+            data: {
+                labels: ['Completion', 'Accuracy', 'Streak', 'Exam Attempts'],
+                datasets: [{
+                    data: [
+                        {{ completion_rate }},
+                        {{ practice_accuracy }},
+                        {% if gam_profile %}{{ gam_profile.current_streak }}{% else %}{{ study_plan.study_streak }}{% endif %},
+                        {{ adaptive_attempts }}
+                    ],
+                    backgroundColor: ['#004a99', '#0f766e', '#f97316', '#7c3aed'],
+                    borderRadius: 12
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y',
+                scales: {
+                    x: { beginAtZero: true, grid: { color: defaultGridColor }, ticks: { color: defaultTickColor } },
+                    y: { grid: { display: false }, ticks: { color: defaultTickColor } }
+                },
+                plugins: {
+                    legend: { display: false }
+                }
+            }
+        });
+    }
+}
 </script>
-</body>
-</html>
+{% endblock %}

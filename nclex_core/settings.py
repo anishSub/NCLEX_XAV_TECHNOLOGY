@@ -65,6 +65,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'study_planner.context_processors.study_plan_navigation',
             ],
         },
     },
@@ -172,6 +173,14 @@ SOCIALACCOUNT_PROVIDERS = {
 
 # --- EMAIL BACKEND (For testing) ---
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+KHALTI_SECRET_KEY = os.getenv('KHALTI_SECRET_KEY', '')
+KHALTI_PUBLIC_KEY = os.getenv('KHALTI_PUBLIC_KEY', '')
+KHALTI_BASE_URL = os.getenv('KHALTI_BASE_URL', 'https://dev.khalti.com/api/v2')
+
+ESEWA_SECRET_KEY = os.getenv('ESEWA_SECRET_KEY', '')
+ESEWA_PRODUCT_CODE = os.getenv('ESEWA_PRODUCT_CODE', '')
+ESEWA_PAYMENT_URL = os.getenv('ESEWA_PAYMENT_URL', 'https://rc-epay.esewa.com.np/api/epay/main/v2/form')
 
 
 
@@ -589,4 +598,3 @@ JAZZMIN_UI_TWEAKS = {
     # ===== ACTIONS (Bulk Actions) =====
     "actions_sticky_top": True,  # Keep action buttons visible
 }
-

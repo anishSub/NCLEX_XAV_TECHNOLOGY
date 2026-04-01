@@ -1,0 +1,49 @@
+<aside class="app-section-sidebar">
+    <div class="app-section-sidebar-card">
+        <div class="app-section-sidebar-head">
+            <div class="app-section-sidebar-kicker">Clinical Suite</div>
+            <div class="app-section-sidebar-title">Practice Hub</div>
+        </div>
+
+        <nav class="app-section-nav">
+            <a href="{% url 'practice_categories' %}" class="{% if practice_nav == 'practice' %}is-active{% endif %}">
+                <span class="material-symbols-outlined">menu_book</span>
+                Practice
+            </a>
+            <a href="{% url 'scenario_practice' %}" class="{% if practice_nav == 'scenarios' %}is-active{% endif %}">
+                <span class="material-symbols-outlined">clinical_notes</span>
+                Scenarios
+            </a>
+            <a href="{% url 'start_exam' %}" class="{% if practice_nav == 'exams' %}is-active{% endif %}">
+                <span class="material-symbols-outlined">assignment</span>
+                Exams
+            </a>
+            <a href="{% url 'gamification:leaderboard' %}" class="{% if practice_nav == 'leaderboard' %}is-active{% endif %}">
+                <span class="material-symbols-outlined">leaderboard</span>
+                Leaderboard
+            </a>
+            <a href="{% url 'gamification:badges' %}" class="{% if practice_nav == 'badges' %}is-active{% endif %}">
+                <span class="material-symbols-outlined">military_tech</span>
+                Badges
+            </a>
+        </nav>
+
+        <div class="app-section-sidebar-cta">
+            <a href="{% url 'start_exam' %}" class="primary">
+                <span class="material-symbols-outlined" style="font-size:18px;">play_circle</span>
+                Start Exam
+            </a>
+            <a href="{% url 'scenario_practice' %}" class="secondary">
+                <span class="material-symbols-outlined" style="font-size:18px;">clinical_notes</span>
+                Open Scenarios
+            </a>
+        </div>
+    </div>
+</aside>
+
+<div class="app-section-mobile-nav">
+    <a href="{% url 'practice_categories' %}" class="{% if practice_nav == 'practice' %}is-active{% endif %}">Practice</a>
+    <a href="{% url 'scenario_practice' %}" class="{% if practice_nav == 'scenarios' %}is-active{% endif %}">Scenarios</a>
+    <a href="{% url 'start_exam' %}" class="{% if practice_nav == 'exams' %}is-active{% endif %}">Exams</a>
+    <a href="{% url 'gamification:leaderboard' %}" class="{% if practice_nav == 'leaderboard' %}is-active{% endif %}">Rank</a>
+</div>
