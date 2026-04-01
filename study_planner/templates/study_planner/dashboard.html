@@ -4,439 +4,602 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Study Planner</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Dashboard – NCLEX XAV Technology</title>
+    <meta name="description" content="Your personalized NCLEX study dashboard with task management, recommendations, and progress tracking.">
+    <link rel="stylesheet" href="{% static 'css/nclex-design.css' %}">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Inter', sans-serif; background: #f4f6f9; }
-        .header { background: linear-gradient(135deg, #004a99 0%, #0066cc 100%); color: white; padding: 1.5rem 2rem; }
-        .header-content { max-width: 1400px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
-        .nav-links a { color: white; text-decoration: none; margin-left: 2rem; }
-        .container { max-width: 1400px; margin: 0 auto; padding: 2rem; }
-        .stats-grid { display: grid; grid-template-columns: repeat( auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
-        .stat-card { background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
-        .stat-number { font-size: 2.5rem; font-weight: 700; color: #004a99; }
-        .stat-label { color: #5a6c7d; margin-top: 0.5rem; }
-        .kanban-board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 2rem; }
-        .kanban-column { background: white; border-radius: 15px; padding: 1.5rem; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
-        .kanban-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 2px solid #e0e0e0; }
-        .kanban-title { font-size: 1.1rem; font-weight: 700; }
-        .kanban-count { background: #e0e0e0; padding: 0.3rem 0.8rem; border-radius: 50px; font-size: 0.9rem; font-weight: 600; }
-        .todo-col .kanban-header { color: #0066cc; }
-        .todo-col .kanban-count { background: #e3f2fd; color: #0066cc; }
-        .in-progress-col .kanban-header { color: #ff9800; }
-        .in-progress-col .kanban-count { background: #fff3e0; color: #ff9800; }
-        .completed-col .kanban-header { color: #38a169; }
-        .completed-col .kanban-count { background: #e8f5e9; color: #38a169; }
-        .task-card { background: #f8fbff; padding: 1rem; margin-bottom: 1rem; border-radius: 10px; border-left: 4px solid; cursor: pointer; transition: all 0.3s; }
-        .task-card:hover { transform: translateX(5px); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        .todo-col .task-card { border-left-color: #0066cc; }
-        .in-progress-col .task-card { border-left-color: #ff9800; }
-        .completed-col .task-card { border-left-color: #38a169; opacity: 0.7; }
-        .task-title { font-weight: 600; color: #2c3e50; margin-bottom: 0.5rem; }
-        .task-meta { font-size: 0.9rem; color: #5a6c7d; }
-        .task-actions { display: flex; gap: 0.5rem; margin-top: 0.8rem; }
-        .btn-action { padding: 0.4rem 0.8rem; font-size: 0.85rem; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; transition: all 0.2s; }
-        .btn-start { background: #fff3e0; color: #ff9800; }
-        .btn-complete { background: #e8f5e9; color: #38a169; }
-        .btn-reset { background: #e3f2fd; color: #0066cc; }
-        .btn-add { padding: 0.8rem 2rem; background: #004a99; color: white; border: none; border-radius: 50px; cursor: pointer; font-weight: 600; }
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; }
-        .modal-content { background: white; max-width: 500px; margin: 100px auto; padding: 2rem; border-radius: 15px; }
-        .form-group { margin-bottom: 1rem; }
-        label { display: block; margin-bottom: 0.3rem; font-weight: 600; }
-        input, select, textarea { width: 100%; padding: 0.8rem; border: 2px solid #e0e0e0; border-radius: 8px; font-family: inherit; }
-        .btn-submit { width: 100%; padding: 1rem; background: #004a99; color: white; border: none; border-radius: 50px; cursor: pointer; font-weight: 600; margin-top: 1rem; }
-        .streak-badge { background: linear-gradient(135deg, #ff6b6b, #ff8e53); padding: 1rem 2rem; border-radius: 15px; color: white; text-align: center; font-size: 1.2rem; font-weight: 700; }
-        .upcoming-panel { background: white; border-radius: 15px; padding: 2rem; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
-        .upcoming-task { padding: 0.8rem; background: #f8fbff; margin-bottom: 0.8rem; border-radius: 8px; }
-        .hidden-task { display: none; }
-        .btn-show-more { width: 100%; padding: 0.8rem; background: #f0f0f0; border: 2px dashed #ccc; border-radius: 8px; color: #666; font-weight: 600; cursor: pointer; margin-top: 1rem; transition: all 0.3s; }
-        .btn-show-more:hover { background: #e8e8e8; border-color: #999; }
-        
-        /* Recommendations Section */
-        .recommendations-section { background: linear-gradient(135deg, #fff5f5 0%, #ffe8e8 100%); border-radius: 20px; padding: 2rem; margin-bottom: 2rem; border: 2px solid #ffcdd2; }
-        .rec-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
-        .rec-title { font-size: 1.5rem; font-weight: 700; color: #c62828; }
-        .rec-subtitle { color: #666; font-size: 0.95rem; margin-top: 0.3rem; }
-        .rec-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; }
-        .rec-card { background: white; border-radius: 15px; padding: 1.5rem; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border-left: 5px solid; transition: all 0.3s; }
-        .rec-card:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(0,0,0,0.12); }
-        .rec-card.weak { border-left-color: #f44336; }
-        .rec-card.needs_work { border-left-color: #ff9800; }
-        .rec-card.strong { border-left-color: #4caf50; }
-        .rec-card-header { display: flex; align-items: center; gap: 0.8rem; margin-bottom: 1rem; }
-        .rec-icon { font-size: 2rem; }
-        .rec-category { font-size: 1.2rem; font-weight: 700; color: #2c3e50; flex: 1; }
-        .rec-percentage { font-size: 3rem; font-weight: 700; text-align: center; margin: 1rem 0; }
-        .rec-card.weak .rec-percentage { color: #f44336; }
-        .rec-card.needs_work .rec-percentage { color: #ff9800; }
-        .rec-card.strong .rec-percentage { color: #4caf50; }
-        .rec-details { text-align: center; color: #666; font-size: 0.9rem; margin-bottom: 1.5rem; }
-        .btn-practice { width: 100%; padding: 1rem; background: linear-gradient(135deg, #004a99 0%, #0066cc 100%); color: white; border: none; border-radius: 50px; font-weight: 600; cursor: pointer; transition: all 0.3s; }
-        .btn-practice:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0, 74, 153, 0.4); }
-        .no-recommendations { text-align: center; padding: 3rem; color: #999; }
-        .no-recommendations i { font-size: 3rem; margin-bottom: 1rem; display: block; }
-        
-        /* ============ RESPONSIVE DESIGN ============ */
-        
-        /* Tablet (768px - 1024px) */
-        @media (max-width: 1024px) {
-            .container { padding: 1rem; }
-            .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 1rem; }
-        }
-        
-        /* Mobile (< 768px) */
-        @media (max-width: 768px) {
-            .header-content { flex-direction: column; gap: 1rem; text-align: center; }
-            .header-content div:last-child { width: 100%; justify-content: center; }
-            
-            .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 0.8rem; }
-            .stat-card { padding: 1rem; }
-            .stat-number { font-size: 1.8rem; }
-            .stat-label { font-size: 0.8rem; }
-            
-            /* Stack Kanban columns vertically */
-            .kanban-board { 
-                display: flex;
-                flex-direction: column;
-                gap: 1.5rem;
-            }
-            
-            .kanban-column { flex: none; width: 100%; }
-            
-            .task-header { flex-direction: column; gap: 1rem; align-items: flex-start; }
-            .btn-add { width: 100%; }
-            
-            /* Recommendations */
-            .rec-grid { grid-template-columns: 1fr; }
-            
-            .rec-card-header { flex-direction: column; text-align: center; }
-            .rec-stats { flex-direction: column; text-align: center; }
-            .btn-practice { width: 100%; }
-        }
-        
-        /* Small Mobile (< 480px) */
-        @media (max-width: 480px) {
-            .header h1 { font-size: 1.5rem; }
-            .stats-grid { grid-template-columns: 1fr; }
-            .stat-number { font-size: 2rem; }
-            .task-card { padding: 0.8rem; }
-        }
+    /* ===== DASHBOARD PAGE STYLES ===== */
+    .dash-page { padding-top: 64px; min-height: 100vh; background: var(--background); }
+
+    /* Welcome Banner */
+    .dash-welcome {
+        background: linear-gradient(135deg, var(--primary), var(--primary-container));
+        color: #fff; padding: 2.5rem; border-radius: 1rem;
+        margin-bottom: 2rem; position: relative; overflow: hidden;
+    }
+    .dash-welcome::after {
+        content: ''; position: absolute; right: -40px; top: -40px;
+        width: 200px; height: 200px; border-radius: 50%;
+        background: rgba(255,255,255,.06);
+    }
+    .dash-welcome h1 { font-size: 1.75rem; font-weight: 800; margin-bottom: .5rem; }
+    .dash-welcome p { opacity: .85; font-size: .95rem; }
+
+    /* Stats Grid */
+    .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 2rem; }
+    .stat-box {
+        background: var(--surface-container-lowest); padding: 1.5rem;
+        border-radius: 1rem; box-shadow: 0 1px 3px var(--shadow-color);
+        display: flex; flex-direction: column; gap: .5rem;
+    }
+    .stat-box .label {
+        font-size: 10px; font-weight: 700; text-transform: uppercase;
+        letter-spacing: .1em; color: #94a3b8;
+    }
+    .stat-box .value { font-size: 2rem; font-weight: 900; color: var(--primary); }
+    .stat-box .sub { font-size: .8rem; color: var(--secondary); }
+    .stat-streak {
+        background: linear-gradient(135deg, #ff6b6b, #ff8e53);
+        color: #fff; text-align: center; border-radius: 1rem;
+        padding: 1.5rem; display: flex; flex-direction: column;
+        align-items: center; justify-content: center;
+    }
+    .stat-streak .material-symbols-outlined { font-size: 2rem; margin-bottom: .25rem; font-variation-settings: 'FILL' 1; }
+    .stat-streak .value { font-size: 2rem; font-weight: 900; }
+    .stat-streak .label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; opacity: .9; }
+
+    /* Quick Actions */
+    .quick-actions {
+        display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap;
+    }
+    .qa-btn {
+        display: flex; align-items: center; gap: .5rem;
+        padding: .75rem 1.5rem; border-radius: var(--radius-full);
+        font-weight: 600; font-size: .85rem; transition: all .2s;
+    }
+    .qa-btn-primary { background: var(--primary); color: #fff; box-shadow: 0 4px 12px rgba(0,52,111,.2); }
+    .qa-btn-primary:hover { opacity: .9; }
+    .qa-btn-outline { border: 1.5px solid var(--primary); color: var(--primary); }
+    .qa-btn-outline:hover { background: rgba(0,52,111,.04); }
+    .qa-btn-surface { background: var(--surface-container); color: var(--secondary); }
+
+    /* Recommendations */
+    .rec-section {
+        background: var(--surface-container-lowest); border-radius: 1rem;
+        padding: 2rem; margin-bottom: 2rem;
+        box-shadow: 0 1px 3px var(--shadow-color);
+        display: none;
+    }
+    .rec-section.visible { display: block; }
+    .rec-hdr { display: flex; align-items: center; gap: .75rem; margin-bottom: 1.5rem; }
+    .rec-hdr .material-symbols-outlined { color: var(--error); font-size: 1.5rem; font-variation-settings: 'FILL' 1; }
+    .rec-hdr h2 { font-size: 1.25rem; font-weight: 800; color: var(--primary); }
+    .rec-hdr span.sub { font-size: .85rem; color: var(--secondary); margin-left: auto; }
+    .rec-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; }
+    .rec-card {
+        background: var(--surface-container-low); border-radius: 1rem;
+        padding: 1.5rem; border-left: 4px solid; transition: all .3s;
+    }
+    .rec-card:hover { transform: translateY(-4px); box-shadow: 0 8px 20px var(--shadow-color); }
+    .rec-card.weak { border-left-color: var(--error); }
+    .rec-card.needs_work { border-left-color: #ff9800; }
+    .rec-card.strong { border-left-color: var(--tertiary); }
+    .rec-card-hdr { display: flex; align-items: center; gap: .75rem; margin-bottom: 1rem; }
+    .rec-card-hdr .icon { font-size: 1.75rem; }
+    .rec-card-hdr .name { font-weight: 700; color: var(--on-surface); }
+    .rec-pct { font-size: 2.5rem; font-weight: 900; text-align: center; margin: .5rem 0; }
+    .rec-card.weak .rec-pct { color: var(--error); }
+    .rec-card.needs_work .rec-pct { color: #ff9800; }
+    .rec-card.strong .rec-pct { color: var(--tertiary); }
+    .rec-detail { text-align: center; color: var(--secondary); font-size: .85rem; margin-bottom: 1.25rem; }
+    .rec-practice-btn {
+        width: 100%; padding: .85rem;
+        background: linear-gradient(135deg, var(--primary), var(--primary-container));
+        color: #fff; font-weight: 700; font-size: .85rem;
+        border-radius: var(--radius-full); transition: all .3s;
+    }
+    .rec-practice-btn:hover { box-shadow: 0 6px 15px rgba(0,74,153,.3); }
+
+    /* Kanban */
+    .kanban-hdr {
+        display: flex; justify-content: space-between; align-items: center;
+        margin-bottom: 1.5rem;
+    }
+    .kanban-hdr h2 { font-size: 1.25rem; font-weight: 800; color: var(--primary); }
+    .kanban-board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; margin-bottom: 2rem; }
+    .kb-col {
+        background: var(--surface-container-lowest); border-radius: 1rem;
+        padding: 1.5rem; box-shadow: 0 1px 3px var(--shadow-color);
+    }
+    .kb-col-hdr {
+        display: flex; justify-content: space-between; align-items: center;
+        margin-bottom: 1rem; padding-bottom: .75rem;
+        border-bottom: 2px solid var(--surface-container);
+    }
+    .kb-col-hdr .title { font-weight: 700; font-size: .95rem; display: flex; align-items: center; gap: .5rem; }
+    .kb-col-hdr .count {
+        padding: .2rem .65rem; border-radius: var(--radius-full);
+        font-size: .8rem; font-weight: 700;
+    }
+    .todo-col .kb-col-hdr .title { color: #3b82f6; }
+    .todo-col .kb-col-hdr .count { background: #dbeafe; color: #3b82f6; }
+    .ip-col .kb-col-hdr .title { color: #f59e0b; }
+    .ip-col .kb-col-hdr .count { background: #fef3c7; color: #f59e0b; }
+    .done-col .kb-col-hdr .title { color: #22c55e; }
+    .done-col .kb-col-hdr .count { background: #dcfce7; color: #22c55e; }
+
+    .task-card {
+        background: var(--surface-container-low); padding: 1rem;
+        border-radius: .75rem; border-left: 3px solid; margin-bottom: .75rem;
+        transition: all .3s; cursor: default;
+    }
+    .task-card:hover { transform: translateX(4px); box-shadow: 0 4px 10px var(--shadow-color); }
+    .todo-col .task-card { border-left-color: #3b82f6; }
+    .ip-col .task-card { border-left-color: #f59e0b; }
+    .done-col .task-card { border-left-color: #22c55e; opacity: .7; }
+    .task-card .t-title { font-weight: 600; color: var(--on-surface); margin-bottom: .3rem; }
+    .task-card .t-meta { font-size: .8rem; color: var(--secondary); }
+    .task-card .t-actions { display: flex; gap: .4rem; margin-top: .6rem; }
+    .t-btn {
+        padding: .35rem .65rem; font-size: .78rem; font-weight: 600;
+        border-radius: .4rem; transition: all .2s;
+    }
+    .t-btn-start { background: #fef3c7; color: #f59e0b; }
+    .t-btn-done { background: #dcfce7; color: #22c55e; }
+    .t-btn-reset { background: #dbeafe; color: #3b82f6; }
+    .t-btn:hover { filter: brightness(.95); }
+    .hidden-task { display: none; }
+    .btn-show-more {
+        width: 100%; padding: .65rem; background: var(--surface-container);
+        border: 2px dashed var(--outline-variant); border-radius: .5rem;
+        color: var(--secondary); font-weight: 600; font-size: .85rem;
+        cursor: pointer; margin-top: .5rem; transition: all .2s;
+    }
+    .btn-show-more:hover { background: var(--surface-container-high); }
+    .empty-msg { color: #94a3b8; text-align: center; padding: 2rem; font-size: .9rem; }
+
+    /* Upcoming */
+    .upcoming-panel {
+        background: var(--surface-container-lowest); border-radius: 1rem;
+        padding: 2rem; box-shadow: 0 1px 3px var(--shadow-color); margin-bottom: 2rem;
+    }
+    .upcoming-panel h2 { font-size: 1.25rem; font-weight: 800; color: var(--primary); margin-bottom: 1rem; }
+    .upcoming-item {
+        display: flex; align-items: center; gap: 1rem;
+        padding: .75rem 1rem; background: var(--surface-container-low);
+        border-radius: .75rem; margin-bottom: .5rem;
+    }
+    .upcoming-item .material-symbols-outlined { color: var(--secondary); font-size: 1.25rem; }
+    .upcoming-item strong { color: var(--on-surface); font-size: .9rem; }
+    .upcoming-item span { color: var(--secondary); font-size: .8rem; margin-left: auto; }
+
+    /* Modal */
+    .modal-overlay {
+        display: none; position: fixed; inset: 0;
+        background: rgba(0,0,0,.4); backdrop-filter: blur(4px);
+        z-index: 100; align-items: center; justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-box {
+        background: var(--surface-container-lowest);
+        border-radius: 1.5rem; padding: 2.5rem;
+        width: 90%; max-width: 440px;
+        box-shadow: 0 32px 64px rgba(0,0,0,.15);
+    }
+    .modal-box h2 { font-size: 1.25rem; font-weight: 800; color: var(--primary); margin-bottom: 1.5rem; }
+    .modal-box .form-group { margin-bottom: 1rem; }
+    .modal-box label {
+        display: block; font-size: .7rem; font-weight: 700;
+        text-transform: uppercase; letter-spacing: .08em; color: #64748b;
+        margin-bottom: .4rem; padding-left: .25rem;
+    }
+    .modal-box input,
+    .modal-box select,
+    .modal-box textarea {
+        width: 100%; padding: .8rem 1rem; border: 1px solid var(--outline-variant);
+        border-radius: .5rem; font-size: .9rem; color: var(--on-surface);
+        background: var(--surface-container-low); transition: all .2s;
+    }
+    .modal-box input:focus,
+    .modal-box select:focus { outline: none; border-color: var(--primary-container); box-shadow: 0 0 0 3px rgba(0,74,153,.1); }
+    .modal-submit {
+        width: 100%; padding: .9rem;
+        background: linear-gradient(135deg, var(--primary), var(--primary-container));
+        color: #fff; font-weight: 700; border-radius: var(--radius-full);
+        font-size: .9rem; margin-top: .5rem;
+    }
+    .modal-cancel {
+        width: 100%; padding: .9rem; margin-top: .5rem;
+        background: var(--surface-container); color: var(--secondary);
+        font-weight: 600; border-radius: var(--radius-full); font-size: .9rem;
+    }
+
+    /* ===== Responsive ===== */
+    @media (max-width: 1024px) { .stats-row { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 768px) {
+        .kanban-board { grid-template-columns: 1fr; }
+        .stats-row { grid-template-columns: repeat(2, 1fr); }
+        .quick-actions { flex-wrap: wrap; }
+        .rec-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 480px) { .stats-row { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
-    <div class="header">
-        <div class="header-content">
-            <div><h1>📅 Study Planner</h1></div>
-            <div><a href="{% url 'home' %}">Home</a><a href="{% url 'setup_study_plan' %}">Settings</a></div>
+
+<!-- ====== TOP NAVIGATION ====== -->
+<nav class="nclex-topnav">
+    <div class="nav-inner">
+        <a href="{% url 'home' %}" class="nav-brand">NCLEX XAV</a>
+        <div class="nav-links">
+            <a href="{% url 'study_planner' %}" class="active">Dashboard</a>
+            <a href="{% url 'practice_categories' %}">Practice</a>
+            <a href="{% url 'start_exam' %}">Exams</a>
+            <a href="{% url 'gamification:leaderboard' %}">Leaderboard</a>
+        </div>
+        <div class="nav-actions">
+            <a href="{% url 'setup_study_plan' %}" class="nav-icon-btn" title="Settings">
+                <span class="material-symbols-outlined">settings</span>
+            </a>
+            <a href="{% url 'home' %}" class="nav-icon-btn">
+                <span class="material-symbols-outlined">home</span>
+            </a>
         </div>
     </div>
-    
-    <div class="container">
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-number">{{ days_until_exam }}</div>
-                <div class="stat-label">Days Until Exam</div>
-                <div style="font-size: 0.9rem; color: #5a6c7d; margin-top: 0.5rem;">{{ study_plan.exam_date|date:"F d, Y" }}</div>
+</nav>
+
+<!-- ====== SIDE NAVIGATION (Desktop) ====== -->
+<aside class="nclex-sidenav">
+    <div class="sidenav-header">
+        <h4>Clinical Suite</h4>
+        <p>NCLEX Prep</p>
+    </div>
+    <div class="sidenav-links">
+        <a href="{% url 'study_planner' %}" class="sidenav-link active">
+            <span class="material-symbols-outlined">dashboard</span> Dashboard
+        </a>
+        <a href="{% url 'practice_categories' %}" class="sidenav-link">
+            <span class="material-symbols-outlined">menu_book</span> Practice
+        </a>
+        <a href="{% url 'start_exam' %}" class="sidenav-link">
+            <span class="material-symbols-outlined">assignment</span> Exams
+        </a>
+        <a href="{% url 'gamification:leaderboard' %}" class="sidenav-link">
+            <span class="material-symbols-outlined">leaderboard</span> Leaderboard
+        </a>
+        <a href="{% url 'gamification:badges' %}" class="sidenav-link">
+            <span class="material-symbols-outlined">military_tech</span> Badges
+        </a>
+    </div>
+    <div class="sidenav-footer">
+        <a href="{% url 'start_exam' %}" class="btn-container-pill" style="width:100%;text-align:center;">
+            <span class="material-symbols-outlined" style="font-size:16px;">play_circle</span> Start Exam
+        </a>
+    </div>
+</aside>
+
+<!-- ====== MAIN CONTENT ====== -->
+<main class="dash-page main-with-sidenav" style="padding: 5.5rem 2rem 6rem;">
+    <div style="max-width:1200px; margin:0 auto;">
+
+        <!-- Welcome Banner -->
+        <div class="dash-welcome">
+            <h1>Welcome back, {{ request.user.first_name|default:request.user.email }}! 👋</h1>
+            <p>Your exam is <strong>{{ days_until_exam }} days</strong> away on {{ study_plan.exam_date|date:"F d, Y" }}.
+            {% if gam_profile %} Level {{ gam_profile.level }} · {{ gam_profile.total_points }} pts · Rank #{{ user_rank }}{% endif %}</p>
+        </div>
+
+        <!-- Stats Row -->
+        <div class="stats-row">
+            <div class="stat-box">
+                <span class="label">Days Until Exam</span>
+                <span class="value">{{ days_until_exam }}</span>
+                <span class="sub">{{ study_plan.exam_date|date:"M d, Y" }}</span>
             </div>
-            <div class="stat-card">
-                <div class="streak-badge">🔥 {{ study_plan.study_streak }} Day Streak</div>
+            <div class="stat-streak">
+                <span class="material-symbols-outlined">local_fire_department</span>
+                <span class="value">{% if gam_profile %}{{ gam_profile.current_streak }}{% else %}{{ study_plan.study_streak }}{% endif %}</span>
+                <span class="label">Day Streak</span>
             </div>
-            <div class="stat-card">
-                <div class="stat-number">{{ completion_rate }}%</div>
-                <div class="stat-label">Completion Rate</div>
+            <div class="stat-box">
+                <span class="label">Completion Rate</span>
+                <span class="value">{{ completion_rate }}%</span>
+                <span class="sub">Tasks completed</span>
             </div>
-            <div class="stat-card">
-                <div class="stat-number">{{ study_plan.daily_study_hours }}h</div>
-                <div class="stat-label">Daily Goal</div>
+            <div class="stat-box">
+                <span class="label">Daily Goal</span>
+                <span class="value">{{ study_plan.daily_study_hours }}h</span>
+                <span class="sub">Study hours</span>
             </div>
         </div>
-        
-        <!-- Smart Recommendations Section -->
-        <div class="recommendations-section" id="recommendationsSection" style="display: none;">
-            <div class="rec-header">
-                <div>
-                    <div class="rec-title">⭐ Recommended Practice</div>
-                    <div class="rec-subtitle">Based on your exam performance, focus on these areas</div>
-                </div>
-            </div>
-            <div class="rec-grid" id="recommendationsGrid">
-                <!-- Recommendations will be loaded here dynamically -->
-            </div>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+            <a href="{% url 'start_exam' %}" class="qa-btn qa-btn-primary">
+                <span class="material-symbols-outlined" style="font-size:18px;">play_circle</span>
+                Start Exam
+            </a>
+            <a href="{% url 'practice_categories' %}" class="qa-btn qa-btn-outline">
+                <span class="material-symbols-outlined" style="font-size:18px;">menu_book</span>
+                Practice
+            </a>
+            <button class="qa-btn qa-btn-surface" onclick="openAddTaskModal()">
+                <span class="material-symbols-outlined" style="font-size:18px;">add_circle</span>
+                Add Task
+            </button>
         </div>
-        
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-            <h2 style="color: #004a99;">Today's Tasks</h2>
-            <button class="btn-add" onclick="openAddTaskModal()">+ Add Task</button>
+
+        <!-- Recommendations Section -->
+        <div class="rec-section" id="recommendationsSection">
+            <div class="rec-hdr">
+                <span class="material-symbols-outlined">auto_awesome</span>
+                <h2>Recommended Practice</h2>
+                <span class="sub">Based on your exam performance</span>
+            </div>
+            <div class="rec-grid" id="recommendationsGrid"></div>
         </div>
-        
+
+        <!-- Kanban Board -->
+        <div class="kanban-hdr">
+            <h2>Today's Tasks</h2>
+        </div>
         <div class="kanban-board">
             <!-- TO DO Column -->
-            <div class="kanban-column todo-col">
-                <div class="kanban-header">
-                    <span class="kanban-title">☐ To Do</span>
-                    <span class="kanban-count">{{ todays_tasks_todo.count }}</span>
+            <div class="kb-col todo-col">
+                <div class="kb-col-hdr">
+                    <span class="title">
+                        <span class="material-symbols-outlined" style="font-size:18px;">radio_button_unchecked</span>
+                        To Do
+                    </span>
+                    <span class="count">{{ todays_tasks_todo.count }}</span>
                 </div>
                 {% for task in todays_tasks_todo %}
                 <div class="task-card {% if forloop.counter > 5 %}hidden-task{% endif %}" data-column="todo">
-                    <div class="task-title">{{ task.title }}</div>
-                    <div class="task-meta">{{ task.estimated_minutes }} min · {{ task.get_priority_display }}</div>
-                    <div class="task-actions">
-                        <button class="btn-action btn-start" onclick="updateStatus({{ task.id }}, 'IN_PROGRESS')">▶️ Start</button>
-                        <button class="btn-action btn-complete" onclick="updateStatus({{ task.id }}, 'COMPLETED')">✓ Complete</button>
+                    <div class="t-title">{{ task.title }}</div>
+                    <div class="t-meta">{{ task.estimated_minutes }} min · {{ task.get_priority_display }}</div>
+                    <div class="t-actions">
+                        <button class="t-btn t-btn-start" onclick="updateStatus({{ task.id }}, 'IN_PROGRESS')">▶ Start</button>
+                        <button class="t-btn t-btn-done" onclick="updateStatus({{ task.id }}, 'COMPLETED')">✓ Done</button>
                     </div>
                 </div>
                 {% empty %}
-                <p style="color: #999; text-align: center; padding: 2rem;">No tasks</p>
+                <p class="empty-msg">No tasks yet</p>
                 {% endfor %}
                 {% if todays_tasks_todo.count > 5 %}
                 <button class="btn-show-more" onclick="toggleShowMore('todo')">+ Show {{ todays_tasks_todo.count|add:"-5" }} More</button>
                 {% endif %}
             </div>
-            
+
             <!-- IN PROGRESS Column -->
-            <div class="kanban-column in-progress-col">
-                <div class="kanban-header">
-                    <span class="kanban-title">⏳ In Progress</span>
-                    <span class="kanban-count">{{ todays_tasks_in_progress.count }}</span>
+            <div class="kb-col ip-col">
+                <div class="kb-col-hdr">
+                    <span class="title">
+                        <span class="material-symbols-outlined" style="font-size:18px;">pending</span>
+                        In Progress
+                    </span>
+                    <span class="count">{{ todays_tasks_in_progress.count }}</span>
                 </div>
                 {% for task in todays_tasks_in_progress %}
                 <div class="task-card {% if forloop.counter > 5 %}hidden-task{% endif %}" data-column="in-progress">
-                    <div class="task-title">{{ task.title }}</div>
-                    <div class="task-meta">{{ task.estimated_minutes }} min · {{ task.get_priority_display }}</div>
-                    <div class="task-actions">
-                        <button class="btn-action btn-reset" onclick="updateStatus({{ task.id }}, 'TODO')">↩️ To Do</button>
-                        <button class="btn-action btn-complete" onclick="updateStatus({{ task.id }}, 'COMPLETED')">✓ Complete</button>
+                    <div class="t-title">{{ task.title }}</div>
+                    <div class="t-meta">{{ task.estimated_minutes }} min · {{ task.get_priority_display }}</div>
+                    <div class="t-actions">
+                        <button class="t-btn t-btn-reset" onclick="updateStatus({{ task.id }}, 'TODO')">↩ To Do</button>
+                        <button class="t-btn t-btn-done" onclick="updateStatus({{ task.id }}, 'COMPLETED')">✓ Done</button>
                     </div>
                 </div>
                 {% empty %}
-                <p style="color: #999; text-align: center; padding: 2rem;">No tasks</p>
+                <p class="empty-msg">No tasks</p>
                 {% endfor %}
                 {% if todays_tasks_in_progress.count > 5 %}
                 <button class="btn-show-more" onclick="toggleShowMore('in-progress')">+ Show {{ todays_tasks_in_progress.count|add:"-5" }} More</button>
                 {% endif %}
             </div>
-            
+
             <!-- COMPLETED Column -->
-            <div class="kanban-column completed-col">
-                <div class="kanban-header">
-                    <span class="kanban-title">✓ Completed</span>
-                    <span class="kanban-count">{{ todays_tasks_completed.count }}</span>
+            <div class="kb-col done-col">
+                <div class="kb-col-hdr">
+                    <span class="title">
+                        <span class="material-symbols-outlined" style="font-size:18px;">check_circle</span>
+                        Completed
+                    </span>
+                    <span class="count">{{ todays_tasks_completed.count }}</span>
                 </div>
                 {% for task in todays_tasks_completed %}
                 <div class="task-card {% if forloop.counter > 5 %}hidden-task{% endif %}" data-column="completed">
-                    <div class="task-title">{{ task.title }}</div>
-                    <div class="task-meta">Completed at {{ task.completed_at|date:"g:i A" }}</div>
-                    <div class="task-actions">
-                        <button class="btn-action btn-reset" onclick="updateStatus({{ task.id }}, 'TODO')">↩️ Redo</button>
+                    <div class="t-title">{{ task.title }}</div>
+                    <div class="t-meta">Completed at {{ task.completed_at|date:"g:i A" }}</div>
+                    <div class="t-actions">
+                        <button class="t-btn t-btn-reset" onclick="updateStatus({{ task.id }}, 'TODO')">↩ Redo</button>
                     </div>
                 </div>
                 {% empty %}
-                <p style="color: #999; text-align: center; padding: 2rem;">No tasks</p>
+                <p class="empty-msg">Nothing yet – keep going!</p>
                 {% endfor %}
                 {% if todays_tasks_completed.count > 5 %}
                 <button class="btn-show-more" onclick="toggleShowMore('completed')">+ Show {{ todays_tasks_completed.count|add:"-5" }} More</button>
                 {% endif %}
             </div>
         </div>
-        
+
+        <!-- Upcoming Tasks -->
         <div class="upcoming-panel">
-            <h2 style="color: #004a99; margin-bottom: 1rem;">Upcoming Tasks</h2>
+            <h2>Upcoming Tasks</h2>
             {% for task in upcoming_tasks %}
-            <div class="upcoming-task">
-                <strong>{{ task.title }}</strong> - {{ task.scheduled_date|date:"M d" }} ({{ task.estimated_minutes }} min)
+            <div class="upcoming-item">
+                <span class="material-symbols-outlined">event</span>
+                <strong>{{ task.title }}</strong>
+                <span>{{ task.scheduled_date|date:"M d" }} · {{ task.estimated_minutes }} min</span>
             </div>
             {% empty %}
-            <p style="color: #999; text-align: center; padding: 2rem;">No upcoming tasks</p>
+            <p class="empty-msg">No upcoming tasks</p>
             {% endfor %}
         </div>
     </div>
-    
-    <!-- Add Task Modal -->
-    <div id="addTaskModal" class="modal">
-        <div class="modal-content">
-            <h2 style="margin-bottom: 1.5rem;">Add New Task</h2>
-            <form id="taskForm">
-                <div class="form-group">
-                    <label>Title</label>
-                    <input type="text" name="title" required>
-                </div>
-                <div class="form-group">
-                    <label>Date</label>
-                    <input type="date" name="scheduled_date" value="{{ today|date:'Y-m-d' }}" required>
-                </div>
-                <div class="form-group">
-                    <label>Priority</label>
-                    <select name="priority">
-                        <option value="HIGH">High</option>
-                        <option value="MEDIUM" selected>Medium</option>
-                        <option value="LOW">Low</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Estimated Time (minutes)</label>
-                    <input type="number" name="estimated_minutes" value="30">
-                </div>
-                <button type="submit" class="btn-submit">Add Task</button>
-                <button type="button" onclick="closeModal()" style="background: #6c757d; margin-top: 0.5rem;" class="btn-submit">Cancel</button>
-            </form>
+</main>
+
+<!-- ====== BOTTOM NAV (Mobile) ====== -->
+<nav class="nclex-bottomnav">
+    <a href="{% url 'study_planner' %}" class="active">
+        <span class="material-symbols-outlined">dashboard</span>
+        <span class="label">Dashboard</span>
+    </a>
+    <a href="{% url 'practice_categories' %}">
+        <span class="material-symbols-outlined">menu_book</span>
+        <span class="label">Practice</span>
+    </a>
+    <a href="{% url 'start_exam' %}">
+        <span class="material-symbols-outlined">assignment</span>
+        <span class="label">Exam</span>
+    </a>
+    <a href="{% url 'gamification:leaderboard' %}">
+        <span class="material-symbols-outlined">leaderboard</span>
+        <span class="label">Rank</span>
+    </a>
+</nav>
+
+<!-- ====== ADD TASK MODAL ====== -->
+<div id="addTaskModal" class="modal-overlay">
+    <div class="modal-box">
+        <h2>Add New Task</h2>
+        <form id="taskForm">
+            <div class="form-group">
+                <label>Title</label>
+                <input type="text" name="title" required placeholder="e.g. Review Pharmacology">
+            </div>
+            <div class="form-group">
+                <label>Scheduled Date</label>
+                <input type="date" name="scheduled_date" value="{{ today|date:'Y-m-d' }}" required>
+            </div>
+            <div class="form-group">
+                <label>Priority</label>
+                <select name="priority">
+                    <option value="HIGH">High</option>
+                    <option value="MEDIUM" selected>Medium</option>
+                    <option value="LOW">Low</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Estimated Time (minutes)</label>
+                <input type="number" name="estimated_minutes" value="30">
+            </div>
+            <button type="submit" class="modal-submit">Add Task</button>
+            <button type="button" onclick="closeModal()" class="modal-cancel">Cancel</button>
+        </form>
+    </div>
+</div>
+
+<!-- ====== FOOTER ====== -->
+<footer class="nclex-footer-light main-with-sidenav">
+    <div class="footer-inner">
+        <div>
+            <span style="font-weight:700;color:var(--primary);">NCLEX XAV</span>
+            <p style="font-size:.75rem;color:#94a3b8;">© 2025 NCLEX XAV Technology. Clinical Excellence Platform.</p>
+        </div>
+        <div class="footer-links">
+            <a href="{% url 'home' %}" style="font-size:.75rem;color:#94a3b8;">Home</a>
+            <a href="{% url 'pricing' %}" style="font-size:.75rem;color:#94a3b8;">Pricing</a>
         </div>
     </div>
-    
-    <script>
-    function openAddTaskModal() { document.getElementById('addTaskModal').style.display = 'block'; }
-    function closeModal() { document.getElementById('addTaskModal').style.display = 'none'; }
-    
-    document.getElementById('taskForm').addEventListener('submit', async function(e) {
-        e.preventDefault();
-        const formData = new FormData(e.target);
-        const data = { title: formData.get('title'), scheduled_date: formData.get('scheduled_date'), priority: formData.get('priority'), estimated_minutes: formData.get('estimated_minutes') };
-        
-        try {
-            const response = await fetch('/planner/api/tasks/create/', {
-                method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
-                body: JSON.stringify(data)
-            });
-            if (response.ok) { location.reload(); }
-        } catch (error) { console.error('Error:', error); }
-    });
-    
-    async function updateStatus(taskId, newStatus) {
-        try {
-            const response = await fetch(`/planner/api/tasks/${taskId}/status/`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
-                body: JSON.stringify({ status: newStatus })
-            });
-            if (response.ok) { location.reload(); }
-        } catch (error) { console.error('Error:', error); }
-    }
-    
-    function toggleShowMore(columnName) {
-        const column = document.querySelector(`.${columnName}-col`);
-        const hiddenTasks = column.querySelectorAll('.hidden-task');
-        const button = column.querySelector('.btn-show-more');
-        
-        const isHidden = hiddenTasks[0].style.display === 'none' || !hiddenTasks[0].style.display;
-        
-        hiddenTasks.forEach(task => {
-            task.style.display = isHidden ? 'block' : 'none';
+</footer>
+
+<script>
+/* ===== Task Modal ===== */
+function openAddTaskModal() { document.getElementById('addTaskModal').classList.add('open'); }
+function closeModal() { document.getElementById('addTaskModal').classList.remove('open'); }
+
+document.getElementById('taskForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    const data = { title: fd.get('title'), scheduled_date: fd.get('scheduled_date'), priority: fd.get('priority'), estimated_minutes: fd.get('estimated_minutes') };
+    try {
+        const r = await fetch('/planner/api/tasks/create/', {
+            method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+            body: JSON.stringify(data)
         });
-        
-        if (isHidden) {
-            button.textContent = '- Show Less';
-        } else {
-            const count = hiddenTasks.length;
-            button.textContent = `+ Show ${count} More`;
-        }
-    }
-    
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
-        }
-        return cookieValue;
-    }
-    </script>
-    
-    <script>
-    // Load recommendations on page load
-    document.addEventListener('DOMContentLoaded', function() {
-        loadRecommendations();
-    });
-    
-    async function loadRecommendations() {
-        try {
-            const response = await fetch('/planner/api/recommendations/');
-            const data = await response.json();
-            
-            if (data.recommendations && data.recommendations.length > 0) {
-                displayRecommendations(data.recommendations);
-            }
-        } catch (error) {
-            console.error('Error loading recommendations:', error);
-        }
-    }
-    
-    function displayRecommendations(recommendations) {
-        const section = document.getElementById('recommendationsSection');
-        const grid = document.getElementById('recommendationsGrid');
-        
-        // Show only weak areas (< 70%) or top 3 if all are strong
-        const weakAreas = recommendations.filter(r => r.percentage < 70);
-        const toShow = weakAreas.length > 0 ? weakAreas.slice(0, 3) : recommendations.slice(0, 3);
-        
-        if (toShow.length === 0) {
-            return; // Don't show section if no recommendations
-        }
-        
-        grid.innerHTML = '';
-        
-        toShow.forEach(rec => {
-            const card = document.createElement('div');
-            card.className = `rec-card ${rec.status}`;
-            card.innerHTML = `
-                <div class="rec-card-header">
-                    <span class="rec-icon">${rec.icon}</span>
-                    <span class="rec-category">${rec.category_name}</span>
-                </div>
-                <div class="rec-percentage">${rec.percentage}%</div>
-                <div class="rec-details">
-                    ${rec.correct_answers} correct / ${rec.total_questions} total
-                </div>
-                <button class="btn-practice" onclick="createPracticeTask(${rec.category_id}, '${rec.category_name}', ${rec.recommended_practice})">
-                    Practice ${rec.recommended_practice} Questions →
-                </button>
-            `;
-            grid.appendChild(card);
+        if (r.ok) location.reload();
+    } catch (err) { console.error(err); }
+});
+
+async function updateStatus(taskId, newStatus) {
+    try {
+        const r = await fetch(`/planner/api/tasks/${taskId}/status/`, {
+            method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+            body: JSON.stringify({ status: newStatus })
         });
-        
-        section.style.display = 'block';
+        if (r.ok) location.reload();
+    } catch (err) { console.error(err); }
+}
+
+function toggleShowMore(col) {
+    const column = document.querySelector(`.${col === 'in-progress' ? 'ip' : col === 'completed' ? 'done' : col}-col`);
+    const hidden = column.querySelectorAll('.hidden-task');
+    const btn = column.querySelector('.btn-show-more');
+    const show = hidden[0].style.display === 'none' || !hidden[0].style.display;
+    hidden.forEach(t => t.style.display = show ? 'block' : 'none');
+    btn.textContent = show ? '- Show Less' : `+ Show ${hidden.length} More`;
+}
+
+function getCookie(name) {
+    let v = null;
+    if (document.cookie) {
+        document.cookie.split(';').forEach(c => {
+            c = c.trim();
+            if (c.startsWith(name + '=')) v = decodeURIComponent(c.substring(name.length + 1));
+        });
     }
-    
-    async function createPracticeTask(categoryId, categoryName, numQuestions) {
-        if (!categoryId) {
-            alert('Cannot create task - category not found in database');
-            return;
-        }
-        
-        try {
-            const response = await fetch('/planner/api/recommendations/create-task/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': getCookie('csrftoken')
-                },
-                body: JSON.stringify({
-                    category_id: categoryId,
-                    category_name: categoryName,
-                    num_questions: numQuestions
-                })
-            });
-            
-            const data = await response.json();
-            
-            if (data.success) {
-                alert(`✅ ${data.message}`);
-                location.reload(); // Refresh to show new task
-            } else {
-                alert(`⚠️ ${data.error}`);
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            alert('Failed to create task');
-        }
-    }
-    </script>
+    return v;
+}
+
+/* ===== Recommendations ===== */
+document.addEventListener('DOMContentLoaded', loadRecommendations);
+
+async function loadRecommendations() {
+    try {
+        const r = await fetch('/planner/api/recommendations/');
+        const data = await r.json();
+        if (data.recommendations && data.recommendations.length > 0) displayRecommendations(data.recommendations);
+    } catch (err) { console.error(err); }
+}
+
+function displayRecommendations(recs) {
+    const section = document.getElementById('recommendationsSection');
+    const grid = document.getElementById('recommendationsGrid');
+    const weak = recs.filter(r => r.percentage < 70);
+    const show = weak.length > 0 ? weak.slice(0, 3) : recs.slice(0, 3);
+    if (!show.length) return;
+    grid.innerHTML = '';
+    show.forEach(rec => {
+        const card = document.createElement('div');
+        card.className = `rec-card ${rec.status}`;
+        card.innerHTML = `
+            <div class="rec-card-hdr">
+                <span class="icon">${rec.icon}</span>
+                <span class="name">${rec.category_name}</span>
+            </div>
+            <div class="rec-pct">${rec.percentage}%</div>
+            <div class="rec-detail">${rec.correct_answers} correct / ${rec.total_questions} total</div>
+            <button class="rec-practice-btn" onclick="createPracticeTask(${rec.category_id}, '${rec.category_name}', ${rec.recommended_practice})">
+                Practice ${rec.recommended_practice} Questions →
+            </button>
+        `;
+        grid.appendChild(card);
+    });
+    section.classList.add('visible');
+}
+
+async function createPracticeTask(catId, catName, numQ) {
+    if (!catId) { alert('Cannot create task'); return; }
+    try {
+        const r = await fetch('/planner/api/recommendations/create-task/', {
+            method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+            body: JSON.stringify({ category_id: catId, category_name: catName, num_questions: numQ })
+        });
+        const data = await r.json();
+        if (data.success) { alert(`✅ ${data.message}`); location.reload(); }
+        else alert(`⚠️ ${data.error}`);
+    } catch (err) { console.error(err); alert('Failed to create task'); }
+}
+</script>
 </body>
 </html>

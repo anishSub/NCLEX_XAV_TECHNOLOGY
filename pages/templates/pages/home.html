@@ -1,702 +1,1248 @@
+{% extends "base.html" %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NCLEX XAV Technology - Your Path to Nursing Excellence</title>
-    
-    <!-- Font Awesome for Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-    
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+
+{% block title %}NCLEX XAV Technology – Your Path to Nursing Excellence{% endblock %}
+{% block meta_description %}Pass your NCLEX-RN with confidence using adaptive testing, scenario practice, study planning, and analytics from NCLEX XAV Technology.{% endblock %}
+{% block body_class %}home-page{% endblock %}
+
+{% block extra_head %}
+    .home-wrapper {
+        padding: 0.75rem 1.25rem 0;
+    }
+    .home-container {
+        max-width: 1320px;
+        margin: 0 auto;
+    }
+    .hero-shell {
+        position: relative;
+        overflow: hidden;
+        padding: 1.9rem;
+        min-height: auto;
+        display: flex;
+        align-items: center;
+        border-radius: 2.25rem;
+        background: linear-gradient(132deg, rgba(255, 255, 255, 0.98) 0%, rgba(226, 239, 255, 0.8) 62%, rgba(214, 243, 244, 0.72) 100%);
+        border: 1px solid rgba(0, 74, 153, 0.06);
+        box-shadow: 0 30px 70px rgba(0, 52, 111, 0.08);
+        isolation: isolate;
+    }
+    .hero-shell::before,
+    .hero-shell::after {
+        content: "";
+        position: absolute;
+        pointer-events: none;
+        z-index: 0;
+    }
+    .hero-shell::before {
+        width: 22rem;
+        height: 22rem;
+        right: -5rem;
+        top: -7rem;
+        background: radial-gradient(circle, rgba(0, 74, 153, 0.11), transparent 70%);
+    }
+    .hero-shell::after {
+        width: 16rem;
+        height: 16rem;
+        left: -5rem;
+        bottom: -6rem;
+        background: radial-gradient(circle, rgba(31, 102, 126, 0.1), transparent 70%);
+    }
+    .hero-grid {
+        position: relative;
+        z-index: 1;
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 0.92fr;
+        gap: 2.1rem;
+        align-items: center;
+    }
+    .hero-copy {
+        max-width: 36rem;
+        position: relative;
+        z-index: 2;
+    }
+    .hero-center-decor {
+        position: absolute;
+        left: 56%;
+        top: 53%;
+        transform: translate(-50%, -50%);
+        width: 170px;
+        height: 170px;
+        pointer-events: none;
+        z-index: 1;
+        opacity: 0.85;
+    }
+    .hero-center-decor .orb {
+        position: absolute;
+        border-radius: 999px;
+    }
+    .hero-center-decor .orb-main {
+        width: 170px;
+        height: 170px;
+        border: 2px solid rgba(0, 74, 153, 0.12);
+        background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.55), rgba(214, 243, 244, 0.22) 65%, rgba(164, 227, 255, 0.06));
+    }
+    .hero-center-decor .orb-ring {
+        width: 112px;
+        height: 112px;
+        left: 29px;
+        top: 29px;
+        border: 1px dashed rgba(0, 74, 153, 0.2);
+    }
+    .hero-center-decor .orb-dot-1,
+    .hero-center-decor .orb-dot-2,
+    .hero-center-decor .orb-dot-3 {
+        background: linear-gradient(135deg, rgba(0, 74, 153, 0.2), rgba(31, 102, 126, 0.12));
+        box-shadow: 0 8px 18px rgba(0, 52, 111, 0.1);
+    }
+    .hero-center-decor .orb-dot-1 {
+        width: 20px;
+        height: 20px;
+        top: 8px;
+        right: 20px;
+    }
+    .hero-center-decor .orb-dot-2 {
+        width: 14px;
+        height: 14px;
+        left: 12px;
+        bottom: 24px;
+    }
+    .hero-center-decor .orb-dot-3 {
+        width: 10px;
+        height: 10px;
+        right: 40px;
+        bottom: 9px;
+    }
+    .hero-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.5rem 0.95rem;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.95);
+        color: var(--primary);
+        font-size: 0.72rem;
+        font-weight: 800;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        box-shadow: 0 10px 24px rgba(0, 74, 153, 0.08);
+        margin-bottom: 1.15rem;
+    }
+    .hero-chip .material-symbols-outlined {
+        font-size: 0.95rem;
+        font-variation-settings: 'FILL' 1;
+    }
+    .hero-title {
+        color: var(--primary);
+        font-size: clamp(2.3rem, 4.4vw, 4.15rem);
+        line-height: 1;
+        letter-spacing: -0.055em;
+        font-weight: 950;
+        margin-bottom: 0.9rem;
+        max-width: 10ch;
+    }
+    .hero-title-accent {
+        display: inline;
+        color: var(--secondary);
+    }
+    .hero-text {
+        color: #4b6173;
+        font-size: 0.98rem;
+        line-height: 1.6;
+        margin-bottom: 1.4rem;
+        max-width: 34rem;
+    }
+    .hero-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.85rem;
+        margin-bottom: 1.4rem;
+    }
+    .hero-actions .btn-primary-pill,
+    .hero-actions .btn-outline-pill {
+        padding: 0.9rem 1.45rem;
+        font-size: 0.9rem;
+    }
+    .hero-metrics {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 0.75rem;
+    }
+    .hero-metric {
+        padding: 0.9rem 0.8rem;
+        border-radius: 0.9rem;
+        background: rgba(255, 255, 255, 0.94);
+        border: 1px solid rgba(0, 74, 153, 0.08);
+        box-shadow: none;
+    }
+    .hero-metric strong {
+        display: block;
+        color: var(--primary);
+        font-size: 1.34rem;
+        font-weight: 950;
+        margin-bottom: 0.08rem;
+        letter-spacing: -0.02em;
+    }
+    .hero-metric span {
+        display: block;
+        color: #6c7e8f;
+        font-size: 0.74rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+    }
+    .hero-visual {
+        position: relative;
+        display: grid;
+        place-items: center;
+        min-height: 100%;
+        justify-items: end;
+        z-index: 2;
+    }
+    .hero-image-wrap {
+        position: relative;
+        width: min(100%, 450px);
+        padding: 0.6rem;
+        border-radius: 1.7rem;
+        background: rgba(255, 255, 255, 0.86);
+        border: 1px solid rgba(0, 74, 153, 0.1);
+        box-shadow: 0 22px 58px rgba(0, 52, 111, 0.12);
+    }
+    .hero-nurse-img {
+        width: 100%;
+        height: auto;
+        object-fit: cover;
+        aspect-ratio: 3 / 4;
+        object-position: center top;
+        border-radius: 1.3rem;
+        position: relative;
+        z-index: 2;
+    }
+    .hero-image-backdrop {
+        position: absolute;
+        width: 110%;
+        height: 110%;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(0, 74, 153, 0.08), transparent 72%);
+        z-index: 1;
+    }
+    .hero-badge-float {
+        position: absolute;
+        z-index: 3;
+        max-width: 11.6rem;
+        background: rgba(255, 255, 255, 0.96);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(0, 74, 153, 0.08);
+        box-shadow: 0 15px 34px rgba(0, 52, 111, 0.13);
+        border-radius: 0.95rem;
+        padding: 0.62rem;
+        display: grid;
+        gap: 0.32rem;
+        opacity: 0;
+        transform: translateY(12px);
+        animation: badge-reveal 0.6s ease-out forwards;
+    }
+    .hero-badge-title {
+        display: flex;
+        align-items: center;
+        gap: 0.45rem;
+        color: var(--primary);
+        font-size: 0.72rem;
+        font-weight: 800;
+    }
+    .hero-badge-title .material-symbols-outlined {
+        font-size: 0.95rem;
+        color: var(--secondary);
+        font-variation-settings: 'FILL' 1;
+    }
+    .hero-badge-float p {
+        margin: 0;
+        color: #5f7387;
+        font-size: 0.68rem;
+        line-height: 1.35;
+    }
+    @keyframes badge-reveal {
+        to {
+            opacity: 1;
+            transform: translateY(0);
         }
-        
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            line-height: 1.6;
-            color: #2c3e50;
-            overflow-x: hidden;
+    }
+    .badge-float-1 {
+        top: -1.15rem;
+        left: -1rem;
+        animation-delay: 0.3s;
+    }
+    .badge-float-2 {
+        bottom: -1.2rem;
+        right: -0.95rem;
+        animation-delay: 0.55s;
+    }
+
+    /* Clinical Core */
+    .clinical-core {
+        padding: 6rem 0;
+    }
+    .core-header {
+        text-align: center;
+        max-width: 800px;
+        margin: 0 auto 5rem;
+    }
+    .core-header h2 {
+        font-size: clamp(2.5rem, 4vw, 3.5rem);
+        font-weight: 950;
+        color: var(--primary);
+        letter-spacing: -0.04em;
+        margin: 1.5rem 0 1.25rem;
+    }
+    .core-header p {
+        font-size: 1.15rem;
+        color: #6c7e8f;
+        line-height: 1.6;
+    }
+    .core-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 2rem;
+    }
+    .core-card {
+        background: #fff;
+        padding: 3rem;
+        border-radius: 2.5rem;
+        border: 1px solid rgba(0, 74, 153, 0.06);
+        box-shadow: 0 10px 30px rgba(0, 52, 111, 0.03);
+        transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+    }
+    .core-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 30px 60px rgba(0, 52, 111, 0.08);
+        border-color: var(--primary-container);
+    }
+    .core-icon {
+        width: 64px;
+        height: 64px;
+        background: var(--surface-container);
+        border-radius: 1.25rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--primary);
+    }
+    .core-icon .material-symbols-outlined {
+        font-size: 2rem;
+        font-variation-settings: 'FILL' 1;
+    }
+    .core-content h3 {
+        font-size: 1.5rem;
+        font-weight: 850;
+        color: var(--primary);
+        margin-bottom: 1rem;
+        letter-spacing: -0.02em;
+    }
+    .core-content p {
+        color: #5b6b7c;
+        line-height: 1.7;
+        margin-bottom: 1.5rem;
+    }
+    .core-bullets {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    .core-bullets li {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 0.92rem;
+        font-weight: 700;
+        color: var(--primary);
+    }
+    .core-bullets li::before {
+        content: "";
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--primary-container);
+    }
+
+
+    .section-block {
+        padding: 4.25rem 0 0;
+    }
+    .section-heading {
+        max-width: 38rem;
+        margin-bottom: 2rem;
+    }
+    .section-heading.center {
+        margin-left: auto;
+        margin-right: auto;
+        text-align: center;
+    }
+    .section-heading .chip {
+        margin-bottom: 0.8rem;
+    }
+    .section-heading h2 {
+        color: var(--primary);
+        font-size: clamp(2rem, 3vw, 3rem);
+        font-weight: 900;
+        line-height: 1.08;
+        letter-spacing: -0.05em;
+        margin-bottom: 0.8rem;
+    }
+    .section-heading p {
+        color: #5e758b;
+        font-size: 1rem;
+        line-height: 1.8;
+    }
+    .feature-row {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 1.2rem;
+    }
+    .feature-box {
+        padding: 1.5rem;
+        border-radius: 1.5rem;
+        background: rgba(255, 255, 255, 0.9);
+        border: 1px solid rgba(0, 74, 153, 0.08);
+        box-shadow: 0 24px 50px rgba(0, 52, 111, 0.08);
+        min-height: 100%;
+    }
+    .feature-box .icon {
+        width: 3.25rem;
+        height: 3.25rem;
+        border-radius: 1rem;
+        background: linear-gradient(135deg, rgba(0, 74, 153, 0.12), rgba(164, 227, 255, 0.82));
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1rem;
+    }
+    .feature-box .icon .material-symbols-outlined {
+        color: var(--primary);
+        font-size: 1.45rem;
+        font-variation-settings: 'FILL' 1;
+    }
+    .feature-box h3 {
+        color: var(--primary);
+        font-size: 1.15rem;
+        font-weight: 800;
+        margin-bottom: 0.65rem;
+    }
+    .feature-box p {
+        color: #62778b;
+        font-size: 0.92rem;
+        line-height: 1.75;
+        margin-bottom: 1rem;
+    }
+    .feature-box a {
+        color: var(--secondary);
+        font-size: 0.86rem;
+        font-weight: 800;
+    }
+    .care-grid {
+        display: grid;
+        grid-template-columns: 1.02fr 0.98fr;
+        gap: 1.25rem;
+        align-items: stretch;
+    }
+    .care-copy,
+    .care-panels {
+        min-width: 0;
+    }
+    .care-copy-card {
+        height: 100%;
+        padding: 2rem;
+        border-radius: 2rem;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.94), rgba(226, 239, 255, 0.9));
+        border: 1px solid rgba(0, 74, 153, 0.08);
+        box-shadow: 0 24px 55px rgba(0, 52, 111, 0.08);
+    }
+    .care-list {
+        display: grid;
+        gap: 0.9rem;
+        margin-top: 1.25rem;
+    }
+    .care-list-item {
+        display: flex;
+        gap: 0.85rem;
+        align-items: flex-start;
+    }
+    .care-list-item .material-symbols-outlined {
+        margin-top: 0.15rem;
+        color: var(--secondary);
+        font-variation-settings: 'FILL' 1;
+    }
+    .care-list-item strong {
+        display: block;
+        color: var(--primary);
+        margin-bottom: 0.25rem;
+        font-size: 0.96rem;
+    }
+    .care-list-item span {
+        display: block;
+        color: #60768b;
+        font-size: 0.9rem;
+        line-height: 1.65;
+    }
+    .care-panels {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1rem;
+    }
+    .care-panel {
+        padding: 1.35rem;
+        border-radius: 1.5rem;
+        background: rgba(255, 255, 255, 0.9);
+        border: 1px solid rgba(0, 74, 153, 0.08);
+        box-shadow: 0 18px 40px rgba(0, 52, 111, 0.08);
+    }
+    .care-panel strong {
+        display: block;
+        color: var(--primary);
+        font-size: 1.8rem;
+        font-weight: 900;
+        margin-bottom: 0.35rem;
+    }
+    .care-panel h3 {
+        color: var(--primary);
+        font-size: 1rem;
+        font-weight: 800;
+        margin-bottom: 0.45rem;
+    }
+    .care-panel p {
+        color: #61788d;
+        font-size: 0.88rem;
+        line-height: 1.65;
+    }
+    .results-grid {
+        display: grid;
+        grid-template-columns: 0.95fr 1.05fr;
+        gap: 1.25rem;
+        align-items: center;
+    }
+    .result-profile {
+        padding: 1.8rem;
+        border-radius: 2rem;
+        background: linear-gradient(135deg, rgba(0, 52, 111, 0.96), rgba(31, 102, 126, 0.92));
+        color: #fff;
+        box-shadow: 0 28px 60px rgba(0, 52, 111, 0.18);
+    }
+    .result-profile-top {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1.2rem;
+    }
+    .result-avatar {
+        width: 5rem;
+        height: 5rem;
+        overflow: hidden;
+        border-radius: 1.4rem;
+        border: 3px solid rgba(255, 255, 255, 0.2);
+        background: rgba(255, 255, 255, 0.14);
+    }
+    .result-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: top center;
+    }
+    .result-profile h3 {
+        font-size: 1.35rem;
+        font-weight: 800;
+        line-height: 1.2;
+        margin-bottom: 0.3rem;
+    }
+    .result-profile .small {
+        font-size: 0.9rem;
+        opacity: 0.82;
+    }
+    .result-quote {
+        font-size: 1rem;
+        line-height: 1.85;
+        opacity: 0.9;
+        margin-bottom: 1.35rem;
+    }
+    .result-stars {
+        color: #ffd166;
+        font-size: 1.05rem;
+        letter-spacing: 0.22rem;
+    }
+    .result-panels {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1rem;
+    }
+    .result-panel {
+        padding: 1.45rem;
+        border-radius: 1.5rem;
+        background: rgba(255, 255, 255, 0.92);
+        border: 1px solid rgba(0, 74, 153, 0.08);
+        box-shadow: 0 20px 40px rgba(0, 52, 111, 0.08);
+    }
+    .result-panel h4 {
+        color: var(--primary);
+        font-size: 1rem;
+        font-weight: 800;
+        margin-bottom: 0.45rem;
+    }
+    .result-panel p {
+        color: #60768b;
+        font-size: 0.9rem;
+        line-height: 1.7;
+        margin-bottom: 0.8rem;
+    }
+    .result-panel strong {
+        display: block;
+        color: var(--secondary);
+        font-size: 1.5rem;
+        font-weight: 900;
+    }
+    .faq-grid {
+        display: grid;
+        grid-template-columns: 0.9fr 1.1fr;
+        gap: 1.4rem;
+        align-items: start;
+    }
+    .faq-copy-card {
+        padding: 2rem;
+        border-radius: 2rem;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.94), rgba(226, 239, 255, 0.92));
+        border: 1px solid rgba(0, 74, 153, 0.08);
+        box-shadow: 0 22px 50px rgba(0, 52, 111, 0.08);
+    }
+    .faq-copy-card p {
+        color: #60768b;
+        line-height: 1.8;
+        margin-bottom: 1.4rem;
+    }
+    .faq-list {
+        display: grid;
+        gap: 0.85rem;
+    }
+    .faq-item {
+        border-radius: 1.25rem;
+        background: rgba(255, 255, 255, 0.9);
+        border: 1px solid rgba(0, 74, 153, 0.08);
+        box-shadow: 0 18px 35px rgba(0, 52, 111, 0.06);
+        overflow: hidden;
+    }
+    .faq-item summary {
+        list-style: none;
+        cursor: pointer;
+        padding: 1.2rem 1.3rem;
+        color: var(--primary);
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+    }
+    .faq-item summary::-webkit-details-marker {
+        display: none;
+    }
+    .faq-item summary .material-symbols-outlined {
+        transition: transform 0.2s ease;
+    }
+    .faq-item[open] summary .material-symbols-outlined {
+        transform: rotate(180deg);
+    }
+    .faq-item .faq-body {
+        padding: 0 1.3rem 1.2rem;
+        color: #62788d;
+        font-size: 0.92rem;
+        line-height: 1.8;
+    }
+    .insights-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 1rem;
+    }
+    .insight-card {
+        min-height: 100%;
+        border-radius: 1.8rem;
+        overflow: hidden;
+        background: rgba(255, 255, 255, 0.92);
+        border: 1px solid rgba(0, 74, 153, 0.08);
+        box-shadow: 0 24px 55px rgba(0, 52, 111, 0.08);
+    }
+    .insight-cover {
+        height: 12rem;
+        display: flex;
+        align-items: flex-end;
+        padding: 1.2rem;
+        color: #fff;
+        font-weight: 800;
+        font-size: 1.15rem;
+        letter-spacing: -0.03em;
+        line-height: 1.2;
+    }
+    .insight-cover.image {
+        background:
+            linear-gradient(180deg, rgba(0, 52, 111, 0.1), rgba(0, 52, 111, 0.78)),
+            url("{% static 'nurse2.jpg' %}") center top / cover no-repeat;
+    }
+    .insight-cover.gradient-blue {
+        background: linear-gradient(135deg, rgba(0, 52, 111, 0.94), rgba(31, 102, 126, 0.84));
+    }
+    .insight-cover.gradient-mint {
+        background: linear-gradient(135deg, rgba(31, 102, 126, 0.92), rgba(164, 227, 255, 0.82));
+    }
+    .insight-body {
+        padding: 1.25rem;
+    }
+    .insight-body .chip {
+        margin-bottom: 0.8rem;
+    }
+    .insight-body p {
+        color: #60758a;
+        font-size: 0.92rem;
+        line-height: 1.75;
+        margin-bottom: 1rem;
+    }
+    .insight-body a {
+        color: var(--secondary);
+        font-size: 0.88rem;
+        font-weight: 800;
+    }
+    .cta-banner {
+        margin-top: 4.25rem;
+        border-radius: 2.2rem;
+        padding: 2rem;
+        background: linear-gradient(135deg, rgba(214, 243, 244, 0.92), rgba(255, 255, 255, 0.96));
+        border: 1px solid rgba(0, 74, 153, 0.08);
+        box-shadow: 0 28px 55px rgba(0, 52, 111, 0.08);
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1.4rem;
+        align-items: center;
+    }
+    .cta-banner h2 {
+        color: var(--primary);
+        font-size: clamp(2rem, 3vw, 3.2rem);
+        line-height: 1.04;
+        letter-spacing: -0.05em;
+        margin-bottom: 0.8rem;
+        font-weight: 900;
+        max-width: 12ch;
+    }
+    .cta-banner p {
+        color: #60778b;
+        line-height: 1.8;
+        max-width: 33rem;
+        margin-bottom: 1.2rem;
+    }
+    .cta-banner .btn-primary-pill {
+        padding: 1rem 1.5rem;
+    }
+    .cta-image {
+        display: flex;
+        justify-content: center;
+    }
+    .cta-image-frame {
+        width: min(100%, 320px);
+        padding: 1rem 1rem 0;
+        border-radius: 1.8rem;
+        background: linear-gradient(180deg, rgba(0, 74, 153, 0.12), rgba(255, 255, 255, 0.5));
+    }
+    .cta-image-frame img {
+        width: 100%;
+        object-fit: contain;
+        object-position: bottom center;
+    }
+    @media (min-width: 900px) {
+        .home-wrapper {
+            padding-top: 1.75rem;
         }
-        
-        /* ============ NAVBAR ============ */
-        .navbar {
-            background: linear-gradient(135deg, #004a99 0%, #0066cc 100%);
-            padding: 1rem 0;
-            box-shadow: 0 2px 20px rgba(0, 74, 153, 0.15);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
+        .hero-shell {
+            padding: 2.35rem 1.85rem;
         }
-        
-        .nav-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        .hero-grid {
+            grid-template-columns: 1fr 0.9fr;
+            gap: 1.9rem;
         }
-        
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            color: white;
-            text-decoration: none;
-            font-size: 1.5rem;
-            font-weight: 700;
+        .trust-strip {
+            grid-template-columns: auto 1fr;
         }
-        
-        .logo i {
-            font-size: 2rem;
-            background: white;
-            color: #004a99;
-            width: 50px;
-            height: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 12px;
+        .trust-items {
+            grid-template-columns: repeat(4, minmax(0, 1fr));
         }
-        
-        .nav-links {
-            display: flex;
-            list-style: none;
-            gap: 2rem;
-            align-items: center;
+        .cta-banner {
+            grid-template-columns: 1.15fr 0.85fr;
+            padding: 2.4rem;
         }
-        
-        .nav-links a {
-            color: white;
-            text-decoration: none;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
+    }
+    @media (min-width: 1200px) {
+        .home-wrapper {
+            padding-left: 2.25rem;
+            padding-right: 2.25rem;
         }
-        
-        .nav-links a:hover {
-            background: rgba(255, 255, 255, 0.15);
+    }
+    @media (min-width: 900px) and (max-width: 1366px) {
+        .hero-shell {
+            padding: 2.1rem 1.55rem;
         }
-        
-        .nav-cta {
-            background: white;
-            color: #004a99 !important;
-            padding: 0.7rem 1.5rem !important;
-            border-radius: 25px;
-            font-weight: 600;
-            box-shadow: 0 4px 15px rgba(255, 255, 255, 0.3);
+        .hero-title {
+            font-size: clamp(2.2rem, 4vw, 3.6rem);
         }
-        
-        .nav-cta:hover {
-            background: #f0f8ff !important;
-            transform: translateY(-2px);
+        .hero-text {
+            font-size: 0.94rem;
+            margin-bottom: 1.2rem;
         }
-        
-        /* ============ HERO SECTION ============ */
-        .hero {
-            background: linear-gradient(135deg, #f0f8ff 0%, #e6f3ff 100%);
-            padding: 6rem 2rem;
-            position: relative;
-            overflow: hidden;
+        .hero-image-wrap {
+            width: min(100%, 400px);
         }
-        
-        .hero::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            right: -10%;
-            width: 40%;
-            height: 100%;
-            background: linear-gradient(135deg, rgba(0, 74, 153, 0.05) 0%, rgba(0, 102, 204, 0.08) 100%);
-            border-radius: 50% 0 0 50%;
-        }
-        
-        .hero-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 4rem;
-            align-items: center;
-            position: relative;
-            z-index: 1;
-        }
-        
-        .hero-content h1 {
-            font-size: 3.5rem;
-            color: #004a99;
-            margin-bottom: 1.5rem;
-            line-height: 1.2;
-            font-weight: 700;
-        }
-        
-        .hero-content .highlight {
-            color: #0066cc;
-            position: relative;
-        }
-        
-        .hero-content p {
-            font-size: 1.25rem;
-            color: #5a6c7d;
-            margin-bottom: 2.5rem;
-            line-height: 1.8;
-        }
-        
-        .hero-buttons {
-            display: flex;
-            gap: 1.5rem;
-            flex-wrap: wrap;
-        }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, #004a99 0%, #0066cc 100%);
-            color: white;
-            padding: 1.2rem 3rem;
-            border: none;
-            border-radius: 50px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 12px;
-            box-shadow: 0 8px 25px rgba(0, 74, 153, 0.3);
-            transition: all 0.3s ease;
-        }
-        
-        .btn-primary:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 12px 35px rgba(0, 74, 153, 0.4);
-        }
-        
-        .btn-secondary {
-            background: white;
-            color: #004a99;
-            padding: 1.2rem 3rem;
-            border: 2px solid #004a99;
-            border-radius: 50px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 12px;
-            transition: all 0.3s ease;
-        }
-        
-        .btn-secondary:hover {
-            background: #004a99;
-            color: white;
-            transform: translateY(-3px);
-        }
-        
-        .hero-visual {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-        }
-        
-        .visual-circle {
-            width: 450px;
-            height: 450px;
-            background: linear-gradient(135deg, #004a99 0%, #0066cc 100%);
-            border-radius: 50%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 20px 60px rgba(0, 74, 153, 0.3);
-            position: relative;
-        }
-        
-        .visual-circle i {
-            font-size: 8rem;
-            color: white;
-            margin-bottom: 1rem;
-        }
-        
-        .visual-circle h3 {
-            color: white;
-            font-size: 1.8rem;
-            font-weight: 600;
-        }
-        
-        .floating-badge {
-            position: absolute;
-            background: white;
-            padding: 1rem 1.5rem;
-            border-radius: 15px;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-weight: 600;
-        }
-        
-        .badge-1 {
-            top: 10%;
-            left: -10%;
-        }
-        
-        .badge-2 {
-            bottom: 15%;
-            right: -10%;
-        }
-        
-        .floating-badge i {
-            font-size: 1.5rem;
-            color: #004a99;
-        }
-        
-        /* ============ FEATURES SECTION ============ */
-        .features {
-            padding: 6rem 2rem;
-            background: white;
-        }
-        
-        .features-container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        
-        .section-header {
-            text-align: center;
-            margin-bottom: 4rem;
-        }
-        
-        .section-header h2 {
-            font-size: 2.5rem;
-            color: #004a99;
-            margin-bottom: 1rem;
-        }
-        
-        .section-header p {
+        .hero-metric strong {
             font-size: 1.2rem;
-            color: #5a6c7d;
         }
-        
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2.5rem;
+        .hero-center-decor {
+            left: 55%;
+            width: 145px;
+            height: 145px;
         }
-        
-        .feature-card {
-            background: linear-gradient(135deg, #f8fbff 0%, #f0f8ff 100%);
-            padding: 2.5rem;
-            border-radius: 20px;
-            text-align: center;
-            transition: all 0.3s ease;
-            border: 1px solid rgba(0, 74, 153, 0.1);
+        .hero-center-decor .orb-main {
+            width: 145px;
+            height: 145px;
         }
-        
-        .feature-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 15px 40px rgba(0, 74, 153, 0.15);
+        .hero-center-decor .orb-ring {
+            width: 94px;
+            height: 94px;
+            left: 25px;
+            top: 25px;
         }
-        
-        .feature-icon {
-            width: 80px;
-            height: 80px;
-            background: linear-gradient(135deg, #004a99 0%, #0066cc 100%);
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 1.5rem;
+    }
+    @media (min-width: 1280px) and (max-width: 1399px) and (max-height: 820px) {
+        .hero-shell {
+            padding: 1.7rem 1.35rem;
         }
-        
-        .feature-icon i {
-            font-size: 2.5rem;
-            color: white;
+        .hero-grid {
+            gap: 1.4rem;
         }
-        
-        .feature-card h3 {
-            font-size: 1.5rem;
-            color: #004a99;
+        .hero-title {
+            font-size: clamp(2rem, 3.4vw, 3.1rem);
+            margin-bottom: 0.65rem;
+        }
+        .hero-text {
+            font-size: 0.9rem;
+            line-height: 1.5;
             margin-bottom: 1rem;
         }
-        
-        .feature-card p {
-            color: #5a6c7d;
-            line-height: 1.8;
-        }
-        
-        /* ============ CTA SECTION ============ */
-        .cta-section {
-            background: linear-gradient(135deg, #004a99 0%, #0066cc 100%);
-            padding: 5rem 2rem;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .cta-section::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -10%;
-            width: 120%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
-        }
-        
-        .cta-container {
-            max-width: 800px;
-            margin: 0 auto;
-            position: relative;
-            z-index: 1;
-        }
-        
-        .cta-container h2 {
-            font-size: 3rem;
-            color: white;
-            margin-bottom: 1.5rem;
-        }
-        
-        .cta-container p {
-            font-size: 1.3rem;
-            color: rgba(255, 255, 255, 0.9);
-            margin-bottom: 3rem;
-            line-height: 1.8;
-        }
-        
-        .btn-cta {
-            background: white;
-            color: #004a99;
-            padding: 1.5rem 4rem;
-            border: none;
-            border-radius: 50px;
-            font-size: 1.3rem;
-            font-weight: 700;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            transition: all 0.3s ease;
-        }
-        
-        .btn-cta:hover {
-            transform: translateY(-5px) scale(1.05);
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
-        }
-        
-        /* ============ FOOTER ============ */
-        .footer {
-            background: #1a2332;
-            color: white;
-            padding: 3rem 2rem 1.5rem;
-        }
-        
-        .footer-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            text-align: center;
-        }
-        
-        .footer p {
-            color: rgba(255, 255, 255, 0.7);
+        .hero-actions {
             margin-bottom: 1rem;
         }
-        
-        /* ============ RESPONSIVE ============ */
-        @media (max-width: 768px) {
-            .hero-container {
-                grid-template-columns: 1fr;
-                text-align: center;
-            }
-            
-            .hero-content h1 {
-                font-size: 2.5rem;
-            }
-            
-            .hero-buttons {
-                justify-content: center;
-            }
-            
-            .visual-circle {
-                width: 300px;
-                height: 300px;
-            }
-            
-            .visual-circle i {
-                font-size: 5rem;
-            }
-            
-            .floating-badge {
-                display: none;
-            }
-            
-            .nav-links {
-                flex-direction: column;
-                gap: 1rem;
-            }
-            
-            /* Pricing section responsive */
-            .pricing-cta {
-                padding: 3rem 1rem !important;
-            }
-            
-            .pricing-cta h2 {
-                font-size: 2rem !important;
-            }
-            
-            .pricing-cta p {
-                font-size: 1.1rem !important;
-            }
-            
-            /* Stack pricing cards on mobile */
-            .pricing-cta div[style*="display: flex"] {
-                flex-direction: column !important;
-                align-items: center !important;
-            }
-            
-            .pricing-cta div[style*="min-width: 280px"] {
-                min-width: 100% !important;
-                max-width: 400px !important;
-            }
+        .hero-actions .btn-primary-pill,
+        .hero-actions .btn-outline-pill {
+            padding: 0.78rem 1.2rem;
+            font-size: 0.85rem;
         }
-        
-        @media (max-width: 480px) {
-            .hero-content h1 { font-size: 2rem; }
-            .hero-content p { font-size: 1rem; }
-            .btn-primary, .btn-secondary { padding: 1rem 2rem; font-size: 1rem; }
-            .pricing-cta h2 { font-size: 1.8rem !important; }
+        .hero-metric {
+            padding: 0.72rem 0.7rem;
         }
-    </style>
-</head>
-<body>
-    <!-- NAVIGATION BAR -->
-    <nav class="navbar">
-        <div class="nav-container">
-            <a href="{% url 'home' %}" class="logo">
-                <i class="fas fa-user-nurse"></i>
-                <span>NCLEX XAV</span>
-            </a>
-            <ul class="nav-links">
-                <li><a href="{% url 'home' %}">Home</a></li>
-                <li><a href="#features">Features</a></li>
-                <li><a href="{% url 'study_planner' %}">Study Planner</a></li>
-                {% if user.is_authenticated %}
-                    <li><a href="{% url 'logout' %}">Logout</a></li>
-                {% else %}
-                    <li><a href="{% url 'login' %}" class="nav-cta">Login</a></li>
-                {% endif %}
-            </ul>
-        </div>
-    </nav>
+        .hero-metric strong {
+            font-size: 1.05rem;
+        }
+        .hero-metric span {
+            font-size: 0.66rem;
+        }
+        .hero-image-wrap {
+            width: min(100%, 370px);
+        }
+        .hero-badge-float {
+            max-width: 10.6rem;
+            padding: 0.5rem;
+        }
+        .hero-badge-title {
+            font-size: 0.64rem;
+        }
+        .hero-badge-float p {
+            font-size: 0.62rem;
+        }
+    }
+    @media (min-width: 1400px) and (max-width: 1536px) and (max-height: 930px) {
+        .hero-shell {
+            padding: 1.95rem 1.65rem;
+        }
+        .hero-title {
+            font-size: clamp(2.15rem, 3.6vw, 3.45rem);
+        }
+        .hero-text {
+            font-size: 0.93rem;
+            margin-bottom: 1.1rem;
+        }
+        .hero-image-wrap {
+            width: min(100%, 390px);
+        }
+        .hero-metric strong {
+            font-size: 1.1rem;
+        }
+    }
+    @media (max-width: 1024px) {
+        .feature-row,
+        .insights-grid,
+        .result-panels {
+            grid-template-columns: 1fr;
+        }
+        .care-grid,
+        .results-grid,
+        .faq-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+    @media (max-width: 900px) {
+        .hero-center-decor {
+            display: none;
+        }
+        .hero-grid {
+            grid-template-columns: 1fr;
+        }
+        .hero-visual {
+            min-height: 400px;
+        }
+        .hero-floating.mid-right {
+            top: auto;
+            right: 0.5rem;
+            bottom: 8rem;
+        }
+    }
+    @media (max-width: 720px) {
+        .home-wrapper {
+            padding-left: 0.9rem;
+            padding-right: 0.9rem;
+        }
+        .hero-shell {
+            padding: 2.2rem 1rem 1.15rem;
+            border-radius: 1.6rem;
+        }
+        .hero-title {
+            max-width: none;
+        }
+        .hero-text {
+            font-size: 0.96rem;
+        }
+        .hero-metrics,
+        .care-panels {
+            grid-template-columns: 1fr;
+        }
+        .hero-visual {
+            min-height: 360px;
+        }
+        .hero-image-wrap {
+            width: 100%;
+            max-width: 360px;
+        }
+        .hero-badge-float {
+            position: static;
+            max-width: 100%;
+            margin-top: 0.65rem;
+            animation: none;
+            opacity: 1;
+            transform: none;
+        }
+        .trust-items {
+            grid-template-columns: 1fr;
+        }
+        .site-header {
+            padding-left: 0.75rem;
+            padding-right: 0.75rem;
+        }
+    }
+{% endblock %}
 
-    <!-- HERO SECTION -->
-    <section class="hero">
-        <div class="hero-container">
-            <div class="hero-content">
-                <h1>Pass Your <span class="highlight">NCLEX-RN</span> with Confidence</h1>
-                <p>Experience the power of Computerized Adaptive Testing (CAT) with our industry-standard Rasch Model exam simulator. Prepare smarter, not harder.</p>
-                
-                <div class="hero-buttons">
-                    {% if user.is_authenticated %}
-                        <a href="{% url 'start_exam' %}" class="btn-primary">
-                            <i class="fas fa-stethoscope"></i>
-                            Start Adaptive Exam
-                        </a>
-                        <a href="{% url 'practice_categories' %}" class="btn-secondary">
-                            <i class="fas fa-tasks"></i>
-                            Practice by Topic
-                        </a>
-                    {% else %}
-                        <a href="{% url 'register' %}" class="btn-primary">
-                            <i class="fas fa-user-plus"></i>
-                            Get Started Free
-                        </a>
-                        <a href="{% url 'login' %}" class="btn-secondary">
-                            <i class="fas fa-sign-in-alt"></i>
-                            Login
-                        </a>
-                    {% endif %}
-                </div>
-            </div>
-            
-            <div class="hero-visual">
-                <div class="visual-circle">
-                    <i class="fas fa-laptop-medical"></i>
-                    <h3>CAT Technology</h3>
-                </div>
-                <div class="floating-badge badge-1">
-                    <i class="fas fa-check-circle"></i>
-                    <span>95% Accuracy</span>
-                </div>
-                <div class="floating-badge badge-2">
-                    <i class="fas fa-brain"></i>
-                    <span>Adaptive Learning</span>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- FEATURES SECTION -->
-    <section class="features" id="features">
-        <div class="features-container">
-            <div class="section-header">
-                <h2>Why Choose NCLEX XAV Technology?</h2>
-                <p>Industry-leading features designed for nursing excellence</p>
-            </div>
-            
-            <div class="features-grid">
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-chart-line"></i>
+{% block content %}
+<div class="home-wrapper">
+    <div class="home-container">
+        <section class="hero-shell">
+            <div class="hero-grid">
+                <div class="hero-copy">
+                    <div class="hero-chip">
+                        <span class="material-symbols-outlined">verified</span>
+                        NCLEX-RN Success Platform
                     </div>
-                    <h3>Adaptive Testing</h3>
-                    <p>Our Rasch Model CAT engine adjusts difficulty in real-time, just like the actual NCLEX exam, ensuring accurate ability measurement.</p>
-                </div>
-                
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-clipboard-check"></i>
+                    <h1 class="hero-title">Master the NCLEX-RN <span class="hero-title-accent">with a smarter study flow</span></h1>
+                    <p class="hero-text">
+                        Structured preparation for modern nursing candidates. Move from uncertainty to exam-day confidence with adaptive simulations, clinical reasoning drills, and guided daily momentum.
+                    </p>
+                    <div class="hero-actions">
+                        <a href="{% url 'register' %}" class="btn-primary-pill">Get started for free</a>
+                        <a href="{% url 'pricing' %}" class="btn-outline-pill">View pricing</a>
                     </div>
-                    <h3>Next-Gen Questions</h3>
-                    <p>Practice with all NGN item types including SATA, Matrix, Hot Spot, and Clinical Judgment scenarios.</p>
-                </div>
-                
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-trophy"></i>
-                    </div>
-                    <h3>Performance Tracking</h3>
-                    <p>Detailed analytics with theta progression charts and 95% confidence intervals to measure your growth.</p>
-                </div>
-                
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-book-medical"></i>
-                    </div>
-                    <h3>Clinical Scenarios</h3>
-                    <p>Realistic unfolding case studies with exhibits including labs, vitals, and nursing notes.</p>
-                </div>
-                
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-clock"></i>
-                    </div>
-                    <h3>Timed Practice</h3>
-                    <p>Full 5-hour exam simulation with 85-150 adaptive questions to build test-taking endurance.</p>
-                </div>
-                
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-file-pdf"></i>
-                    </div>
-                    <h3>PDF Reports</h3>
-                    <p>Download comprehensive performance reports with category breakdowns and improvement recommendations.</p>
-                </div>
-                
-                <a href="{% url 'practice_categories' %}" style="text-decoration: none; color: inherit; display: block; cursor: pointer;">
-                    <div class="feature-card">
-                        <div class="feature-icon">
-                            <i class="fas fa-list-check"></i>
+                    <div class="hero-metrics">
+                        <div class="hero-metric">
+                            <strong>98%</strong>
+                            <span>Pass Rate</span>
                         </div>
-                        <h3>Practice by Category</h3>
-                        <p>Focus on specific topics! Choose from 8 NCLEX categories and practice questions where you need it most.</p>
+                        <div class="hero-metric">
+                            <strong>10k+</strong>
+                            <span>Students</span>
+                        </div>
+                        <div class="hero-metric">
+                            <strong>5k+</strong>
+                            <span>Questions</span>
+                        </div>
                     </div>
-                </a>
-            </div>
-        </div>
-    </section>
+                </div>
 
-    <!-- CTA SECTION -->
-    <section class="cta-section">
-        <div class="cta-container">
-            <h2>Ready to Ace Your NCLEX?</h2>
-            <p>Join thousands of nursing students who have successfully passed their NCLEX-RN exam using our adaptive testing platform.</p>
-            
-            {% if user.is_authenticated %}
-                <a href="{% url 'start_exam' %}" class="btn-cta">
-                    <i class="fas fa-rocket"></i>
-                    Begin Adaptive Exam Now
-                </a>
-            {% else %}
-                <a href="{% url 'register' %}" class="btn-cta">
-                    <i class="fas fa-graduation-cap"></i>
-                    Start Your Journey Today
-                </a>
-            {% endif %}
-        </div>
-    </section>
-        
-        <!-- Pricing Section -->
-        <section class="pricing-cta" style="background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); padding: 5rem 2rem; text-align: center; color: white;">
-            <div class="container" style="max-width: 1200px; margin: 0 auto;">
-                <h2 style="font-size: 3rem; font-weight: 800; margin-bottom: 1rem;">Ready to Ace Your NCLEX?</h2>
-                <p style="font-size: 1.3rem; opacity: 0.9; margin-bottom: 3rem; max-width: 700px; margin-left: auto; margin-right: auto;">
-                    Practice unlimited questions for FREE. Upgrade for the full adaptive CAT exam experience!
-                </p>
-                
-                <div style="display: flex; gap: 2rem; justify-content: center; flex-wrap: wrap; margin-bottom: 3rem;">
-                    <!-- Free Tier - PARICHAYA with hover badge -->
-                    <div class="home-pricing-card home-pricing-card-free" style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); border-radius: 20px; padding: 2rem; min-width: 280px; max-width: 350px; border: 2px solid rgba(255,255,255,0.3); position: relative; transition: all 0.3s;">
-                        <!-- FREE badge - shows on hover -->
-                        <div class="home-free-badge" style="position: absolute; top: -15px; right: 20px; background: #27ae60; color: white; padding: 0.5rem 1.5rem; border-radius: 50px; font-weight: 700; font-size: 0.85rem; opacity: 0; transition: opacity 0.3s;">FREE</div>
-                        
-                        <div style="font-size: 3rem; margin-bottom: 1rem;">🌱</div>
-                        <h3 style="font-size: 1.8rem; margin-bottom: 1rem;">परिचय (Parichaya)</h3>
-                        <p style="font-size: 3rem; font-weight: 800; margin-bottom: 1rem;">Rs. 0</p>
-                        <p style="opacity: 0.9; margin-bottom: 1.5rem;">Unlimited practice questions</p>
-                        <a href="{% url 'register' %}" style="display: inline-block; padding: 1rem 2.5rem; background: white; color: #1e3c72; text-decoration: none; border-radius: 50px; font-weight: 700; transition: all 0.3s;">
-                            Start Free Now →
-                        </a>
-                    </div>
-                    
-                    <!-- Premium Tier - AAGAMAN with hover badge -->
-                    <div class="home-pricing-card home-pricing-card-premium" style="background: rgba(255,255,255,0.25); backdrop-filter: blur(10px); border-radius: 20px; padding: 2rem; min-width: 280px; max-width: 350px; border: 3px solid #ffd93d; position: relative; transition: all 0.3s;">
-                        <!-- POPULAR badge - shows on hover -->
-                        <div class="home-popular-badge" style="position: absolute; top: -15px; right: 20px; background: #ffd93d; color: #1e3c72; padding: 0.5rem 1.5rem; border-radius: 50px; font-weight: 700; font-size: 0.85rem; opacity: 0; transition: opacity 0.3s;">POPULAR</div>
-                        
-                        <div style="font-size: 3rem; margin-bottom: 1rem;">🚀</div>
-                        <h3 style="font-size: 1.8rem; margin-bottom: 1rem;">आगमन (Aagaman)</h3>
-                        <p style="font-size: 1rem; opacity: 0.8; margin-bottom: 0.5rem;">Starting at</p>
-                        <p style="font-size: 3rem; font-weight: 800; margin-bottom: 1rem;">Rs. 999</p>
-                       <p style="opacity: 0.9; margin-bottom: 1.5rem;">Full adaptive CAT exam + analytics</p>
-                        <a href="{% url 'pricing' %}" style="display: inline-block; padding: 1rem 2.5rem; background: #ffd93d; color: #1e3c72; text-decoration: none; border-radius: 50px; font-weight: 700; transition: all 0.3s;">
-                            View All Plans →
-                        </a>
+                <div class="hero-center-decor" aria-hidden="true">
+                    <span class="orb orb-main"></span>
+                    <span class="orb orb-ring"></span>
+                    <span class="orb orb-dot-1"></span>
+                    <span class="orb orb-dot-2"></span>
+                    <span class="orb orb-dot-3"></span>
+                </div>
+
+                <div class="hero-visual">
+                    <div class="hero-image-wrap">
+                        <div class="hero-image-backdrop"></div>
+                        <img src="{% static 'nurse-vertical.png' %}" alt="NCLEX Success" class="hero-nurse-img">
+
+                        <div class="hero-badge-float badge-float-1">
+                            <div class="hero-badge-title">
+                                <span class="material-symbols-outlined">approval_delegation</span>
+                                New content
+                            </div>
+                            <p>Case study analysis</p>
+                        </div>
+                        <div class="hero-badge-float badge-float-2">
+                            <div class="hero-badge-title">
+                                <span class="material-symbols-outlined">groups</span>
+                                Active now
+                            </div>
+                            <p>Join the study group</p>
+                        </div>
                     </div>
                 </div>
             </div>
-            
-            <style>
-                /* Hover effect for homepage pricing cards */
-                .home-pricing-card:hover {
-                    transform: translateY(-10px);
-                }
-                
-                .home-pricing-card-free:hover .home-free-badge {
-                    opacity: 1 !important;
-                }
-                
-                .home-pricing-card-premium:hover .home-popular-badge {
-                    opacity: 1 !important;
-                }
-            </style>
+
         </section>
 
-        <!-- Footer -->
-        <footer style="background-color: #2c3e50; color: #ecf0f1; padding: 3rem 2rem; text-align: center;">
-            <p>&copy; 2025 NCLEX XAV Technology. All rights reserved.</p>
-            <p>Empowering nurses through adaptive learning technology.</p>
-        </footer>
-</body>
-</html>
+        <section class="section-block">
+            <div class="clinical-core">
+                <div class="core-header">
+                    <span class="chip chip-primary">The Clinical Suite</span>
+                    <h2>Everything you need to pass the first time</h2>
+                    <p>Powerful tools designed to simplify your study workflow and maximize your exam readiness.</p>
+                </div>
+
+                <div class="core-grid">
+                    <!-- Adaptive Testing -->
+                    <div class="core-card">
+                        <div class="core-icon"><span class="material-symbols-outlined">psychology</span></div>
+                        <div class="core-content">
+                            <h3>Adaptive CAT Simulation</h3>
+                            <p>Real-time difficulty adjustment using Rasch-model logic. Train under the same conditions as the actual NCLEX-RN.</p>
+                            <ul class="core-bullets">
+                                <li>Theta-ability tracking</li>
+                                <li>Standard Error calculation</li>
+                                <li>Realistic 85-150 item sessions</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- NGN Support -->
+                    <div class="core-card">
+                        <div class="core-icon"><span class="material-symbols-outlined">clinical_notes</span></div>
+                        <div class="core-content">
+                            <h3>Next-Gen Item Types</h3>
+                            <p>Master all NGN formats including Case Studies, SATA, Matrix, Dropdown Rationale, and Highlight Text.</p>
+                            <ul class="core-bullets">
+                                <li>Drag & Drop Rationale</li>
+                                <li>Hotspot Identification</li>
+                                <li>Matrix Multiple Response</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Study Planning -->
+                    <div class="core-card">
+                        <div class="core-icon"><span class="material-symbols-outlined">event_available</span></div>
+                        <div class="core-content">
+                            <h3>Intelligent Study Planner</h3>
+                            <p>Stay organized with goal-based planning, daily tasks, and streak tracking to maintain momentum.</p>
+                            <ul class="core-bullets">
+                                <li>Target exam date tracking</li>
+                                <li>Daily task recommendations</li>
+                                <li>Gamified streak bonuses</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Analytics -->
+                    <div class="core-card">
+                        <div class="core-icon"><span class="material-symbols-outlined">analytics</span></div>
+                        <div class="core-content">
+                            <h3>Deep Performance Analytics</h3>
+                            <p>Identify your weak areas with category-level breakdowns and actionable post-exam feedback.</p>
+                            <ul class="core-bullets">
+                                <li>Category-based insights</li>
+                                <li>Confidence interval tracking</li>
+                                <li>Detailed PDF score reports</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Content Library -->
+                    <div class="core-card">
+                        <div class="core-icon"><span class="material-symbols-outlined">library_books</span></div>
+                        <div class="core-content">
+                            <h3>Comprehensive Content Library</h3>
+                            <p>Access thousands of NCLEX-RN questions spanning all test plan categories, written by nursing educators.</p>
+                            <ul class="core-bullets">
+                                <li>5,000+ practice questions</li>
+                                <li>Detailed rationales & references</li>
+                                <li>Regularly updated for 2026</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Smart Review -->
+                    <div class="core-card">
+                        <div class="core-icon"><span class="material-symbols-outlined">auto_awesome</span></div>
+                        <div class="core-content">
+                            <h3>Smart Review & Remediation</h3>
+                            <p>Reinforce weak areas with AI-driven review sessions that adapt to your learning gaps over time.</p>
+                            <ul class="core-bullets">
+                                <li>Spaced repetition scheduling</li>
+                                <li>Targeted weak-area drills</li>
+                                <li>Concept map connections</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <section class="section-block">
+            <div class="faq-grid">
+                <div class="faq-copy-card">
+                    <span class="chip chip-tertiary">Need-to-Know Highlights</span>
+                    <h2 style="color:var(--primary); font-size:clamp(2rem, 3vw, 3rem); line-height:1.08; letter-spacing:-0.05em; margin-top:0.85rem; margin-bottom:0.9rem; font-weight:900;">Doctors of progress, experts in exam readiness</h2>
+                    <p>
+                        This section mirrors the clean accordion layout from your reference while using your own product details, features, and links.
+                    </p>
+                    <a href="{% url 'pricing' %}" class="btn-outline-pill">Explore premium plans</a>
+                </div>
+
+                <div class="faq-list">
+                    <details class="faq-item" open>
+                        <summary>
+                            What makes NCLEX XAV different?
+                            <span class="material-symbols-outlined">expand_more</span>
+                        </summary>
+                        <div class="faq-body">The platform combines adaptive CAT logic, next-generation item support, clinical scenarios, study planning, gamification, and pricing tiers in one workflow.</div>
+                    </details>
+                    <details class="faq-item">
+                        <summary>
+                            What can students access for free?
+                            <span class="material-symbols-outlined">expand_more</span>
+                        </summary>
+                        <div class="faq-body">The Parichaya plan gives users unlimited practice questions and basic progress visibility before upgrading to premium exam features.</div>
+                    </details>
+                    <details class="faq-item">
+                        <summary>
+                            Does the platform support NCLEX NGN items?
+                            <span class="material-symbols-outlined">expand_more</span>
+                        </summary>
+                        <div class="faq-body">Yes. The project supports multiple-choice, SATA, drag and drop rationale, matrix multiple response, dropdown rationale, hotspot, and highlight text.</div>
+                    </details>
+                    <details class="faq-item">
+                        <summary>
+                            How do students stay consistent?
+                            <span class="material-symbols-outlined">expand_more</span>
+                        </summary>
+                        <div class="faq-body">Students can use the study planner for goals and tasks, plus points, badges, streaks, leaderboard progress, and the adventure game for motivation.</div>
+                    </details>
+                </div>
+            </div>
+        </section>
+
+        <section class="section-block">
+            <div class="section-heading">
+                <span class="chip chip-primary">Platform Insights</span>
+                <h2>Discover learning paths built for modern nursing prep</h2>
+                <p>These content cards reuse your product information and present it in a more editorial, modern healthcare-style layout.</p>
+            </div>
+
+            <div class="insights-grid">
+                <div class="insight-card">
+                    <div class="insight-cover image">Adaptive simulation for stronger exam confidence</div>
+                    <div class="insight-body">
+                        <span class="chip chip-surface">Exam Prep</span>
+                        <p>Start full adaptive exams, review your results, and build familiarity with the pressure and pacing of the NCLEX-RN.</p>
+                        <a href="{% url 'start_exam' %}">Launch adaptive exam</a>
+                    </div>
+                </div>
+                <div class="insight-card">
+                    <div class="insight-cover gradient-blue">Scenario practice with exhibits, judgment steps, and category focus</div>
+                    <div class="insight-body">
+                        <span class="chip chip-surface">Clinical Reasoning</span>
+                        <p>Practice realistic unfolding cases with nursing notes, lab data, vitals, and structured clinical judgment functions.</p>
+                        <a href="{% url 'scenario_practice' %}">Try scenarios</a>
+                    </div>
+                </div>
+                <div class="insight-card">
+                    <div class="insight-cover gradient-mint">Planner, subscriptions, leaderboard, and study game in one place</div>
+                    <div class="insight-body">
+                        <span class="chip chip-surface">Student Success</span>
+                        <p>Keep your weekly plan organized, unlock premium tools, and stay motivated through progress systems designed around consistency.</p>
+                        <a href="{% url 'study_planner' %}">Open planner</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="cta-banner">
+            <div>
+                <span class="chip chip-primary">Take the Next Step</span>
+                <h2>Take your first confident step toward passing the NCLEX</h2>
+                <p>
+                    Join {{ total_students|default:"future nurses" }} future nurses on a platform built around smarter practice, measurable progress, and stronger confidence from day one.
+                </p>
+                {% if user.is_authenticated %}
+                    <a href="{% url 'start_exam' %}" class="btn-primary-pill">
+                        <span class="material-symbols-outlined" style="font-size:18px;">rocket_launch</span>
+                        Begin Adaptive Exam Now
+                    </a>
+                {% else %}
+                    <a href="{% url 'register' %}" class="btn-primary-pill">
+                        <span class="material-symbols-outlined" style="font-size:18px;">arrow_forward</span>
+                        Create Your Free Account
+                    </a>
+                {% endif %}
+            </div>
+            <div class="cta-image">
+                <div class="cta-image-frame">
+                    <img src="{% static 'nurse4.jpg' %}" alt="NCLEX XAV nurse illustration">
+                </div>
+            </div>
+        </section>
+        <section class="section-block" style="margin-bottom: 5rem;">
+            <div class="results-grid" style="grid-template-columns: 1fr; max-width: 1000px; margin: 0 auto;">
+                <div class="result-profile" style="padding: 4rem; text-align: center; border-radius: 3rem; background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(214,243,244,0.4));">
+                    <div class="result-avatar" style="margin: 0 auto 2rem; width: 100px; height: 100px;">
+                        <img src="{% static 'nurse6.jpg' %}" alt="NCLEX Success Student">
+                    </div>
+                    <h3 style="font-size: 2rem; font-weight: 900; color: var(--primary); margin-bottom: 1rem;">Chosen by aspiring nurses who want structured, modern preparation</h3>
+                    <p style="font-size: 1.1rem; color: #61788d; margin-bottom: 2.5rem; max-width: 700px; margin-left: auto; margin-right: auto;">
+                        Adaptive exams, practical feedback, and an interface built to keep study sessions focused.
+                    </p>
+                    <div style="background: white; padding: 3rem; border-radius: 2rem; box-shadow: 0 20px 50px rgba(0, 52, 111, 0.05); border: 1px solid rgba(0, 74, 153, 0.04);">
+                        <p class="result-quote" style="font-size: 1.4rem; font-weight: 700; line-height: 1.6; color: var(--primary); margin-bottom: 1.5rem;">
+                            “NCLEX XAV gives me one place to practice, review my weak categories, plan my week, and stay motivated. The analytics make it easy to know where to improve next.”
+                        </p>
+                        <div class="result-stars" style="font-size: 1.5rem; color: #fbbf24; letter-spacing: 0.2em;">★★★★★</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+{% endblock %}

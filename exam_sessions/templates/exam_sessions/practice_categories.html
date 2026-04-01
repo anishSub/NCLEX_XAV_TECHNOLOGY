@@ -4,49 +4,169 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Practice Mode - Select Categories</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <title>Practice Mode – NCLEX XAV Technology</title>
+    <meta name="description" content="Select NCLEX categories to practice and sharpen your clinical skills.">
+    <link rel="stylesheet" href="{% static 'css/nclex-design.css' %}">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #f0f8ff 0%, #e6f3ff 100%); min-height: 100vh; padding: 2rem; }
-        .container { max-width: 800px; margin: 0 auto; background: white; border-radius: 20px; padding: 3rem; box-shadow: 0 10px 40px rgba(0, 74, 153, 0.15); }
-        h1 { color: #004a99; margin-bottom: 0.5rem; font-size: 2.5rem; }
-        .subtitle { color: #5a6c7d; margin-bottom: 2rem; font-size: 1.1rem; }
-        .category-grid { display: grid; grid-template-columns: repeat(auto-fill, minmin(200px, 1fr)); gap: 1rem; margin: 2rem 0; }
-        .category-checkbox { display: flex; align-items: center; padding: 1.2rem; background: #f8fbff; border: 2px solid #e0e0e0; border-radius: 12px; cursor: pointer; transition: all 0.3s ease; }
-        .category-checkbox:hover { background: #f0f8ff; border-color: #0066cc; transform: translateY(-2px); }
-        .category-checkbox input[type="checkbox"] { width: 20px; height: 20px; margin-right: 12px; cursor: pointer; }
-        .category-checkbox input[type="checkbox"]:checked + label { font-weight: 600; color: #004a99; }
-        .category-checkbox label { cursor: pointer; flex: 1; }
-        .question-count { margin: 2rem 0; }
-        .question-count label { display: block; margin-bottom: 0.5rem; font-weight: 600; color: #004a99; }
-        .question-count select { width: 100%; padding: 1rem; font-size: 1.1rem; border: 2px solid #e0e0e0; border-radius: 8px; }
-        .btn-start { width: 100%; padding: 1.2rem; background: linear-gradient(135deg, #004a99 0%, #0066cc 100%); color: white; border: none; border-radius: 50px; font-size: 1.2rem; font-weight: 600; cursor: pointer; margin-top: 2rem; }
-        .btn-start:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0, 74, 153, 0.3); }
-        .btn-back { display: inline-block; margin-bottom: 1rem; color: #0066cc; text-decoration: none; }
-        .btn-back:hover { text-decoration: underline; }
-       </style>
+    .practice-page { padding-top: 64px; min-height: 100vh; background: var(--background); }
+    .practice-hero {
+        background: linear-gradient(135deg, var(--primary), var(--primary-container));
+        color: #fff; padding: 3rem 2rem; border-radius: 1rem;
+        margin-bottom: 2rem; position: relative; overflow: hidden;
+    }
+    .practice-hero::after {
+        content: ''; position: absolute; right: -20px; top: -20px;
+        width: 160px; height: 160px; border-radius: 50%;
+        background: rgba(255,255,255,.06);
+    }
+    .practice-hero h1 { font-size: 2rem; font-weight: 900; letter-spacing: -.03em; margin-bottom: .5rem; }
+    .practice-hero p { opacity: .85; max-width: 30rem; }
+
+    .cat-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 1rem; margin-bottom: 2rem;
+    }
+    .cat-card {
+        position: relative;
+        background: var(--surface-container-lowest);
+        border: 2px solid var(--surface-container-high);
+        border-radius: 1rem; padding: 1.5rem 1.25rem;
+        cursor: pointer; transition: all .3s;
+        display: flex; align-items: center; gap: .75rem;
+    }
+    .cat-card:hover {
+        border-color: var(--primary);
+        background: var(--surface-container-low);
+        transform: translateY(-4px);
+        box-shadow: 0 8px 20px var(--shadow-color);
+    }
+    .cat-card.selected {
+        border-color: var(--primary);
+        background: #dbeafe;
+    }
+    .cat-card input[type="checkbox"] {
+        width: 20px; height: 20px; accent-color: var(--primary);
+        cursor: pointer; flex-shrink: 0;
+    }
+    .cat-card label {
+        cursor: pointer; font-weight: 600; font-size: .9rem;
+        color: var(--on-surface);
+    }
+    .cat-card.selected label { color: var(--primary); }
+
+    .options-panel {
+        background: var(--surface-container-lowest);
+        border-radius: 1rem; padding: 2rem;
+        box-shadow: 0 1px 3px var(--shadow-color);
+        margin-bottom: 2rem;
+    }
+    .options-panel h3 {
+        font-size: 1rem; font-weight: 700; color: var(--primary);
+        margin-bottom: 1rem; display: flex; align-items: center; gap: .5rem;
+    }
+    .options-panel select {
+        width: 100%; padding: .9rem 1rem;
+        background: var(--surface-container-low);
+        border: 1px solid var(--outline-variant);
+        border-radius: .5rem; font-size: .95rem;
+        color: var(--on-surface); cursor: pointer;
+    }
+    .options-panel select:focus {
+        outline: none;
+        border-color: var(--primary-container);
+        box-shadow: 0 0 0 3px rgba(0,74,153,.1);
+    }
+
+    .start-btn {
+        width: 100%; padding: 1.1rem;
+        background: linear-gradient(135deg, var(--primary), var(--primary-container));
+        color: #fff; font-weight: 700; font-size: 1.05rem;
+        border-radius: var(--radius-full); cursor: pointer;
+        box-shadow: 0 8px 25px rgba(0,52,111,.2);
+        transition: all .3s; display: flex;
+        align-items: center; justify-content: center; gap: .5rem;
+    }
+    .start-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(0,52,111,.3); }
+    .start-btn:active { transform: scale(.97); }
+
+    .back-link {
+        display: inline-flex; align-items: center; gap: .35rem;
+        color: var(--primary); font-weight: 600; font-size: .9rem;
+        margin-bottom: 1.5rem;
+    }
+    .back-link:hover { text-decoration: underline; }
+
+    @media (max-width: 768px) {
+        .cat-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+        .practice-hero h1 { font-size: 1.5rem; }
+    }
+    @media (max-width: 480px) {
+        .cat-grid { grid-template-columns: 1fr; }
+    }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <a href="{% url 'home' %}" class="btn-back">← Back to Home</a>
-        <h1>📝 Practice Mode</h1>
-        <p class="subtitle">Select categories you want to practice and choose the number of questions</p>
-        
+
+<!-- ====== TOP NAVIGATION ====== -->
+<nav class="nclex-topnav">
+    <div class="nav-inner">
+        <a href="{% url 'home' %}" class="nav-brand">NCLEX XAV</a>
+        <div class="nav-links">
+            <a href="{% url 'study_planner' %}">Dashboard</a>
+            <a href="{% url 'practice_categories' %}" class="active">Practice</a>
+            <a href="{% url 'start_exam' %}">Exams</a>
+            <a href="{% url 'gamification:leaderboard' %}">Leaderboard</a>
+        </div>
+        <div class="nav-actions">
+            <a href="{% url 'home' %}" class="nav-icon-btn"><span class="material-symbols-outlined">home</span></a>
+        </div>
+    </div>
+</nav>
+
+<!-- ====== SIDE NAVIGATION ====== -->
+<aside class="nclex-sidenav">
+    <div class="sidenav-header"><h4>Clinical Suite</h4><p>NCLEX Prep</p></div>
+    <div class="sidenav-links">
+        <a href="{% url 'study_planner' %}" class="sidenav-link"><span class="material-symbols-outlined">dashboard</span> Dashboard</a>
+        <a href="{% url 'practice_categories' %}" class="sidenav-link active"><span class="material-symbols-outlined">menu_book</span> Practice</a>
+        <a href="{% url 'start_exam' %}" class="sidenav-link"><span class="material-symbols-outlined">assignment</span> Exams</a>
+        <a href="{% url 'gamification:leaderboard' %}" class="sidenav-link"><span class="material-symbols-outlined">leaderboard</span> Leaderboard</a>
+        <a href="{% url 'gamification:badges' %}" class="sidenav-link"><span class="material-symbols-outlined">military_tech</span> Badges</a>
+    </div>
+</aside>
+
+<!-- ====== MAIN CONTENT ====== -->
+<main class="practice-page main-with-sidenav" style="padding: 5.5rem 2rem 6rem;">
+    <div style="max-width:900px; margin:0 auto;">
+
+        <a href="{% url 'home' %}" class="back-link">
+            <span class="material-symbols-outlined" style="font-size:18px;">arrow_back</span>
+            Back to Home
+        </a>
+
+        <div class="practice-hero">
+            <h1>Practice Mode</h1>
+            <p>Choose your categories and number of questions to sharpen your clinical knowledge.</p>
+        </div>
+
         <form method="POST" action="{% url 'start_practice' %}">
             {% csrf_token %}
-            
-            <div class="category-grid">
+
+            <div class="cat-grid">
                 {% for category in categories %}
-                <div class="category-checkbox">
+                <div class="cat-card" onclick="toggleCat(this)">
                     <input type="checkbox" name="categories" value="{{ category.id }}" id="cat-{{ category.id }}">
                     <label for="cat-{{ category.id }}">{{ category.name }}</label>
                 </div>
                 {% endfor %}
             </div>
-            
-            <div class="question-count">
-                <label for="num_questions">Number of Questions:</label>
+
+            <div class="options-panel">
+                <h3>
+                    <span class="material-symbols-outlined" style="font-size:20px;">tune</span>
+                    Number of Questions
+                </h3>
                 <select name="num_questions" id="num_questions">
                     <option value="10">10 Questions</option>
                     <option value="20" selected>20 Questions</option>
@@ -54,9 +174,29 @@
                     <option value="50">50 Questions</option>
                 </select>
             </div>
-            
-            <button type="submit" class="btn-start">Start Practice 🚀</button>
+
+            <button type="submit" class="start-btn">
+                <span class="material-symbols-outlined" style="font-size:20px;">play_circle</span>
+                Start Practice
+            </button>
         </form>
     </div>
+</main>
+
+<!-- ====== BOTTOM NAV ====== -->
+<nav class="nclex-bottomnav">
+    <a href="{% url 'study_planner' %}"><span class="material-symbols-outlined">dashboard</span><span class="label">Dashboard</span></a>
+    <a href="{% url 'practice_categories' %}" class="active"><span class="material-symbols-outlined">menu_book</span><span class="label">Practice</span></a>
+    <a href="{% url 'start_exam' %}"><span class="material-symbols-outlined">assignment</span><span class="label">Exam</span></a>
+    <a href="{% url 'gamification:leaderboard' %}"><span class="material-symbols-outlined">leaderboard</span><span class="label">Rank</span></a>
+</nav>
+
+<script>
+function toggleCat(card) {
+    const cb = card.querySelector('input[type="checkbox"]');
+    cb.checked = !cb.checked;
+    card.classList.toggle('selected', cb.checked);
+}
+</script>
 </body>
 </html>

@@ -17,11 +17,15 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from django.urls import include
+from django.views.generic import RedirectView
 from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    # Backward-compatibility aliases for legacy template URL names
+    path('leaderboard/', RedirectView.as_view(pattern_name='gamification:leaderboard', permanent=False), name='leaderboard'),
+    path('badges/', RedirectView.as_view(pattern_name='gamification:badges', permanent=False), name='badges'),
     # 1. Your Custom Login/Register App
     path('auth/', include('users.urls')), 
     
@@ -39,9 +43,12 @@ urlpatterns = [
     
     # 6. Gamification (Streaks, Badges, Points)
     path('gamification/', include('gamification.urls')),
-    
+
+    # 7. NCLEX Adventure Game
+    path('game/', include('game.urls')),
+
     path('', include('pages.urls')),  # Home Page
-    
+
 ]
 
 if settings.DEBUG:

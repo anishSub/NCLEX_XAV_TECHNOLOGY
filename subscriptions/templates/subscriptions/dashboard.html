@@ -4,118 +4,203 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Subscription - NCLEX Prep</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <title>My Subscription – NCLEX XAV Technology</title>
+    <meta name="description" content="Manage your NCLEX XAV subscription, view plan details and remaining access time.">
+    <link rel="stylesheet" href="{% static 'css/nclex-design.css' %}">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Inter', sans-serif; background: #f4f6f9; }
-        
-        .header { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white; padding: 1.5rem 2rem; }
-        .header-content { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
-        .header h1 { font-size: 1.8rem; }
-        .header a { color: white; text-decoration: none; margin-left: 2rem; }
-        
-        .container { max-width: 1200px; margin: 2rem auto; padding: 0 2rem; }
-        
-        .subscription-card { background: white; border-radius: 20px; padding: 2.5rem; box-shadow: 0 4px 15px rgba(0,0,0,0.08); margin-bottom: 2rem; }
-        
-        .status-badge { display: inline-block; padding: 0.5rem 1.5rem; border-radius: 50px; font-weight: 700; font-size: 1.1rem; }
-        .status-free { background: #e0e0e0; color: #666; }
-        .status-premium { background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%); color: #1e3c72; }
-        
-        .plan-info { margin: 2rem 0; }
-        .plan-name { font-size: 2rem; font-weight: 700; color: #2c3e50; margin-bottom: 0.5rem; }
-        .plan-details { color: #7f8c8d; font-sizefont-size: 1rem; }
-        
-        .days-remaining { text-align: center; padding: 2rem; background: #f8f9fa; border-radius: 12px; margin: 2rem 0; }
-        .days-number { font-size: 4rem; font-weight: 800; color: #1e3c72; }
-        .days-label { color: #7f8c8d; font-size: 1.1rem; margin-top: 0.5rem; }
-        
-        .btn-upgrade { display: inline-block; padding: 1.2rem 3rem; background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white; text-decoration: none; border-radius: 50px; font-weight: 700; transition: all 0.3s; }
-        .btn-upgrade:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(30, 60, 114, 0.4); }
-        
-        .features-list { margin: 2rem 0; }
-        .features-list li { padding: 0.8rem 0; border-bottom: 1px solid #ecf0f1; }
-        .features-list li:last-child { border-bottom: none; }
-        
-        @media (max-width: 768px) {
-            .header-content { flex-direction: column; text-align: center; }
-            .container { padding: 0 1rem; }
-            .subscription-card { padding: 1.5rem; }
-            .days-number { font-size: 3rem; }
-        }
+    .sub-page { padding-top: 64px; min-height: 100vh; background: var(--background); }
+
+    .sub-hero {
+        background: linear-gradient(135deg, var(--primary), var(--primary-container));
+        color: #fff; padding: 2.5rem; border-radius: 1rem;
+        margin-bottom: 2rem; position: relative; overflow: hidden;
+    }
+    .sub-hero::after {
+        content: ''; position: absolute; right: -40px; top: -40px;
+        width: 200px; height: 200px; border-radius: 50%;
+        background: rgba(255,255,255,.06);
+    }
+    .sub-hero h1 { font-size: 1.75rem; font-weight: 800; margin-bottom: .25rem; }
+    .sub-hero p { opacity: .85; font-size: .9rem; }
+
+    .sub-card {
+        background: var(--surface-container-lowest); border-radius: 1rem;
+        padding: 2.5rem; box-shadow: 0 1px 3px var(--shadow-color);
+        margin-bottom: 2rem;
+    }
+
+    .status-badge {
+        display: inline-flex; align-items: center; gap: .4rem;
+        padding: .5rem 1.25rem; border-radius: 999px;
+        font-weight: 700; font-size: .85rem;
+    }
+    .status-free { background: var(--surface-container); color: var(--secondary); }
+    .status-premium {
+        background: linear-gradient(135deg, #ffd700, #ffed4e);
+        color: var(--primary);
+    }
+    .status-premium .material-symbols-outlined { font-size: 16px; font-variation-settings: 'FILL' 1; }
+
+    .plan-name {
+        font-size: 1.75rem; font-weight: 900; color: var(--primary);
+        letter-spacing: -.03em; margin-top: 1.5rem; margin-bottom: .25rem;
+    }
+    .plan-sub { color: var(--secondary); font-size: .9rem; }
+
+    .days-box {
+        background: var(--surface-container-low); border-radius: 1rem;
+        padding: 2.5rem; margin: 2rem 0; text-align: center;
+    }
+    .days-val {
+        font-size: 4.5rem; font-weight: 900; color: var(--primary);
+        letter-spacing: -.05em; line-height: 1;
+    }
+    .days-lbl {
+        font-size: .75rem; font-weight: 700; text-transform: uppercase;
+        letter-spacing: .1em; color: #94a3b8; margin-top: .5rem;
+    }
+    .days-exp {
+        font-size: .85rem; color: var(--secondary); margin-top: 1rem;
+    }
+
+    .features-list { list-style: none; margin: 1.5rem 0; }
+    .features-list li {
+        display: flex; align-items: center; gap: .75rem;
+        padding: .75rem 0; border-bottom: 1px solid var(--surface-container);
+        font-size: .9rem; color: var(--on-surface);
+    }
+    .features-list li:last-child { border-bottom: none; }
+    .features-list li .material-symbols-outlined {
+        font-size: 1.1rem; font-variation-settings: 'FILL' 1;
+    }
+    .features-list li .material-symbols-outlined.yes { color: var(--tertiary); }
+    .features-list li .material-symbols-outlined.no { color: var(--error); }
+    .features-list li.locked { color: #94a3b8; }
+
+    .upgrade-box {
+        background: var(--surface-container-low); border-radius: 1rem;
+        padding: 2.5rem; text-align: center; margin: 2rem 0;
+    }
+    .upgrade-box h3 {
+        font-size: 1.25rem; font-weight: 800; color: var(--primary);
+        margin-bottom: .5rem;
+    }
+    .upgrade-box p { color: var(--secondary); font-size: .9rem; margin-bottom: 1.5rem; }
+
+    @media (max-width: 768px) {
+        .sub-card { padding: 1.5rem; }
+        .days-val { font-size: 3rem; }
+    }
     </style>
 </head>
 <body>
-    <div class="header">
-        <div class="header-content">
-            <h1>💎 My Subscription</h1>
-            <div>
-                <a href="{% url 'home' %}">Home</a>
-                <a href="{% url 'pricing' %}">Pricing</a>
-            </div>
+
+<!-- ====== TOP NAVIGATION ====== -->
+<nav class="nclex-topnav">
+    <div class="nav-inner">
+        <a href="{% url 'home' %}" class="nav-brand">NCLEX XAV</a>
+        <div class="nav-links">
+            <a href="{% url 'study_planner' %}">Dashboard</a>
+            <a href="{% url 'pricing' %}">Pricing</a>
+        </div>
+        <div class="nav-actions">
+            <a href="{% url 'home' %}" class="nav-icon-btn"><span class="material-symbols-outlined">home</span></a>
         </div>
     </div>
-    
-    <div class="container">
-        <div class="subscription-card">
+</nav>
+
+<!-- ====== SIDE NAVIGATION ====== -->
+<aside class="nclex-sidenav">
+    <div class="sidenav-header"><h4>Clinical Suite</h4><p>NCLEX Prep</p></div>
+    <div class="sidenav-links">
+        <a href="{% url 'study_planner' %}" class="sidenav-link"><span class="material-symbols-outlined">dashboard</span> Dashboard</a>
+        <a href="{% url 'practice_categories' %}" class="sidenav-link"><span class="material-symbols-outlined">menu_book</span> Practice</a>
+        <a href="{% url 'start_exam' %}" class="sidenav-link"><span class="material-symbols-outlined">assignment</span> Exams</a>
+        <a href="{% url 'gamification:leaderboard' %}" class="sidenav-link"><span class="material-symbols-outlined">leaderboard</span> Leaderboard</a>
+        <a href="{% url 'gamification:badges' %}" class="sidenav-link"><span class="material-symbols-outlined">military_tech</span> Badges</a>
+    </div>
+</aside>
+
+<!-- ====== MAIN CONTENT ====== -->
+<main class="sub-page main-with-sidenav" style="padding: 5.5rem 2rem 6rem;">
+    <div style="max-width:800px; margin:0 auto;">
+
+        <div class="sub-hero">
+            <h1>My Subscription</h1>
+            <p>Manage your plan and track your access</p>
+        </div>
+
+        <div class="sub-card">
             {% if is_premium %}
-                <div class="status-badge status-premium">⭐ Premium Active</div>
-                
-                <div class="plan-info">
-                    <div class="plan-name">
-                        {% if subscription.duration == 'MONTHLY' %}आगमन (Aagaman){% endif %}
-                        {% if subscription.duration == 'QUARTERLY' %}प्रगति (Pragati){% endif %}
-                        {% if subscription.duration == 'YEARLY' %}विजय (Vijaya){% endif %}
-                    </div>
-                    <div class="plan-details">
-                        Active since {{ subscription.start_date|date:"F d, Y" }}
-                    </div>
+                <span class="status-badge status-premium">
+                    <span class="material-symbols-outlined">star</span> Premium Active
+                </span>
+
+                <div class="plan-name">
+                    {% if subscription.duration == 'MONTHLY' %}आगमन (Aagaman){% endif %}
+                    {% if subscription.duration == 'QUARTERLY' %}प्रगति (Pragati){% endif %}
+                    {% if subscription.duration == 'YEARLY' %}विजय (Vijaya){% endif %}
+                    {% if subscription.duration == 'LIFETIME' %}सिद्धि (Siddhi){% endif %}
                 </div>
-                
-                <div class="days-remaining">
-                    <div class="days-number">{{ days_remaining }}</div>
-                    <div class="days-label">Days Remaining</div>
+                <div class="plan-sub">Active since {{ subscription.start_date|date:"F d, Y" }}</div>
+
+                <div class="days-box">
+                    <div class="days-val">{{ days_remaining }}</div>
+                    <div class="days-lbl">Days Remaining</div>
+                    <div class="days-exp">Expires on <strong>{{ subscription.end_date|date:"F d, Y" }}</strong></div>
                 </div>
-                
+
                 <ul class="features-list">
-                    <li>✅ Full Adaptive CAT Exam Access</li>
-                    <li>✅ Advanced Performance Analytics</li>
-                    <li>✅ AI-Powered Recommendations</li>
-                    <li>✅ Pass Probability Tracking</li>
-                    <li>✅ Download Study Reports</li>
-                    <li>✅ Priority Support</li>
+                    <li><span class="material-symbols-outlined yes">check_circle</span> Full Adaptive CAT Exam Access</li>
+                    <li><span class="material-symbols-outlined yes">check_circle</span> Advanced Performance Analytics</li>
+                    <li><span class="material-symbols-outlined yes">check_circle</span> AI-Powered Recommendations</li>
+                    <li><span class="material-symbols-outlined yes">check_circle</span> Pass Probability Tracking</li>
+                    <li><span class="material-symbols-outlined yes">check_circle</span> Download Study Reports</li>
+                    <li><span class="material-symbols-outlined yes">check_circle</span> Priority Support</li>
                 </ul>
-                
-                <div style="text-align: center; margin-top: 2rem;">
-                    <p style="color: #7f8c8d;">Your subscription expires on <strong>{{ subscription.end_date|date:"F d, Y" }}</strong></p>
-                </div>
-                
+
             {% else %}
-                <div class="status-badge status-free">Free Tier</div>
-                
-                <div class="plan-info">
-                    <div class="plan-name">परिचय (Parichaya)</div>
-                    <div class="plan-details">Unlimited practice questions</div>
+                <span class="status-badge status-free">Free Tier</span>
+
+                <div class="plan-name">परिचय (Parichaya)</div>
+                <div class="plan-sub">Unlimited practice questions</div>
+
+                <div class="upgrade-box">
+                    <h3>Upgrade to Premium</h3>
+                    <p>Unlock adaptive CAT exams, advanced analytics, and AI-powered study recommendations.</p>
+                    <a href="{% url 'pricing' %}" class="btn-primary-pill" style="padding:1rem 2.5rem;">
+                        <span class="material-symbols-outlined" style="font-size:18px;">rocket_launch</span>
+                        View Premium Plans
+                    </a>
                 </div>
-                
-                <div style="background: #f8f9fa; padding: 2rem; border-radius: 12px; margin: 2rem 0; text-align: center;">
-                    <h3 style="color: #2c3e50; margin-bottom: 1rem;">Upgrade to Premium</h3>
-                    <p style="color: #7f8c8d; margin-bottom: 2rem;">Get access to adaptive CAT exam, advanced analytics, and AI recommendations!</p>
-                    <a href="{% url 'pricing' %}" class="btn-upgrade">View Premium Plans</a>
-                </div>
-                
+
                 <ul class="features-list">
-                    <li>✅ Unlimited Practice Questions</li>
-                    <li>✅ All 8 Categories</li>
-                    <li>✅ Study Planner</li>
-                    <li>✅ Basic Performance Stats</li>
-                    <li>❌ Adaptive CAT Exam (Premium Only)</li>
-                    <li>❌ Advanced Analytics (Premium Only)</li>
-                    <li>❌ AI Recommendations (Premium Only)</li>
+                    <li><span class="material-symbols-outlined yes">check_circle</span> Unlimited Practice Questions</li>
+                    <li><span class="material-symbols-outlined yes">check_circle</span> All 8 Categories</li>
+                    <li><span class="material-symbols-outlined yes">check_circle</span> Study Planner</li>
+                    <li><span class="material-symbols-outlined yes">check_circle</span> Basic Performance Stats</li>
+                    <li class="locked"><span class="material-symbols-outlined no">cancel</span> Adaptive CAT Exam (Premium Only)</li>
+                    <li class="locked"><span class="material-symbols-outlined no">cancel</span> Advanced Analytics (Premium Only)</li>
+                    <li class="locked"><span class="material-symbols-outlined no">cancel</span> AI Recommendations (Premium Only)</li>
                 </ul>
             {% endif %}
         </div>
     </div>
+</main>
+
+<!-- ====== BOTTOM NAV ====== -->
+<nav class="nclex-bottomnav">
+    <a href="{% url 'study_planner' %}"><span class="material-symbols-outlined">dashboard</span><span class="label">Dashboard</span></a>
+    <a href="{% url 'practice_categories' %}"><span class="material-symbols-outlined">menu_book</span><span class="label">Practice</span></a>
+    <a href="{% url 'start_exam' %}"><span class="material-symbols-outlined">assignment</span><span class="label">Exam</span></a>
+    <a href="{% url 'gamification:leaderboard' %}"><span class="material-symbols-outlined">leaderboard</span><span class="label">Rank</span></a>
+</nav>
+
+<footer class="nclex-footer-light main-with-sidenav">
+    <div class="footer-inner">
+        <div><span style="font-weight:700;color:var(--primary);">NCLEX XAV</span>
+        <p style="font-size:.75rem;color:#94a3b8;">© 2025 NCLEX XAV Technology.</p></div>
+    </div>
+</footer>
 </body>
 </html>
