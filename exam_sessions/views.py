@@ -19,19 +19,30 @@ from django.contrib.auth.decorators import login_required
 @login_required
 def start_exam_view(request):
     """
-    Creates a new exam session and renders the take_exam page.
+    Shows the exam launch screen and starts a new exam session on submit.
     """
-    # Create a new exam session for the logged-in user
-    session = ExamSessions.objects.create(
+    if request.method == 'POST':
+        session = ExamSessions.objects.create(
+            user=request.user,
+            status='Ongoing',
+            current_theta=0.0,
+            total_information=0.01,
+            standard_error=1.0
+        )
+
+        return render(request, 'exam_sessions/take_exam.html', {
+            'session': session
+        })
+
+    previous_exam = ExamSessions.objects.filter(
         user=request.user,
-        status='Ongoing',
-        current_theta=0.0,
-        total_information=0.01,
-        standard_error=1.0
-    )
-    
-    return render(request, 'exam_sessions/take_exam.html', {
-        'session': session
+        session_type='ADAPTIVE'
+    ).order_by('-created_at').first()
+
+    return render(request, 'exam_sessions/exam_start.html', {
+        'question_bank_size': Questions.objects.filter(parent_scenario__isnull=True).count(),
+        'case_study_count': Questions.objects.filter(parent_scenario__isnull=False).values('parent_scenario').distinct().count(),
+        'previous_exam': previous_exam,
     })
 
 

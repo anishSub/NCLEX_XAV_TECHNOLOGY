@@ -1,38 +1,298 @@
-{% extends "admin/base_site.html" %}
+{% extends "base.html" %}
 {% load static %}
 
+{% block title %}Practice Scenarios – NCLEX XAV Technology{% endblock %}
+{% block meta_description %}Practice unfolding NCLEX case studies with exhibits, nursing notes, and clinical judgment steps.{% endblock %}
+
+{% block extra_head %}
+<style>
+    .scenario-panel,
+    .scenario-hero,
+    .scenario-card,
+    .scenario-stat {
+        background: rgba(255, 255, 255, 0.9);
+        border: 1px solid rgba(0, 74, 153, 0.08);
+        box-shadow: 0 18px 44px rgba(0, 52, 111, 0.07);
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+    }
+    .scenario-hero {
+        border-radius: 2rem;
+        padding: 2rem;
+        background:
+            radial-gradient(circle at top right, rgba(255, 255, 255, 0.18), transparent 34%),
+            linear-gradient(135deg, var(--primary), var(--primary-container));
+        color: #fff;
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 1.25rem;
+    }
+    .scenario-hero::after {
+        content: "";
+        position: absolute;
+        right: -3rem;
+        bottom: -3rem;
+        width: 13rem;
+        height: 13rem;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.08);
+    }
+    .scenario-hero-grid {
+        position: relative;
+        z-index: 1;
+        display: grid;
+        gap: 1rem;
+    }
+    .scenario-hero h1 {
+        font-size: clamp(2rem, 3vw, 3rem);
+        line-height: 1.02;
+        letter-spacing: -0.05em;
+        margin-bottom: 0.75rem;
+        font-weight: 900;
+    }
+    .scenario-hero p {
+        max-width: 42rem;
+        color: rgba(255, 255, 255, 0.84);
+        line-height: 1.75;
+    }
+    .scenario-stat-grid {
+        display: grid;
+        grid-template-columns: repeat(1, minmax(0, 1fr));
+        gap: 1rem;
+        margin-bottom: 1.25rem;
+    }
+    .scenario-stat {
+        border-radius: 1.35rem;
+        padding: 1.25rem;
+    }
+    .scenario-stat .label {
+        display: block;
+        font-size: 0.72rem;
+        color: #6c849b;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        margin-bottom: 0.45rem;
+    }
+    .scenario-stat .value {
+        display: block;
+        color: var(--primary);
+        font-size: 1.95rem;
+        font-weight: 900;
+        letter-spacing: -0.05em;
+    }
+    .scenario-stat .sub {
+        display: block;
+        margin-top: 0.35rem;
+        color: #60778b;
+        font-size: 0.88rem;
+    }
+    .scenario-panel {
+        border-radius: 1.6rem;
+        padding: 1.45rem;
+        margin-bottom: 1.25rem;
+    }
+    .scenario-section-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+    .scenario-section-head h2 {
+        color: var(--primary);
+        font-size: 1.2rem;
+        font-weight: 900;
+        letter-spacing: -0.03em;
+    }
+    .scenario-section-head p {
+        color: #62788d;
+        font-size: 0.9rem;
+    }
+    .scenario-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    .scenario-card {
+        border-radius: 1.4rem;
+        padding: 1.25rem;
+        display: grid;
+        gap: 1rem;
+    }
+    .scenario-card-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    .scenario-card h3 {
+        color: var(--primary);
+        font-size: 1.15rem;
+        font-weight: 900;
+        letter-spacing: -0.03em;
+        margin-bottom: 0.35rem;
+    }
+    .scenario-card p {
+        color: #60778b;
+        line-height: 1.65;
+        font-size: 0.92rem;
+    }
+    .scenario-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.45rem 0.75rem;
+        border-radius: 999px;
+        background: rgba(226, 239, 255, 0.82);
+        color: var(--primary);
+        font-weight: 800;
+        font-size: 0.8rem;
+        white-space: nowrap;
+    }
+    .scenario-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.6rem;
+    }
+    .scenario-meta span {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.5rem 0.75rem;
+        border-radius: 999px;
+        background: rgba(236, 244, 255, 0.78);
+        color: #466279;
+        font-size: 0.82rem;
+        font-weight: 700;
+    }
+    .scenario-actions {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.8rem;
+    }
+    .scenario-actions small {
+        color: #6c849b;
+        font-size: 0.84rem;
+    }
+    .scenario-start-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.45rem;
+        padding: 0.9rem 1.2rem;
+        border-radius: 999px;
+        background: linear-gradient(135deg, var(--primary), var(--primary-container));
+        color: #fff;
+        font-weight: 800;
+    }
+    .scenario-empty {
+        text-align: center;
+        padding: 2rem 1rem;
+        color: #6c849b;
+    }
+    .scenario-alert {
+        margin-top: 1rem;
+        padding: 1rem 1.1rem;
+        border-radius: 1rem;
+        background: #fee2e2;
+        color: #991b1b;
+        font-weight: 700;
+    }
+    @media (min-width: 860px) {
+        .scenario-stat-grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="content-wrapper" style="margin-left: 0; padding: 20px;">
-    <div class="card">
-        <div class="card-header">
-            <h3 class="card-title">Select a Scenario to Practice</h3>
-        </div>
-        <div class="card-body">
-            {% if scenarios %}
-                <div class="list-group">
-                {% for scenario in scenarios %}
-                    <div class="list-group-item d-flex justify-content-between align-items-center">
-                        <div>
-                            <h5 class="mb-1">{{ scenario.title }}</h5>
-                            <small class="text-muted">{{ scenario.questions.count }} Questions</small>
-                        </div>
-                        <a href="{% url 'start_scenario' scenario.id %}" class="btn btn-primary d-flex align-items-center gap-2">
-                            <span>Start Scenario</span>
-                            <i class="fas fa-play"></i>
-                        </a>
+<section class="app-section-shell">
+    <div class="app-section-layout">
+        {% include "includes/practice_sidebar.html" with practice_nav="scenarios" %}
+
+        <div class="app-section-main">
+
+            <section class="scenario-hero">
+                <div class="scenario-hero-grid">
+                    <div>
+                        <h1>Practice clinical scenarios with the same app-style UI.</h1>
+                        <p>This page now matches the rest of NCLEX XAV instead of using the admin layout. Browse your available case studies, check question counts, and start a scenario in a cleaner student-facing experience.</p>
                     </div>
-                {% endfor %}
                 </div>
-            {% else %}
-                <div class="text-center py-5">
-                    <p class="text-muted">No scenarios available for practice yet.</p>
+            </section>
+
+            <div class="scenario-stat-grid">
+                <article class="scenario-stat">
+                    <span class="label">Scenario Library</span>
+                    <span class="value">{{ scenario_count }}</span>
+                    <span class="sub">Available case studies ready to launch</span>
+                </article>
+                <article class="scenario-stat">
+                    <span class="label">Scenario Questions</span>
+                    <span class="value">{{ total_scenario_questions }}</span>
+                    <span class="sub">Total questions across the unfolding case bank</span>
+                </article>
+                <article class="scenario-stat">
+                    <span class="label">Latest Case</span>
+                    <span class="value">{% if latest_scenario %}{{ latest_scenario.title|truncatechars:18 }}{% else %}None{% endif %}</span>
+                    <span class="sub">{% if latest_scenario %}Created {{ latest_scenario.created_at|date:"M d, Y" }}{% else %}Add a scenario to get started{% endif %}</span>
+                </article>
+            </div>
+
+            <section class="scenario-panel">
+                <div class="scenario-section-head">
+                    <div>
+                        <h2>Select a Scenario to Practice</h2>
+                        <p>Each case study opens a guided scenario session with exhibits, notes, and sequential clinical-judgment questions.</p>
+                    </div>
                 </div>
-            {% endif %}
-            
-            {% if error %}
-                <div class="alert alert-danger mt-3">{{ error }}</div>
-            {% endif %}
+
+                {% if scenarios %}
+                    <div class="scenario-grid">
+                        {% for scenario in scenarios %}
+                            <article class="scenario-card">
+                                <div class="scenario-card-head">
+                                    <div>
+                                        <div class="scenario-pill">
+                                            <span class="material-symbols-outlined" style="font-size:16px;">health_and_safety</span>
+                                            Case Study
+                                        </div>
+                                        <h3>{{ scenario.title }}</h3>
+                                        <p>Work through an unfolding patient situation using exhibits, nursing context, and structured question progression.</p>
+                                    </div>
+                                </div>
+
+                                <div class="scenario-meta">
+                                    <span><span class="material-symbols-outlined" style="font-size:16px;">quiz</span>{{ scenario.questions.count }} Questions</span>
+                                    <span><span class="material-symbols-outlined" style="font-size:16px;">tab</span>{{ scenario.exhibits|length }} Exhibits</span>
+                                    <span><span class="material-symbols-outlined" style="font-size:16px;">schedule</span>{{ scenario.created_at|date:"M d, Y" }}</span>
+                                </div>
+
+                                <div class="scenario-actions">
+                                    <small>Recommended when you want realistic chart-style reasoning instead of isolated practice questions.</small>
+                                    <a href="{% url 'start_scenario' scenario.id %}" class="scenario-start-btn">
+                                        <span class="material-symbols-outlined" style="font-size:18px;">play_circle</span>
+                                        Start Scenario
+                                    </a>
+                                </div>
+                            </article>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="scenario-empty">
+                        <p>No scenarios are available yet. Add case studies in the admin and they will appear here automatically.</p>
+                    </div>
+                {% endif %}
+
+                {% if error %}
+                    <div class="scenario-alert">{{ error }}</div>
+                {% endif %}
+            </section>
         </div>
     </div>
-</div>
+</section>
 {% endblock %}

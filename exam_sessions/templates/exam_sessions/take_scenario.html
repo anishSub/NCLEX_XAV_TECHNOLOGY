@@ -93,7 +93,7 @@
     window.currentQuestionNumber = 0;
     
     document.addEventListener('DOMContentLoaded', function() {
-        fetch(`/exam/scenario/api/session/{{ session.id }}/first-question/`)
+        fetch('{% url "scenario_first_question" session.id %}')
             .then(res => res.json())
             .then(data => { 
                 if (data.question) { 
@@ -119,7 +119,7 @@
         submitBtn.innerHTML = 'Processing...';
         
         try {
-            const response = await fetch(`/exam/scenario/api/session/${sessionId}/submit/`, {
+            const response = await fetch(`{% url "scenario_submit_answer" 0 %}`.replace('/0/', `/${sessionId}/`), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
                 body: JSON.stringify({ question_id: questionId, user_answer: answers })
@@ -132,7 +132,7 @@
                 document.getElementById('question-panel').scrollTop = 0;
             } else if (data.status === "FINISHED") {
                 Swal.fire({ icon: 'success', title: 'Scenario Complete!', text: 'You\'ve completed the case study!', timer: 2000, showConfirmButton: false }).then(() => {
-                    window.location.href = `/exam/practice/results/${sessionId}/`;
+                    window.location.href = `{% url "practice_results" 0 %}`.replace('/0/', `/${sessionId}/`);
                 });
             }
         } catch (error) {

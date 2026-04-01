@@ -8,7 +8,7 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="{% static 'exam_sessions/css/exam_style.css' %}">
     <script src="{% static 'exam_sessions/js/exam_engine.js' %}"></script>
-    <style>body { margin: 0; font-family: Arial, Helvetica, sans-serif; background-color: #f4f6f9; } .exam-header { background: linear-gradient(135deg, #0066cc 0%, #004a99 100%);  color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); } .exam-title h1 { margin: 0; font-size: 1.5rem; font-weight: 600; } .exam-info { display: flex; gap: 30px; align-items: center; } #question-counter { font-size: 1.1rem; background: rgba(255,255,255,0.2); padding: 5px 15px; border-radius: 20px; } .exam-container { max-width: 1400px; margin: 0 auto; padding: 20px; } #question-panel { background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); padding: 30px; } .submit-btn { width: 100%; max-width: 300px; margin: 30px auto 0; display: block; padding: 15px; background: linear-gradient(135deg, #004a99 0%, #0066cc 100%); color: white; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 10px rgba(0, 74, 153, 0.3); min-height: 54px; } .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0, 74, 153, 0.4); } @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }</style>
+    <style>body { margin: 0; font-family: Arial, Helvetica, sans-serif; background-color: #f4f6f9; } .exam-header { background: linear-gradient(135deg, #0066cc 0%, #004a99 100%);  color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); } .exam-title h1 { margin: 0; font-size: 1.5rem; font-weight: 600; } .exam-info { display: flex; gap: 30px; align-items: center; } #question-counter { font-size: 1.1rem; background: rgba(255,255,255,0.2); padding: 5px 15px; border-radius: 20px; } .exam-container { max-width: 1400px; margin: 0 auto; padding: 20px; } #question-panel { background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); padding: 30px; } #question-display-area { min-height: 300px; display: block; } .submit-btn { width: 100%; max-width: 300px; margin: 30px auto 0; display: block; padding: 15px; background: linear-gradient(135deg, #004a99 0%, #0066cc 100%); color: white; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 10px rgba(0, 74, 153, 0.3); min-height: 54px; } .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0, 74, 153, 0.4); } @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }</style>
 </head>
 <body>
     <div class="exam-header">
@@ -35,7 +35,7 @@
     window.currentQuestionNumber = 0;
     
     document.addEventListener('DOMContentLoaded', function() {
-        fetch(`/exam/practice/api/session/{{ session.id }}/first-question/`)
+        fetch('{% url "practice_first_question" session.id %}')
             .then(res => res.json())
             .then(data => { if (data.question) { renderQuestion(data.question); } })
             .catch(err => console.error('Error:', err));
@@ -43,7 +43,7 @@
     
     async function handlePracticeSubmit() {
         // Reuse the robust logic from exam_engine.js, pointing to the Practice API
-        await handleUserSubmit(`/exam/practice/api/session/${window.activeSessionId}/submit/`);
+        await handleUserSubmit(`{% url "practice_submit_answer" 0 %}`.replace('/0/', `/${window.activeSessionId}/`));
     }
     
     function getCookie(name) {

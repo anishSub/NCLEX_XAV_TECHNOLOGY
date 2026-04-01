@@ -1,0 +1,71 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redirecting to eSewa – NCLEX XAV Technology</title>
+    <link rel="stylesheet" href="{% static 'css/nclex-design.css' %}">
+    <style>
+    body {
+        min-height: 100vh;
+        margin: 0;
+        display: grid;
+        place-items: center;
+        background: linear-gradient(180deg, #f9fcff 0%, #eef7ff 100%);
+        font-family: Arial, Helvetica, sans-serif;
+    }
+    .redirect-card {
+        width: min(92vw, 480px);
+        padding: 2rem;
+        border-radius: 1.5rem;
+        background: rgba(255, 255, 255, 0.94);
+        border: 1px solid rgba(0, 74, 153, 0.08);
+        box-shadow: 0 24px 60px rgba(0, 52, 111, 0.1);
+        text-align: center;
+    }
+    .redirect-card h1 {
+        color: var(--primary);
+        font-size: 1.5rem;
+        font-weight: 900;
+        margin-bottom: 0.75rem;
+    }
+    .redirect-card p {
+        color: #60778b;
+        line-height: 1.7;
+        margin-bottom: 1.25rem;
+    }
+    .redirect-card button {
+        padding: 0.95rem 1.25rem;
+        border-radius: 999px;
+        background: linear-gradient(135deg, var(--primary), var(--primary-container));
+        color: #fff;
+        font-weight: 800;
+    }
+    </style>
+</head>
+<body>
+    <div class="redirect-card">
+        <h1>Redirecting to eSewa</h1>
+        <p>Your payment request is ready. If you are not redirected automatically, use the button below.</p>
+
+        <form id="esewaForm" method="POST" action="{{ esewa_url }}">
+            <input type="hidden" name="amount" value="{{ amount }}">
+            <input type="hidden" name="total_amount" value="{{ total_amount }}">
+            <input type="hidden" name="transaction_uuid" value="{{ transaction_uuid }}">
+            <input type="hidden" name="product_code" value="{{ product_code }}">
+            <input type="hidden" name="signature" value="{{ signature }}">
+            <input type="hidden" name="success_url" value="{{ success_url }}">
+            <input type="hidden" name="failure_url" value="{{ failure_url }}">
+            <input type="hidden" name="signed_field_names" value="total_amount,transaction_uuid,product_code">
+            <button type="submit">Continue to eSewa</button>
+        </form>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        document.getElementById('esewaForm').submit();
+    });
+    </script>
+</body>
+</html>

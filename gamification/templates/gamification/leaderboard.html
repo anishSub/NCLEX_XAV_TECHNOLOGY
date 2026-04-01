@@ -5,7 +5,7 @@
 
 {% block extra_head %}
 <style>
-    .leaderboard-page { padding: 6rem 2rem 8rem; background: transparent; min-height: 100vh; }
+    .leaderboard-page { min-height: 100vh; }
     .leaderboard-container { max-width: 1000px; margin: 0 auto; }
 
     .leaderboard-header { text-align: center; margin-bottom: 4rem; }
@@ -80,74 +80,80 @@
 {% endblock %}
 
 {% block content %}
-<div class="leaderboard-page main-with-sidenav">
-    <div class="leaderboard-container">
+<section class="app-section-shell">
+    <div class="app-section-layout">
+        {% include "includes/practice_sidebar.html" with practice_nav="leaderboard" %}
+
+        <div class="app-section-main">
+            <div class="leaderboard-page">
+                <div class="leaderboard-container">
         
-        <div class="leaderboard-header">
-            <h1>Global Hall of Fame</h1>
-            <p>Compete with nursing students worldwide. Earn points by passing exams and maintaining streaks.</p>
-        </div>
-
-        {% if top_users %}
-            <!-- Top 3 Podium -->
-            <div class="top-three">
-                {% if top_users|length >= 2 %}
-                <div class="podium-card rank-2">
-                    <div class="rank-badge">2</div>
-                    <div class="avatar-wrap">
-                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed={{ top_users.1.user.username }}" alt="Avatar">
+                    <div class="leaderboard-header">
+                        <h1>Global Hall of Fame</h1>
+                        <p>Compete with nursing students worldwide. Earn points by passing exams and maintaining streaks.</p>
                     </div>
-                    <div class="user-name">{{ top_users.1.user.username }}</div>
-                    <div class="user-points">{{ top_users.1.total_points }} XP</div>
-                </div>
-                {% endif %}
 
-                {% if top_users|length >= 1 %}
-                <div class="podium-card rank-1">
-                    <div class="rank-badge">1</div>
-                    <div class="avatar-wrap">
-                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed={{ top_users.0.user.username }}" alt="Avatar">
-                    </div>
-                    <div class="user-name">{{ top_users.0.user.username }}</div>
-                    <div class="user-points">{{ top_users.0.total_points }} XP</div>
-                </div>
-                {% endif %}
+                    {% if top_users %}
+                        <div class="top-three">
+                            {% if top_users|length >= 2 %}
+                            <div class="podium-card rank-2">
+                                <div class="rank-badge">2</div>
+                                <div class="avatar-wrap">
+                                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed={{ top_users.1.user.username }}" alt="Avatar">
+                                </div>
+                                <div class="user-name">{{ top_users.1.user.username }}</div>
+                                <div class="user-points">{{ top_users.1.total_points }} XP</div>
+                            </div>
+                            {% endif %}
 
-                {% if top_users|length >= 3 %}
-                <div class="podium-card rank-3">
-                    <div class="rank-badge">3</div>
-                    <div class="avatar-wrap">
-                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed={{ top_users.2.user.username }}" alt="Avatar">
-                    </div>
-                    <div class="user-name">{{ top_users.2.user.username }}</div>
-                    <div class="user-points">{{ top_users.2.total_points }} XP</div>
-                </div>
-                {% endif %}
-            </div>
+                            {% if top_users|length >= 1 %}
+                            <div class="podium-card rank-1">
+                                <div class="rank-badge">1</div>
+                                <div class="avatar-wrap">
+                                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed={{ top_users.0.user.username }}" alt="Avatar">
+                                </div>
+                                <div class="user-name">{{ top_users.0.user.username }}</div>
+                                <div class="user-points">{{ top_users.0.total_points }} XP</div>
+                            </div>
+                            {% endif %}
 
-            <!-- Full List -->
-            <div class="leaderboard-list">
-                {% for profile in top_users %}
-                {% if forloop.counter > 3 %}
-                <div class="list-row {% if profile.user == request.user %}current-user{% endif %}">
-                    <div class="list-rank">#{{ forloop.counter }}</div>
-                    <div class="list-user">
-                        <div class="list-avatar">
-                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed={{ profile.user.username }}" alt="Avatar" style="width:100%; height:100%;">
+                            {% if top_users|length >= 3 %}
+                            <div class="podium-card rank-3">
+                                <div class="rank-badge">3</div>
+                                <div class="avatar-wrap">
+                                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed={{ top_users.2.user.username }}" alt="Avatar">
+                                </div>
+                                <div class="user-name">{{ top_users.2.user.username }}</div>
+                                <div class="user-points">{{ top_users.2.total_points }} XP</div>
+                            </div>
+                            {% endif %}
                         </div>
-                        <div class="list-name">{{ profile.user.username }}</div>
-                    </div>
-                    <div class="list-points">{{ profile.total_points }} XP</div>
+
+                        <div class="leaderboard-list">
+                            {% for profile in top_users %}
+                            {% if forloop.counter > 3 %}
+                            <div class="list-row {% if profile.user == request.user %}current-user{% endif %}">
+                                <div class="list-rank">#{{ forloop.counter }}</div>
+                                <div class="list-user">
+                                    <div class="list-avatar">
+                                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed={{ profile.user.username }}" alt="Avatar" style="width:100%; height:100%;">
+                                    </div>
+                                    <div class="list-name">{{ profile.user.username }}</div>
+                                </div>
+                                <div class="list-points">{{ profile.total_points }} XP</div>
+                            </div>
+                            {% endif %}
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div style="text-align:center; padding:5rem 2rem;">
+                            <span class="material-symbols-outlined" style="font-size:4rem; color:var(--surface-container-high); margin-bottom:1.5rem;">leaderboard</span>
+                            <p style="color:var(--secondary);">No rankings available yet. Be the first to earn points!</p>
+                        </div>
+                    {% endif %}
                 </div>
-                {% endif %}
-                {% endfor %}
             </div>
-        {% else %}
-            <div style="text-align:center; padding:5rem 2rem;">
-                <span class="material-symbols-outlined" style="font-size:4rem; color:var(--surface-container-high); margin-bottom:1.5rem;">leaderboard</span>
-                <p style="color:var(--secondary);">No rankings available yet. Be the first to earn points!</p>
-            </div>
-        {% endif %}
+        </div>
     </div>
-</div>
+</section>
 {% endblock %}

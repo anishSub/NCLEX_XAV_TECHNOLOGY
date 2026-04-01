@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Checkout – NCLEX XAV Technology</title>
     <meta name="description" content="Complete your NCLEX XAV subscription purchase securely.">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     <link rel="stylesheet" href="{% static 'css/nclex-design.css' %}">
     <style>
     .checkout-page {
@@ -91,12 +92,22 @@
         border-color: var(--primary); background: #dbeafe;
     }
     .pay-logo {
-        width: 72px; height: 36px; border-radius: .5rem;
+        width: 92px; height: 48px; border-radius: .75rem;
         display: flex; align-items: center; justify-content: center;
         font-weight: 800; font-size: 1rem; color: #fff;
+        overflow: hidden;
+        background: #fff;
+        border: 1px solid rgba(0, 74, 153, 0.08);
     }
-    .logo-esewa { background: #60bb46; }
-    .logo-khalti { background: #5c2d91; }
+    .pay-logo img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        display: block;
+        background: #fff;
+    }
+    .logo-esewa { padding: 0.2rem; }
+    .logo-khalti { padding: 0.25rem; }
     .logo-manual { background: var(--primary); font-size: .7rem; }
     .pay-info { flex: 1; }
     .pay-name { font-weight: 700; color: var(--on-surface); font-size: .9rem; }
@@ -190,7 +201,9 @@
                 <h3>Select Payment Method</h3>
 
                 <div class="pay-option selected" data-method="esewa" onclick="selectPayment('esewa')">
-                    <div class="pay-logo logo-esewa">eSewa</div>
+                    <div class="pay-logo logo-esewa">
+                        <img src="{% static 'subscriptions/img/esewa.png' %}" alt="eSewa">
+                    </div>
                     <div class="pay-info">
                         <div class="pay-name">eSewa</div>
                         <div class="pay-desc">Most popular in Nepal</div>
@@ -199,28 +212,27 @@
                 </div>
 
                 <div class="pay-option" data-method="khalti" onclick="selectPayment('khalti')">
-                    <div class="pay-logo logo-khalti">Khalti</div>
+                    <div class="pay-logo logo-khalti">
+                        <img src="{% static 'subscriptions/img/khalti.png' %}" alt="Khalti">
+                    </div>
                     <div class="pay-info">
                         <div class="pay-name">Khalti</div>
                         <div class="pay-desc">Digital wallet payment</div>
                     </div>
                     <div class="pay-radio"></div>
                 </div>
-
-                <div class="pay-option" data-method="manual" onclick="selectPayment('manual')">
-                    <div class="pay-logo logo-manual">TEST</div>
-                    <div class="pay-info">
-                        <div class="pay-name">Manual Activation (Testing)</div>
-                        <div class="pay-desc">For development/testing only</div>
-                    </div>
-                    <div class="pay-radio"></div>
-                </div>
             </div>
 
-            <button class="pay-btn" onclick="proceedPayment()">
-                <span class="material-symbols-outlined" style="font-size:20px;">lock</span>
-                Proceed to Payment
-            </button>
+            <form id="paymentForm" method="POST" action="{% url 'start_subscription_payment' %}">
+                {% csrf_token %}
+                <input type="hidden" name="duration" value="{{ duration }}">
+                <input type="hidden" name="amount" value="{{ amount }}">
+                <input type="hidden" name="payment_method" id="paymentMethodInput" value="esewa">
+                <button type="button" class="pay-btn" onclick="proceedPayment()">
+                    <span class="material-symbols-outlined" style="font-size:20px;">lock</span>
+                    Proceed to Payment
+                </button>
+            </form>
 
             <div class="security-note">
                 <span class="material-symbols-outlined">verified_user</span>
@@ -232,41 +244,16 @@
 
 <script>
 let selectedMethod = 'esewa';
-const duration = '{{ duration }}';
-const amount = '{{ amount }}';
 
 function selectPayment(method) {
     selectedMethod = method;
     document.querySelectorAll('.pay-option').forEach(o => o.classList.remove('selected'));
     document.querySelector(`[data-method="${method}"]`).classList.add('selected');
+    document.getElementById('paymentMethodInput').value = method;
 }
 
-function getCookie(name) {
-    let v = null;
-    if (document.cookie) {
-        document.cookie.split(';').forEach(c => {
-            c = c.trim();
-            if (c.startsWith(name + '=')) v = decodeURIComponent(c.substring(name.length + 1));
-        });
-    }
-    return v;
-}
-
-async function proceedPayment() {
-    if (selectedMethod === 'manual') {
-        try {
-            const r = await fetch('/subscriptions/api/activate/', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
-                body: JSON.stringify({ duration, amount })
-            });
-            const data = await r.json();
-            if (data.success) { alert('✅ ' + data.message); window.location.href = '/subscriptions/dashboard/'; }
-            else alert('❌ ' + (data.error || 'Activation failed'));
-        } catch (err) { console.error(err); alert('Error activating subscription'); }
-    } else {
-        alert(`${selectedMethod.toUpperCase()} integration coming soon!\n\nFor now, use "Manual Activation (Testing)" to activate your subscription.`);
-    }
+function proceedPayment() {
+    document.getElementById('paymentForm').submit();
 }
 </script>
 </body>

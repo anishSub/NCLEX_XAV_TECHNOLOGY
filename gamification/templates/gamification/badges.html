@@ -5,10 +5,38 @@
 
 {% block extra_head %}
 <style>
-    .badges-page { padding: 6rem 2rem 8rem; background: transparent; min-height: 100vh; }
-    .badges-container { max-width: 1000px; margin: 0 auto; }
+    .badges-shell { padding: 1.25rem 1rem 3rem; }
+    .badges-layout { max-width: 1560px; margin: 0 auto; display: grid; grid-template-columns: 1fr; gap: 1.25rem; }
+    .badges-sidebar { display: none; }
+    .badges-sidebar-card,
+    .badges-header-card,
+    .badge-card {
+        background: rgba(255, 255, 255, 0.9);
+        border: 1px solid rgba(0, 74, 153, 0.08);
+        box-shadow: 0 18px 44px rgba(0, 52, 111, 0.07);
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+    }
+    .badges-sidebar-card { border-radius: 1.6rem; padding: 1.1rem; position: sticky; top: 6rem; }
+    .badges-sidebar-head { padding: 0.45rem 0.45rem 1rem; border-bottom: 1px solid rgba(0, 74, 153, 0.08); margin-bottom: 1rem; }
+    .badges-sidebar-kicker { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.12em; color: #6b8298; font-weight: 700; }
+    .badges-sidebar-title { color: var(--primary); font-size: 1.3rem; font-weight: 900; letter-spacing: -0.04em; margin-top: 0.35rem; }
+    .badges-nav { display: grid; gap: 0.45rem; margin-bottom: 1rem; }
+    .badges-nav a { display: flex; align-items: center; gap: 0.8rem; padding: 0.95rem 1rem; border-radius: 1rem; font-weight: 700; color: #5a7289; background: rgba(236, 244, 255, 0.65); transition: 0.2s ease; }
+    .badges-nav a:hover, .badges-nav a.is-active { color: var(--primary); background: rgba(215, 234, 254, 0.95); transform: translateX(2px); }
+    .badges-sidebar-cta { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(0, 74, 153, 0.08); display: grid; gap: 0.75rem; }
+    .badges-sidebar-cta a { display: inline-flex; align-items: center; justify-content: center; gap: 0.45rem; padding: 0.95rem 1rem; border-radius: 999px; font-weight: 800; }
+    .badges-sidebar-cta .primary { background: linear-gradient(135deg, var(--primary), var(--primary-container)); color: #fff; }
+    .badges-sidebar-cta .secondary { color: var(--primary); background: rgba(226, 239, 255, 0.78); }
+    .badges-main { min-width: 0; }
+    .badges-mobile-nav { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.65rem; margin-bottom: 1rem; }
+    .badges-mobile-nav a { padding: 0.9rem 0.75rem; border-radius: 1rem; background: rgba(255, 255, 255, 0.84); border: 1px solid rgba(0, 74, 153, 0.08); color: #5a7289; font-size: 0.82rem; font-weight: 700; text-align: center; }
+    .badges-mobile-nav a.is-active { color: var(--primary); background: rgba(215, 234, 254, 0.95); }
+    .badges-page { min-height: 100vh; }
+    .badges-container { max-width: 1080px; margin: 0 auto; }
 
-    .badges-header { text-align: center; margin-bottom: 4rem; }
+    .badges-header-card { border-radius: 2rem; padding: 2rem; margin-bottom: 1.5rem; text-align: center; }
+    .badges-header { text-align: center; }
     .badges-header h1 { font-size: 2.5rem; font-weight: 900; color: var(--primary); letter-spacing: -.03em; margin-bottom: .75rem; }
     .badges-header p { color: var(--secondary); font-size: 1.1rem; }
 
@@ -48,42 +76,79 @@
     @media (max-width: 640px) {
         .badges-grid { grid-template-columns: repeat(2, 1fr); gap: 1rem; }
     }
+    @media (min-width: 980px) {
+        .badges-layout { grid-template-columns: 290px minmax(0, 1fr); align-items: start; }
+        .badges-sidebar { display: block; }
+        .badges-mobile-nav { display: none; }
+    }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="badges-page main-with-sidenav">
-    <div class="badges-container">
-        
-        <div class="badges-header">
-            <h1>Achievement Gallery</h1>
-            <p>Your clinical milestones and honors. Unlock more by completing challenges.</p>
-        </div>
-
-        <div class="badges-grid">
-            {% for badge in all_badges %}
-                <div class="badge-card {% if not badge.earned %}locked{% endif %}">
-                    <div class="badge-icon">
-                        <span class="material-symbols-outlined">{{ badge.info.icon|default:"military_tech" }}</span>
+<section class="badges-shell">
+    <div class="badges-layout">
+        <aside class="badges-sidebar">
+            <div class="badges-sidebar-card">
+                <div class="badges-sidebar-head">
+                    <div class="badges-sidebar-kicker">Gamification</div>
+                    <div class="badges-sidebar-title">Achievements</div>
+                </div>
+                <nav class="badges-nav">
+                    <a href="{% url 'study_planner' %}"><span class="material-symbols-outlined">dashboard</span>Dashboard</a>
+                    <a href="{% url 'practice_categories' %}"><span class="material-symbols-outlined">menu_book</span>Practice</a>
+                    <a href="{% url 'start_exam' %}"><span class="material-symbols-outlined">assignment</span>Exams</a>
+                    <a href="{% url 'gamification:leaderboard' %}"><span class="material-symbols-outlined">leaderboard</span>Leaderboard</a>
+                    <a href="{% url 'gamification:badges' %}" class="is-active"><span class="material-symbols-outlined">military_tech</span>Badges</a>
+                </nav>
+                <div class="badges-sidebar-cta">
+                    <a href="{% url 'gamification:leaderboard' %}" class="primary"><span class="material-symbols-outlined" style="font-size:18px;">trophy</span>View Rank</a>
+                    <a href="{% url 'practice_categories' %}" class="secondary"><span class="material-symbols-outlined" style="font-size:18px;">quiz</span>Practice Now</a>
+                </div>
+            </div>
+        </aside>
+        <div class="badges-main">
+            <div class="badges-mobile-nav">
+                <a href="{% url 'study_planner' %}">Dashboard</a>
+                <a href="{% url 'practice_categories' %}">Practice</a>
+                <a href="{% url 'gamification:leaderboard' %}">Rank</a>
+                <a href="{% url 'gamification:badges' %}" class="is-active">Badges</a>
+            </div>
+            <div class="badges-page">
+                <div class="badges-container">
+                    <div class="badges-header-card">
+                        <div class="badges-header">
+                            <h1>Achievement Gallery</h1>
+                            <p>Your clinical milestones and honors. Unlock more by completing challenges.</p>
+                        </div>
                     </div>
-                    <div class="badge-name">{{ badge.info.name }}</div>
-                    <div class="badge-desc">{{ badge.info.description }}</div>
-                    
-                    {% if badge.earned %}
-                        <div class="unlocked-date">Unlocked</div>
-                    {% else %}
-                        <div style="margin-top:1.25rem; font-size:.75rem; color:var(--secondary);">Locked</div>
+
+                    <div class="badges-grid">
+                        {% for badge in all_badges %}
+                            <div class="badge-card {% if not badge.earned %}locked{% endif %}">
+                                <div class="badge-icon">
+                                    <span class="material-symbols-outlined">{{ badge.info.icon|default:"military_tech" }}</span>
+                                </div>
+                                <div class="badge-name">{{ badge.info.name }}</div>
+                                <div class="badge-desc">{{ badge.info.description }}</div>
+                                
+                                {% if badge.earned %}
+                                    <div class="unlocked-date">Unlocked</div>
+                                {% else %}
+                                    <div style="margin-top:1.25rem; font-size:.75rem; color:var(--secondary);">Locked</div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    {% if not all_badges %}
+                        <div style="text-align:center; padding:5rem 2rem;">
+                            <span class="material-symbols-outlined" style="font-size:4rem; color:var(--surface-container-high); margin-bottom:1.5rem;">military_tech</span>
+                            <p style="color:var(--secondary);">No badges have been created yet. Check back soon!</p>
+                        </div>
                     {% endif %}
                 </div>
-            {% endfor %}
-        </div>
-
-        {% if not all_badges %}
-            <div style="text-align:center; padding:5rem 2rem;">
-                <span class="material-symbols-outlined" style="font-size:4rem; color:var(--surface-container-high); margin-bottom:1.5rem;">military_tech</span>
-                <p style="color:var(--secondary);">No badges have been created yet. Check back soon!</p>
             </div>
-        {% endif %}
+        </div>
     </div>
-</div>
+</section>
 {% endblock %}

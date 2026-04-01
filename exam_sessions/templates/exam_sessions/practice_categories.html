@@ -1,196 +1,239 @@
+{% extends "base.html" %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Practice Mode – NCLEX XAV Technology</title>
-    <meta name="description" content="Select NCLEX categories to practice and sharpen your clinical skills.">
-    <link rel="stylesheet" href="{% static 'css/nclex-design.css' %}">
-    <style>
-    .practice-page { padding-top: 64px; min-height: 100vh; background: var(--background); }
+
+{% block title %}Practice Mode – NCLEX XAV Technology{% endblock %}
+{% block meta_description %}Select NCLEX categories to practice and sharpen your clinical skills.{% endblock %}
+
+{% block extra_head %}
+<style>
+    .practice-panel,
+    .practice-hero,
+    .cat-card {
+        background: rgba(255, 255, 255, 0.9);
+        border: 1px solid rgba(0, 74, 153, 0.08);
+        box-shadow: 0 18px 44px rgba(0, 52, 111, 0.07);
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+    }
     .practice-hero {
-        background: linear-gradient(135deg, var(--primary), var(--primary-container));
-        color: #fff; padding: 3rem 2rem; border-radius: 1rem;
-        margin-bottom: 2rem; position: relative; overflow: hidden;
+        border-radius: 2rem;
+        padding: 2rem;
+        background:
+            radial-gradient(circle at top right, rgba(255, 255, 255, 0.18), transparent 34%),
+            linear-gradient(135deg, var(--primary), var(--primary-container));
+        color: #fff;
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 1.25rem;
     }
     .practice-hero::after {
-        content: ''; position: absolute; right: -20px; top: -20px;
-        width: 160px; height: 160px; border-radius: 50%;
-        background: rgba(255,255,255,.06);
+        content: "";
+        position: absolute;
+        right: -3rem;
+        bottom: -3rem;
+        width: 13rem;
+        height: 13rem;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.08);
     }
-    .practice-hero h1 { font-size: 2rem; font-weight: 900; letter-spacing: -.03em; margin-bottom: .5rem; }
-    .practice-hero p { opacity: .85; max-width: 30rem; }
-
+    .practice-hero h1 {
+        font-size: clamp(2rem, 3vw, 3rem);
+        line-height: 1.02;
+        letter-spacing: -0.05em;
+        margin-bottom: 0.75rem;
+        font-weight: 900;
+        position: relative;
+        z-index: 1;
+    }
+    .practice-hero p {
+        max-width: 38rem;
+        color: rgba(255, 255, 255, 0.84);
+        line-height: 1.75;
+        position: relative;
+        z-index: 1;
+    }
+    .practice-panel {
+        border-radius: 1.6rem;
+        padding: 1.45rem;
+        margin-bottom: 1.25rem;
+    }
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        color: var(--primary);
+        font-weight: 700;
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+    }
+    .back-link:hover {
+        text-decoration: underline;
+    }
     .cat-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-        gap: 1rem; margin-bottom: 2rem;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1.25rem;
     }
     .cat-card {
         position: relative;
-        background: var(--surface-container-lowest);
-        border: 2px solid var(--surface-container-high);
-        border-radius: 1rem; padding: 1.5rem 1.25rem;
-        cursor: pointer; transition: all .3s;
-        display: flex; align-items: center; gap: .75rem;
+        border-radius: 1.2rem;
+        padding: 1.15rem 1rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        transition: 0.25s ease;
     }
     .cat-card:hover {
-        border-color: var(--primary);
-        background: var(--surface-container-low);
-        transform: translateY(-4px);
-        box-shadow: 0 8px 20px var(--shadow-color);
+        transform: translateY(-3px);
+        border-color: rgba(0, 74, 153, 0.18);
+        background: rgba(236, 244, 255, 0.82);
     }
     .cat-card.selected {
-        border-color: var(--primary);
-        background: #dbeafe;
+        background: rgba(215, 234, 254, 0.95);
+        border-color: rgba(0, 74, 153, 0.2);
     }
     .cat-card input[type="checkbox"] {
-        width: 20px; height: 20px; accent-color: var(--primary);
-        cursor: pointer; flex-shrink: 0;
+        width: 20px;
+        height: 20px;
+        accent-color: var(--primary);
+        cursor: pointer;
+        flex-shrink: 0;
     }
     .cat-card label {
-        cursor: pointer; font-weight: 600; font-size: .9rem;
-        color: var(--on-surface);
+        cursor: pointer;
+        font-weight: 700;
+        font-size: 0.92rem;
+        color: var(--primary);
     }
-    .cat-card.selected label { color: var(--primary); }
-
+    .practice-panel h2 {
+        color: var(--primary);
+        font-size: 1.15rem;
+        font-weight: 900;
+        letter-spacing: -0.03em;
+        margin-bottom: 0.85rem;
+    }
+    .practice-panel p {
+        color: #60778b;
+        line-height: 1.7;
+        margin-bottom: 1rem;
+    }
     .options-panel {
-        background: var(--surface-container-lowest);
-        border-radius: 1rem; padding: 2rem;
-        box-shadow: 0 1px 3px var(--shadow-color);
-        margin-bottom: 2rem;
+        background: rgba(236, 244, 255, 0.72);
+        border-radius: 1.2rem;
+        padding: 1.3rem;
+        margin-bottom: 1.25rem;
     }
     .options-panel h3 {
-        font-size: 1rem; font-weight: 700; color: var(--primary);
-        margin-bottom: 1rem; display: flex; align-items: center; gap: .5rem;
+        font-size: 1rem;
+        font-weight: 800;
+        color: var(--primary);
+        margin-bottom: 0.8rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
     }
     .options-panel select {
-        width: 100%; padding: .9rem 1rem;
-        background: var(--surface-container-low);
-        border: 1px solid var(--outline-variant);
-        border-radius: .5rem; font-size: .95rem;
-        color: var(--on-surface); cursor: pointer;
+        width: 100%;
+        padding: 0.95rem 1rem;
+        background: #fff;
+        border: 1px solid rgba(0, 74, 153, 0.12);
+        border-radius: 0.8rem;
+        font-size: 0.95rem;
+        color: var(--on-surface);
+        cursor: pointer;
     }
-    .options-panel select:focus {
-        outline: none;
-        border-color: var(--primary-container);
-        box-shadow: 0 0 0 3px rgba(0,74,153,.1);
-    }
-
     .start-btn {
-        width: 100%; padding: 1.1rem;
+        width: 100%;
+        padding: 1.05rem;
         background: linear-gradient(135deg, var(--primary), var(--primary-container));
-        color: #fff; font-weight: 700; font-size: 1.05rem;
-        border-radius: var(--radius-full); cursor: pointer;
-        box-shadow: 0 8px 25px rgba(0,52,111,.2);
-        transition: all .3s; display: flex;
-        align-items: center; justify-content: center; gap: .5rem;
+        color: #fff;
+        font-weight: 800;
+        font-size: 1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        box-shadow: 0 12px 24px rgba(0, 52, 111, 0.18);
+        transition: 0.25s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
     }
-    .start-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(0,52,111,.3); }
-    .start-btn:active { transform: scale(.97); }
-
-    .back-link {
-        display: inline-flex; align-items: center; gap: .35rem;
-        color: var(--primary); font-weight: 600; font-size: .9rem;
-        margin-bottom: 1.5rem;
+    .start-btn:hover {
+        transform: translateY(-2px);
     }
-    .back-link:hover { text-decoration: underline; }
-
     @media (max-width: 768px) {
-        .cat-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
-        .practice-hero h1 { font-size: 1.5rem; }
+        .cat-grid {
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        }
     }
     @media (max-width: 480px) {
-        .cat-grid { grid-template-columns: 1fr; }
+        .cat-grid {
+            grid-template-columns: 1fr;
+        }
     }
-    </style>
-</head>
-<body>
+</style>
+{% endblock %}
 
-<!-- ====== TOP NAVIGATION ====== -->
-<nav class="nclex-topnav">
-    <div class="nav-inner">
-        <a href="{% url 'home' %}" class="nav-brand">NCLEX XAV</a>
-        <div class="nav-links">
-            <a href="{% url 'study_planner' %}">Dashboard</a>
-            <a href="{% url 'practice_categories' %}" class="active">Practice</a>
-            <a href="{% url 'start_exam' %}">Exams</a>
-            <a href="{% url 'gamification:leaderboard' %}">Leaderboard</a>
-        </div>
-        <div class="nav-actions">
-            <a href="{% url 'home' %}" class="nav-icon-btn"><span class="material-symbols-outlined">home</span></a>
+{% block content %}
+<section class="app-section-shell">
+    <div class="app-section-layout">
+        {% include "includes/practice_sidebar.html" with practice_nav="practice" %}
+
+        <div class="app-section-main">
+
+            <a href="{% url 'home' %}" class="back-link">
+                <span class="material-symbols-outlined" style="font-size:18px;">arrow_back</span>
+                Back to Home
+            </a>
+
+            <section class="practice-hero">
+                <h1>Practice Mode</h1>
+                <p>Choose categories, select the number of questions, and build targeted review sessions without leaving the main NCLEX XAV layout.</p>
+            </section>
+
+            <section class="practice-panel">
+                <h2>Build a focused practice session</h2>
+                <p>Select one or more categories below. The session will pull from your category bank and open the practice exam with the same core question engine used across the platform.</p>
+
+                <form method="POST" action="{% url 'start_practice' %}">
+                    {% csrf_token %}
+
+                    <div class="cat-grid">
+                        {% for category in categories %}
+                            <div class="cat-card" onclick="toggleCat(this)">
+                                <input type="checkbox" name="categories" value="{{ category.id }}" id="cat-{{ category.id }}">
+                                <label for="cat-{{ category.id }}">{{ category.name }}</label>
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="options-panel">
+                        <h3>
+                            <span class="material-symbols-outlined" style="font-size:20px;">tune</span>
+                            Number of Questions
+                        </h3>
+                        <select name="num_questions" id="num_questions">
+                            <option value="10">10 Questions</option>
+                            <option value="20" selected>20 Questions</option>
+                            <option value="30">30 Questions</option>
+                            <option value="50">50 Questions</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="start-btn">
+                        <span class="material-symbols-outlined" style="font-size:20px;">play_circle</span>
+                        Start Practice
+                    </button>
+                </form>
+            </section>
         </div>
     </div>
-</nav>
+</section>
+{% endblock %}
 
-<!-- ====== SIDE NAVIGATION ====== -->
-<aside class="nclex-sidenav">
-    <div class="sidenav-header"><h4>Clinical Suite</h4><p>NCLEX Prep</p></div>
-    <div class="sidenav-links">
-        <a href="{% url 'study_planner' %}" class="sidenav-link"><span class="material-symbols-outlined">dashboard</span> Dashboard</a>
-        <a href="{% url 'practice_categories' %}" class="sidenav-link active"><span class="material-symbols-outlined">menu_book</span> Practice</a>
-        <a href="{% url 'start_exam' %}" class="sidenav-link"><span class="material-symbols-outlined">assignment</span> Exams</a>
-        <a href="{% url 'gamification:leaderboard' %}" class="sidenav-link"><span class="material-symbols-outlined">leaderboard</span> Leaderboard</a>
-        <a href="{% url 'gamification:badges' %}" class="sidenav-link"><span class="material-symbols-outlined">military_tech</span> Badges</a>
-    </div>
-</aside>
-
-<!-- ====== MAIN CONTENT ====== -->
-<main class="practice-page main-with-sidenav" style="padding: 5.5rem 2rem 6rem;">
-    <div style="max-width:900px; margin:0 auto;">
-
-        <a href="{% url 'home' %}" class="back-link">
-            <span class="material-symbols-outlined" style="font-size:18px;">arrow_back</span>
-            Back to Home
-        </a>
-
-        <div class="practice-hero">
-            <h1>Practice Mode</h1>
-            <p>Choose your categories and number of questions to sharpen your clinical knowledge.</p>
-        </div>
-
-        <form method="POST" action="{% url 'start_practice' %}">
-            {% csrf_token %}
-
-            <div class="cat-grid">
-                {% for category in categories %}
-                <div class="cat-card" onclick="toggleCat(this)">
-                    <input type="checkbox" name="categories" value="{{ category.id }}" id="cat-{{ category.id }}">
-                    <label for="cat-{{ category.id }}">{{ category.name }}</label>
-                </div>
-                {% endfor %}
-            </div>
-
-            <div class="options-panel">
-                <h3>
-                    <span class="material-symbols-outlined" style="font-size:20px;">tune</span>
-                    Number of Questions
-                </h3>
-                <select name="num_questions" id="num_questions">
-                    <option value="10">10 Questions</option>
-                    <option value="20" selected>20 Questions</option>
-                    <option value="30">30 Questions</option>
-                    <option value="50">50 Questions</option>
-                </select>
-            </div>
-
-            <button type="submit" class="start-btn">
-                <span class="material-symbols-outlined" style="font-size:20px;">play_circle</span>
-                Start Practice
-            </button>
-        </form>
-    </div>
-</main>
-
-<!-- ====== BOTTOM NAV ====== -->
-<nav class="nclex-bottomnav">
-    <a href="{% url 'study_planner' %}"><span class="material-symbols-outlined">dashboard</span><span class="label">Dashboard</span></a>
-    <a href="{% url 'practice_categories' %}" class="active"><span class="material-symbols-outlined">menu_book</span><span class="label">Practice</span></a>
-    <a href="{% url 'start_exam' %}"><span class="material-symbols-outlined">assignment</span><span class="label">Exam</span></a>
-    <a href="{% url 'gamification:leaderboard' %}"><span class="material-symbols-outlined">leaderboard</span><span class="label">Rank</span></a>
-</nav>
-
+{% block extra_scripts %}
 <script>
 function toggleCat(card) {
     const cb = card.querySelector('input[type="checkbox"]');
@@ -198,5 +241,4 @@ function toggleCat(card) {
     card.classList.toggle('selected', cb.checked);
 }
 </script>
-</body>
-</html>
+{% endblock %}

@@ -18,6 +18,7 @@ class Subscription(models.Model):
         ('MONTHLY', '1 Month'),
         ('QUARTERLY', '3 Months'),
         ('YEARLY', '1 Year'),
+        ('LIFETIME', 'Lifetime'),
     ]
     
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='subscription')
@@ -72,7 +73,9 @@ class Subscription(models.Model):
             self.end_date = self.start_date + timedelta(days=90)
         elif duration == 'YEARLY':
             self.end_date = self.start_date + timedelta(days=365)
-        
+        elif duration == 'LIFETIME':
+            self.end_date = self.start_date + timedelta(days=365 * 50)
+
         self.is_active = True
         self.save()
 

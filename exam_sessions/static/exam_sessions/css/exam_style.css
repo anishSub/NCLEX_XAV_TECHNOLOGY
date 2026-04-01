@@ -2,6 +2,46 @@ body {
     font-family: Arial, Helvetica, sans-serif;
 }
 
+.exam-question-shell {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    width: 100%;
+}
+
+.exam-question-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.exam-question-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+}
+
+.q-header {
+    width: 100%;
+}
+
+.q-text {
+    margin: 0;
+    color: #004a99;
+    font-size: clamp(1.25rem, 2.5vw, 1.65rem);
+    line-height: 1.8;
+    font-weight: 800;
+}
+
+.exam-answer-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    width: 100%;
+}
+
 .rationale-sentence {
     background: #f8f9fa;
     padding: 20px;
@@ -82,7 +122,6 @@ body {
     border: 1px solid #e0e0e0;
     border-radius: 8px;
     padding: 15px;
-    margin-top: 20px;
 }
 
 .sata-option {
@@ -125,7 +164,6 @@ body {
 .matrix-scroll-container {
     overflow-x: auto;
     /* Handles small screens/tablets */
-    margin-top: 1.5rem;
 }
 
 .matrix-table {
@@ -299,6 +337,13 @@ body {
     transition: background 0.2s;
 }
 
+.mcq-options-container {
+    background: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 15px;
+}
+
 .mcq-option:hover {
     background-color: #f8f9fa;
 }
@@ -311,12 +356,16 @@ body {
     position: relative;
     padding-left: 35px;
     margin-bottom: 10px;
+    user-select: none;
 }
 
 .radio-container input {
     position: absolute;
     opacity: 0;
     cursor: pointer;
+    height: 20px;
+    width: 20px;
+    left: 0;
 }
 
 .radiomark {
@@ -326,34 +375,43 @@ body {
     transform: translateY(-50%);
     height: 20px;
     width: 20px;
-    background-color: #eee;
+    background-color: #fff;
     border-radius: 50%;
-    border: 1px solid #ccc;
+    border: 2px solid #0066cc;
+    z-index: 1;
 }
 
 .radio-container:hover input~.radiomark {
-    background-color: #ccc;
+    background-color: #e3f2fd;
+    border-color: #004a99;
 }
 
 .radio-container input:checked~.radiomark {
-    background-color: #17a2b8;
-    border-color: #17a2b8;
+    background-color: #0066cc;
+    border-color: #0066cc;
 }
 
 .radiomark:after {
     content: "";
     position: absolute;
     display: none;
-    top: 5px;
-    left: 5px;
-    width: 8px;
-    height: 8px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 10px;
+    height: 10px;
     border-radius: 50%;
     background: white;
 }
 
 .radio-container input:checked~.radiomark:after {
     display: block;
+}
+
+.option-text {
+    color: #212529;
+    line-height: 1.6;
+    flex: 1;
 }
 
 /* Scenario UI Enhancements */
@@ -475,6 +533,24 @@ body {
     margin-top: 20px;
     width: 100%;
     box-sizing: border-box;
+}
+
+.answer-choices-header {
+    color: #475569;
+    font-size: 0.8rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.source-well-single {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    padding: 1rem;
+    background: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
 }
 
 .hotspot-instruction {
